@@ -256,10 +256,11 @@ module.exports = async (req, res) => {
                     html: html
                 })
             });
-            const resendData = await resendRes.json();
+            let resendData = {};
+            try { resendData = await resendRes.json(); } catch (_) { /* non-JSON response */ }
             if (!resendRes.ok) {
-                console.error('Resend API error:', resendData);
-                return res.status(502).json({ error: 'Erreur envoi email' });
+                // Clé invalide ou quota dépassé : silencieux côté client
+                return res.status(200).json({ success: false, skipped: true, reason: 'Resend error', status: resendRes.status });
             }
             return res.status(200).json({ success: true, id: resendData.id });
         }
@@ -298,9 +299,7 @@ module.exports = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Email send error:', error);
-        return res.status(500).json({ 
-            error: 'Failed to send email'
-        });
+        // Retourner 200 pour ne pas créer de boucles d'erreurs côté client
+        return res.status(200).json({ success: false, skipped: true, reason: error.message || 'unexpected error' });
     }
 };
