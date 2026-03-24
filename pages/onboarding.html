@@ -835,7 +835,6 @@
                     .single();
                 
                 if (client?.onboarding_completed) {
-                    // Rediriger vers l'app
                     window.location.href = '../app.html';
                 }
             }
@@ -1042,7 +1041,6 @@
                         trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
                     };
                     try { localStorage.setItem('pendingClientData', JSON.stringify(pendingClientData)); } catch(e) {}
-                    localStorage.setItem('showFirstLoginModal', '1');
                     showEmailSentBlock(email, password);
                     return;
                 }
@@ -1099,11 +1097,10 @@
                     }
                 }
 
-                // SUCCÈS: Redirection vers l'app (firstLogin=true pour afficher la modale de bienvenue)
+                // SUCCÈS: Redirection vers l'app
                 btn.innerHTML = '<i data-lucide="check"></i> Compte créé ! Redirection...';
-                localStorage.setItem('showFirstLoginModal', '1');
                 setTimeout(() => {
-                    window.location.href = '../app.html?firstLogin=true';
+                    window.location.href = '../app.html';
                 }, 1000);
 
             } catch (error) {
@@ -1188,8 +1185,7 @@
                 }
             } catch(e) { /* non bloquant */ }
 
-            localStorage.setItem('showFirstLoginModal', '1');
-            setTimeout(() => { window.location.href = '../app.html?firstLogin=true'; }, 800);
+            setTimeout(() => { window.location.href = '../app.html'; }, 800);
         }
     </script>
 </body>

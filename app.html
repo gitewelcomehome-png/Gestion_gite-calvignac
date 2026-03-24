@@ -1601,6 +1601,12 @@
                 
                 <!-- Bouton d'action -->
                 <div style="text-align: center;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; color: #888; font-size: 14px;">
+                            <input type="checkbox" id="hideWelcomeModalCheck" style="width:16px;height:16px;cursor:pointer;">
+                            Ne plus afficher ce message
+                        </label>
+                    </div>
                     <button onclick="closeWelcomeModalAndOpenGites()" style="background: linear-gradient(135deg, #00acc1 0%, #0097a7 100%); color: white; border: none; padding: 20px 55px; border-radius: 50px; font-size: 20px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(0,172,193,0.4); transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,172,193,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(0,172,193,0.4)'">
                         ✅ Configurer mes gîtes
                     </button>
@@ -4771,61 +4777,45 @@
     
     // Fonction pour fermer la modale de bienvenue et ouvrir la gestion des gîtes
     window.closeWelcomeModalAndOpenGites = function() {
-        // Fermer la modale
         const modal = document.getElementById('welcomeFirstLoginModal');
-        if (modal) {
-            modal.style.display = 'none';
+        if (modal) modal.style.display = 'none';
+        // Sauvegarder la préférence "ne plus afficher"
+        if (document.getElementById('hideWelcomeModalCheck')?.checked) {
+            const uid = window.authManager?.currentUser?.id;
+            if (uid) localStorage.setItem('hideWelcomeModal_' + uid, '1');
         }
-        
-        // Attendre que showGitesManager soit disponible
         const checkGitesManager = setInterval(() => {
             if (window.showGitesManager) {
                 clearInterval(checkGitesManager);
-                setTimeout(() => {
-                    window.showGitesManager();
-                }, 300);
+                setTimeout(() => { window.showGitesManager(); }, 300);
             }
         }, 100);
-        
-        // Timeout après 5 secondes
         setTimeout(() => clearInterval(checkGitesManager), 5000);
     }
     
     // Attacher les événements aux boutons du menu utilisateur
     document.addEventListener('DOMContentLoaded', function() {
-        // 🎯 Détecter première connexion (URL param OU flag localStorage)
-        const urlParams = new URLSearchParams(window.location.search);
-        const isFirstLogin = urlParams.get('firstLogin') === 'true' || localStorage.getItem('showFirstLoginModal') === '1';
-        if (isFirstLogin) {
-            localStorage.removeItem('showFirstLoginModal');
-            // Attendre que la session auth soit prête (auth.js est async)
-            let _attempts = 0;
-            const _waitAuth = setInterval(async () => {
-                _attempts++;
-                if (window.authManager?.currentUser || _attempts > 60) {
-                    clearInterval(_waitAuth);
-                    if (!window.authManager?.currentUser) return; // pas de session
-                    // Traiter les données client en attente (cas confirmation email Supabase)
-                    const _pending = localStorage.getItem('pendingClientData');
-                    if (_pending) {
-                        try {
-                            const _cd = JSON.parse(_pending);
-                            if (_cd.user_id === window.authManager.currentUser.id) {
-                                const { data: _ex } = await window.supabaseClient
-                                    .from('cm_clients').select('id').eq('user_id', _cd.user_id).maybeSingle();
-                                if (!_ex?.id) {
-                                    await window.supabaseClient.from('cm_clients').insert(_cd);
-                                }
-                            }
-                        } catch(e) {}
-                        localStorage.removeItem('pendingClientData');
-                    }
-                    const modal = document.getElementById('welcomeFirstLoginModal');
-                    if (modal) modal.style.display = 'flex';
-                    window.history.replaceState({}, document.title, '/index.html');
-                }
+        // 🎯 Modale bienvenue première connexion : déclenchée dès que l'auth est prête
+        (function() {
+            let _checked = false;
+            const _poll = setInterval(() => {
+                const user = window.authManager?.currentUser;
+                if (!user) return;
+                clearInterval(_poll);
+                if (_checked) return;
+                _checked = true;
+                // Déjà masqué par l'utilisateur ?
+                if (localStorage.getItem('hideWelcomeModal_' + user.id) === '1') return;
+                // Compte créé il y a moins de 30 minutes ?
+                const age = Date.now() - new Date(user.created_at).getTime();
+                if (age > 30 * 60 * 1000) return;
+                const modal = document.getElementById('welcomeFirstLoginModal');
+                if (modal) modal.style.display = 'flex';
+                window.history.replaceState({}, document.title, window.location.pathname);
             }, 100);
-        }
+            // Stop après 15s si jamais
+            setTimeout(() => clearInterval(_poll), 15000);
+        })();
         
         // Boutons avec data-action
         const actionButtons = document.querySelectorAll('.user-menu-item[data-action]');
