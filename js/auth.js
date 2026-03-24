@@ -381,10 +381,10 @@ class AuthManager {
         try {
             const accountCreatedAt = new Date(this.currentUser.created_at).getTime();
             const now = Date.now();
-            const fiveMinutes = 5 * 60 * 1000;
+            const thirtyMinutes = 30 * 60 * 1000;
             
-            // Si le compte a été créé il y a moins de 5 minutes, c'est la première connexion
-            return (now - accountCreatedAt) < fiveMinutes;
+            // Si le compte a été créé il y a moins de 30 minutes, c'est la première connexion
+            return (now - accountCreatedAt) < thirtyMinutes;
         } catch (error) {
             console.error('Erreur vérification première connexion:', error);
             return false;
