@@ -1020,32 +1020,26 @@
 
                 // ÉTAPE 2: Créer le profil client avec toutes les informations
                 const clientData = {
-                    email: email,
-                    name: (document.getElementById('prenom').value.trim() + ' ' + document.getElementById('nom').value.trim()).trim(),
-                    phone: document.getElementById('telephone').value.trim(),
-                    company_name: document.getElementById('entreprise').value.trim() || null,
-                    address: [
-                        document.getElementById('adresse').value.trim(),
-                        document.getElementById('codePostal').value.trim(),
-                        document.getElementById('ville').value.trim(),
-                        document.getElementById('pays').value
-                    ].filter(Boolean).join(', '),
+                    user_id: currentUser.id,
+                    email_principal: email,
+                    prenom_contact: document.getElementById('prenom').value.trim(),
+                    nom_contact: document.getElementById('nom').value.trim(),
+                    telephone: document.getElementById('telephone').value.trim() || null,
+                    nom_entreprise: document.getElementById('entreprise').value.trim() || null,
+                    adresse: document.getElementById('adresse').value.trim() || null,
+                    code_postal: document.getElementById('codePostal').value.trim() || null,
+                    ville: document.getElementById('ville').value.trim() || null,
+                    pays: document.getElementById('pays').value || 'France',
                     onboarding_completed: true,
                     type_abonnement: selectedPlan,
                     billing_cycle: selectedCycle,
-                    status: 'trial',
-                    trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-                    metadata: {
-                        user_id: currentUser.id,
-                        code_postal: document.getElementById('codePostal').value.trim(),
-                        ville: document.getElementById('ville').value.trim(),
-                        pays: document.getElementById('pays').value
-                    }
+                    statut: 'trial',
+                    trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
                 };
 
                 const { error: insertError } = await window.supabaseClient
                     .from('cm_clients')
-                    .insert(clientData);
+                    .upsert(clientData, { onConflict: 'user_id' });
                 
                 if (insertError) {
                     console.error('Erreur insertion client:', insertError);
