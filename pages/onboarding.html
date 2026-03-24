@@ -1013,59 +1013,71 @@
 
                 currentUser = signUpData.user;
                 
-                btn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Enregistrement du profil...';
-
-                // Attendre un peu que Supabase enregistre le compte
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                // ÉTAPE 2: Créer le profil client via RPC SECURITY DEFINER
-                // (contourne RLS si session pas encore établie après signUp)
-                const { data: rpcResult, error: insertError } = await window.supabaseClient
-                    .rpc('create_client_onboarding', {
-                        p_user_id:         currentUser.id,
-                        p_email_principal:  email,
-                        p_prenom_contact:   document.getElementById('prenom').value.trim(),
-                        p_nom_contact:      document.getElementById('nom').value.trim(),
-                        p_telephone:        document.getElementById('telephone').value.trim() || null,
-                        p_nom_entreprise:   document.getElementById('entreprise').value.trim() || null,
-                        p_adresse:          document.getElementById('adresse').value.trim() || null,
-                        p_code_postal:      document.getElementById('codePostal').value.trim() || null,
-                        p_ville:            document.getElementById('ville').value.trim() || null,
-                        p_pays:             document.getElementById('pays').value || 'France',
-                        p_type_abonnement:  selectedPlan,
-                        p_billing_cycle:    selectedCycle,
-                        p_trial_ends_at:    new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-                    });
-
-                if (insertError) {
-                    console.error('Erreur insertion client:', insertError);
-                    throw new Error('Erreur lors de l\'enregistrement du profil: ' + insertError.message);
-                }
-
-                // ✅ NOUVEAU : Enregistrer le parrainage si code présent
-                if (typeof registerReferral === 'function') {
-                    try {
-                        const referralResult = await registerReferral(email, currentUser.id);
-                        if (referralResult?.referral) {
-                            // console.log('🎉 Parrainage enregistré avec succès !');
-                        }
-                    } catch (referralError) {
-                        console.error('⚠️ Erreur parrainage (non bloquante):', referralError);
-                    }
-                }
-
-                // ÉTAPE 3: Connexion automatique
                 btn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Connexion...';
-                
+
+                // ÉTAPE 2 : Connexion immédiate pour obtenir une session valide
+                // (nécessaire pour que l'insert passe le RLS)
                 const { error: signInError } = await window.supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
                 if (signInError) {
-                    // Email de confirmation requis → afficher le bloc succès + formulaire de connexion
+                    // Email de confirmation requis → afficher le bloc succès
                     showEmailSentBlock(email, password);
                     return;
+                }
+
+                btn.innerHTML = '<i data-lucide="loader" style="width: 16px; height: 16px; animation: spin 1s linear infinite;"></i> Enregistrement du profil...';
+
+                // ÉTAPE 3: Créer le profil client (session établie → RLS OK)
+                const clientData = {
+                    user_id: currentUser.id,
+                    email_principal: email,
+                    prenom_contact: document.getElementById('prenom').value.trim(),
+                    nom_contact: document.getElementById('nom').value.trim(),
+                    telephone: document.getElementById('telephone').value.trim() || null,
+                    nom_entreprise: document.getElementById('entreprise').value.trim() || null,
+                    adresse: document.getElementById('adresse').value.trim() || null,
+                    code_postal: document.getElementById('codePostal').value.trim() || null,
+                    ville: document.getElementById('ville').value.trim() || null,
+                    pays: document.getElementById('pays').value || 'France',
+                    onboarding_completed: true,
+                    type_abonnement: selectedPlan,
+                    billing_cycle: selectedCycle,
+                    statut: 'trial',
+                    trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+                };
+
+                const { data: existingClient } = await window.supabaseClient
+                    .from('cm_clients')
+                    .select('id')
+                    .eq('user_id', currentUser.id)
+                    .maybeSingle();
+
+                let insertError;
+                if (existingClient?.id) {
+                    const { error: e } = await window.supabaseClient
+                        .from('cm_clients').update(clientData).eq('id', existingClient.id);
+                    insertError = e;
+                } else {
+                    const { error: e } = await window.supabaseClient
+                        .from('cm_clients').insert(clientData);
+                    insertError = e;
+                }
+
+                if (insertError) {
+                    console.error('Erreur insertion client:', insertError);
+                    throw new Error('Erreur lors de l\'enregistrement du profil: ' + insertError.message);
+                }
+
+                // ✅ Enregistrer le parrainage si code présent
+                if (typeof registerReferral === 'function') {
+                    try {
+                        await registerReferral(email, currentUser.id);
+                    } catch (referralError) {
+                        console.error('⚠️ Erreur parrainage (non bloquante):', referralError);
+                    }
                 }
 
                 // SUCCÈS: Redirection vers l'app
