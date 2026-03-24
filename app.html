@@ -4794,8 +4794,7 @@
     }
     
     // Attacher les événements aux boutons du menu utilisateur
-    document.addEventListener('DOMContentLoaded', function() {
-        // 🎯 Modale bienvenue première connexion : déclenchée dès que l'auth est prête
+    /*
         (function() {
             let _checked = false;
             console.log('[firstLogin] Polling démarré');
@@ -4860,6 +4859,34 @@
         }
     });
     */ // FIN DU SYSTÈME ANCIEN DÉSACTIVÉ
+
+    // 🎯 Modale bienvenue première connexion : déclenchée dès que l'auth est prête
+    (function() {
+        let _checked = false;
+        console.log('[firstLogin] Polling démarré');
+        const _poll = setInterval(() => {
+            const user = window.authManager?.currentUser;
+            if (!user) {
+                console.log('[firstLogin] Attente user...');
+                return;
+            }
+            clearInterval(_poll);
+            if (_checked) return;
+            _checked = true;
+            console.log('[firstLogin] User trouvé:', user.id, '| created_at:', user.created_at);
+            const hideKey = 'hideWelcomeModal_' + user.id;
+            const hidden = localStorage.getItem(hideKey);
+            console.log('[firstLogin] hideKey localStorage:', hidden);
+            if (hidden === '1') { console.log('[firstLogin] ❌ Masqué par l\'utilisateur'); return; }
+            const age = Date.now() - new Date(user.created_at).getTime();
+            console.log('[firstLogin] Âge du compte:', Math.round(age/1000) + 's (max 1800s)');
+            if (age > 30 * 60 * 1000) { console.log('[firstLogin] ❌ Compte trop ancien'); return; }
+            const modal = document.getElementById('welcomeFirstLoginModal');
+            console.log('[firstLogin] Modal trouvée:', !!modal);
+            if (modal) { modal.style.display = 'flex'; console.log('[firstLogin] ✅ Modal affichée'); }
+        }, 100);
+        setTimeout(() => { clearInterval(_poll); console.log('[firstLogin] Polling arrêté (timeout 15s)'); }, 15000);
+    })();
     
     // 🔄 ATTACHER LES LISTENERS DES ONGLETS IMMÉDIATEMENT
     (function attachTabListeners() {
