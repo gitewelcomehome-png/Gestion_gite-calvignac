@@ -4793,20 +4793,38 @@
     
     // Attacher les événements aux boutons du menu utilisateur
     document.addEventListener('DOMContentLoaded', function() {
-        // 🎯 Détecter première connexion et afficher modale de bienvenue
+        // 🎯 Détecter première connexion (URL param OU flag localStorage)
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('firstLogin') === 'true') {
-            // Affichage modale de bienvenue
-            
-            // Attendre un peu pour que la page soit complètement chargée
-            setTimeout(() => {
-                const modal = document.getElementById('welcomeFirstLoginModal');
-                if (modal) {
-                    modal.style.display = 'flex';
+        const isFirstLogin = urlParams.get('firstLogin') === 'true' || localStorage.getItem('showFirstLoginModal') === '1';
+        if (isFirstLogin) {
+            localStorage.removeItem('showFirstLoginModal');
+            // Attendre que la session auth soit prête (auth.js est async)
+            let _attempts = 0;
+            const _waitAuth = setInterval(async () => {
+                _attempts++;
+                if (window.authManager?.currentUser || _attempts > 60) {
+                    clearInterval(_waitAuth);
+                    if (!window.authManager?.currentUser) return; // pas de session
+                    // Traiter les données client en attente (cas confirmation email Supabase)
+                    const _pending = localStorage.getItem('pendingClientData');
+                    if (_pending) {
+                        try {
+                            const _cd = JSON.parse(_pending);
+                            if (_cd.user_id === window.authManager.currentUser.id) {
+                                const { data: _ex } = await window.supabaseClient
+                                    .from('cm_clients').select('id').eq('user_id', _cd.user_id).maybeSingle();
+                                if (!_ex?.id) {
+                                    await window.supabaseClient.from('cm_clients').insert(_cd);
+                                }
+                            }
+                        } catch(e) {}
+                        localStorage.removeItem('pendingClientData');
+                    }
+                    const modal = document.getElementById('welcomeFirstLoginModal');
+                    if (modal) modal.style.display = 'flex';
+                    window.history.replaceState({}, document.title, '/index.html');
                 }
-                // Nettoyer l'URL
-                window.history.replaceState({}, document.title, '/index.html');
-            }, 800);
+            }, 100);
         }
         
         // Boutons avec data-action

@@ -1042,6 +1042,7 @@
                         trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
                     };
                     try { localStorage.setItem('pendingClientData', JSON.stringify(pendingClientData)); } catch(e) {}
+                    localStorage.setItem('showFirstLoginModal', '1');
                     showEmailSentBlock(email, password);
                     return;
                 }
@@ -1100,6 +1101,7 @@
 
                 // SUCCÈS: Redirection vers l'app (firstLogin=true pour afficher la modale de bienvenue)
                 btn.innerHTML = '<i data-lucide="check"></i> Compte créé ! Redirection...';
+                localStorage.setItem('showFirstLoginModal', '1');
                 setTimeout(() => {
                     window.location.href = '../app.html?firstLogin=true';
                 }, 1000);
@@ -1186,6 +1188,7 @@
                 }
             } catch(e) { /* non bloquant */ }
 
+            localStorage.setItem('showFirstLoginModal', '1');
             setTimeout(() => { window.location.href = '../app.html?firstLogin=true'; }, 800);
         }
     </script>
