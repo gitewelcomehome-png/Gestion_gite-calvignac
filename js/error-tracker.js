@@ -312,6 +312,11 @@
                     url.includes('codetabs.com')) {
                     return response;
                 }
+
+                // Ignorer les erreurs de l'endpoint send-email (non bloquant)
+                if (url.includes('/api/send-email') || url.includes('send-email')) {
+                    return response;
+                }
                 
                 // Ne logger que les erreurs importantes (pas 404 sur assets)
                 if (response.status >= 500 || (response.status >= 400 && !url.includes('.css') && !url.includes('.js'))) {

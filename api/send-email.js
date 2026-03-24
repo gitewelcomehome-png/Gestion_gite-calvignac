@@ -235,7 +235,8 @@ module.exports = async (req, res) => {
         if (to && subject && html) {
             const apiKey = process.env.RESEND_API_KEY;
             if (!apiKey) {
-                return res.status(500).json({ error: 'Configuration email manquante (RESEND_API_KEY)' });
+                // Clé non configurée : retourner 200 silencieux pour ne pas polluer les logs
+                return res.status(200).json({ success: false, skipped: true, reason: 'RESEND_API_KEY not configured' });
             }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
                 return res.status(400).json({ error: 'Adresse email invalide' });
