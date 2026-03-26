@@ -361,17 +361,19 @@ async function genererPlanningMenage() {
                     .filter(r => r.gite === p.gite && parseLocalDate(r.dateDebut) >= p.departDate)
                     .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
                 
+                const _toYMD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                 await window.supabaseClient
                     .from('cleaning_schedule')
                     .update({
                         owner_user_id: user.id,
                         gite: reservation.gite,
-                        scheduled_date: p.date.toISOString().split('T')[0],
+                        scheduled_date: _toYMD(p.date),
+                        date: _toYMD(p.date),
                         time_of_day: timeOfDay,
                         status: 'pending',
                         validated_by_company: false,
-                        reservation_end: p.departDate.toISOString().split('T')[0],
-                        reservation_start_after: nextRes ? parseLocalDate(nextRes.dateDebut).toISOString().split('T')[0] : null
+                        reservation_end: _toYMD(p.departDate),
+                        reservation_start_after: nextRes ? _toYMD(parseLocalDate(nextRes.dateDebut)) : null
                     })
                     .eq('reservation_id', reservation.id);
             }
@@ -543,6 +545,7 @@ async function afficherPlanningParSemaine() {
                         gite: r.gite,
                         gite_id: r.gite_id,
                         scheduled_date: scheduledDateStr,
+                        date: scheduledDateStr,
                         time_of_day: calculatedTimeOfDay,
                         status: 'pending',
                         validated_by_company: false,
