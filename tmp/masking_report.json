@@ -1,0 +1,215 @@
+{
+  "summary": {
+    "tablesInSnapshot": 93,
+    "totalRows": 868,
+    "totalCells": 12529,
+    "totalMaskedCells": 361,
+    "tablesWithMasked": 25,
+    "rowsWithMasked": 196,
+    "requiredMaskedOrMissing": 205
+  },
+  "topTables": [
+    {
+      "table": "reservations",
+      "rows": 52,
+      "rowsWithMasked": 52,
+      "maskedCells": 187
+    },
+    {
+      "table": "shopping_list_items",
+      "rows": 58,
+      "rowsWithMasked": 58,
+      "maskedCells": 58
+    },
+    {
+      "table": "client_access_tokens",
+      "rows": 13,
+      "rowsWithMasked": 13,
+      "maskedCells": 13
+    },
+    {
+      "table": "_cleanup_dropped_tables_20260223",
+      "rows": 13,
+      "rowsWithMasked": 13,
+      "maskedCells": 13
+    },
+    {
+      "table": "activites_gites",
+      "rows": 4,
+      "rowsWithMasked": 4,
+      "maskedCells": 11
+    },
+    {
+      "table": "shopping_lists",
+      "rows": 10,
+      "rowsWithMasked": 10,
+      "maskedCells": 10
+    },
+    {
+      "table": "infos_gites",
+      "rows": 3,
+      "rowsWithMasked": 3,
+      "maskedCells": 9
+    },
+    {
+      "table": "cleaning_rules",
+      "rows": 9,
+      "rowsWithMasked": 9,
+      "maskedCells": 9
+    },
+    {
+      "table": "gites",
+      "rows": 4,
+      "rowsWithMasked": 4,
+      "maskedCells": 7
+    },
+    {
+      "table": "subscriptions_plans",
+      "rows": 3,
+      "rowsWithMasked": 3,
+      "maskedCells": 6
+    },
+    {
+      "table": "cm_clients",
+      "rows": 1,
+      "rowsWithMasked": 1,
+      "maskedCells": 5
+    },
+    {
+      "table": "lignes_commande_prestations",
+      "rows": 4,
+      "rowsWithMasked": 4,
+      "maskedCells": 4
+    },
+    {
+      "table": "user_notification_preferences",
+      "rows": 1,
+      "rowsWithMasked": 1,
+      "maskedCells": 4
+    },
+    {
+      "table": "km_lieux_favoris",
+      "rows": 2,
+      "rowsWithMasked": 2,
+      "maskedCells": 4
+    },
+    {
+      "table": "community_artisans",
+      "rows": 1,
+      "rowsWithMasked": 1,
+      "maskedCells": 3
+    },
+    {
+      "table": "referral_invitations",
+      "rows": 9,
+      "rowsWithMasked": 3,
+      "maskedCells": 3
+    },
+    {
+      "table": "cm_pricing_plans",
+      "rows": 3,
+      "rowsWithMasked": 3,
+      "maskedCells": 3
+    },
+    {
+      "table": "cm_promotions",
+      "rows": 2,
+      "rowsWithMasked": 2,
+      "maskedCells": 2
+    },
+    {
+      "table": "cleaner_tokens",
+      "rows": 2,
+      "rowsWithMasked": 2,
+      "maskedCells": 2
+    },
+    {
+      "table": "referral_campaigns",
+      "rows": 2,
+      "rowsWithMasked": 2,
+      "maskedCells": 2
+    }
+  ],
+  "topMaskedColumns": [
+    {
+      "column": "shopping_list_items.item_name",
+      "maskedCount": 58
+    },
+    {
+      "column": "reservations.client_name",
+      "maskedCount": 52
+    },
+    {
+      "column": "reservations.client_phone",
+      "maskedCount": 45
+    },
+    {
+      "column": "reservations.client_address",
+      "maskedCount": 45
+    },
+    {
+      "column": "reservations.telephone",
+      "maskedCount": 45
+    },
+    {
+      "column": "client_access_tokens.token",
+      "maskedCount": 13
+    },
+    {
+      "column": "_cleanup_dropped_tables_20260223.table_name",
+      "maskedCount": 13
+    },
+    {
+      "column": "shopping_lists.name",
+      "maskedCount": 10
+    },
+    {
+      "column": "cleaning_rules.rule_name",
+      "maskedCount": 9
+    },
+    {
+      "column": "gites.name",
+      "maskedCount": 4
+    },
+    {
+      "column": "activites_gites.nom",
+      "maskedCount": 4
+    },
+    {
+      "column": "activites_gites.adresse",
+      "maskedCount": 4
+    },
+    {
+      "column": "lignes_commande_prestations.nom_prestation",
+      "maskedCount": 4
+    },
+    {
+      "column": "gites.address",
+      "maskedCount": 3
+    },
+    {
+      "column": "infos_gites.adresse",
+      "maskedCount": 3
+    },
+    {
+      "column": "activites_gites.telephone",
+      "maskedCount": 3
+    },
+    {
+      "column": "referral_invitations.recipient_email",
+      "maskedCount": 3
+    },
+    {
+      "column": "subscriptions_plans.name",
+      "maskedCount": 3
+    },
+    {
+      "column": "subscriptions_plans.display_name",
+      "maskedCount": 3
+    },
+    {
+      "column": "cm_pricing_plans.nom",
+      "maskedCount": 3
+    }
+  ]
+}

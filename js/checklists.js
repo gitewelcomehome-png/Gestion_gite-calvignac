@@ -261,29 +261,19 @@ async function initChecklistsTab() {
         typeSelect.dataset.checklistBound = 'true';
     }
 
-    // 🎯 Appliquer le filtre depuis le dashboard si présent
-    const checklistFilterData = localStorage.getItem('checklistFilter');
-    if (checklistFilterData) {
-        try {
-            const filter = JSON.parse(checklistFilterData);
-            // Appliquer le gîte si présent
-            if (filter.giteId && giteSelect) {
-                currentGiteFilter = filter.giteId;
-                giteSelect.value = filter.giteId;
-                populateChecklistDuplicateTargetOptions(gites);
-            }
-            // Appliquer le type (entree/sortie)
-            if (filter.type && typeSelect) {
-                currentTypeFilter = filter.type;
-                typeSelect.value = filter.type;
-            }
-            // Nettoyer le localStorage après usage
-            localStorage.removeItem('checklistFilter');
-            // console.log('🎯 Filtre check-list appliqué:', filter);
-        } catch (error) {
-            console.error('❌ Erreur parsing filtre check-list:', error);
-            localStorage.removeItem('checklistFilter');
+    // 🎯 Appliquer le filtre depuis le dashboard si présent (variable globale)
+    const filter = window._checklistFilter;
+    if (filter) {
+        if (filter.giteId && giteSelect) {
+            currentGiteFilter = filter.giteId;
+            giteSelect.value = filter.giteId;
+            populateChecklistDuplicateTargetOptions(gites);
         }
+        if (filter.type && typeSelect) {
+            currentTypeFilter = filter.type;
+            typeSelect.value = filter.type;
+        }
+        window._checklistFilter = null;
     }
 
     const duplicateBtn = document.getElementById('btn-checklist-duplicate-all');

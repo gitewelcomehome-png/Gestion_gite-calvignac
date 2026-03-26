@@ -370,19 +370,19 @@ async function syncCalendar(giteId, platform, url) {
     // 1. Notre proxy Vercel serverless (toujours en premier, échoue silencieusement si absent)
     // 2. Proxies publics (fallback)
     const proxies = [
-        `/api/cors-proxy?url=${encodeURIComponent(url)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.codetabs.com/v1/proxy/?quest=${url}`
+        { url: `/api/cors-proxy?url=${encodeURIComponent(url)}`, type: 'raw' },
+        { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'raw' },
+        { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'allorigins' },
+        { url: `https://api.codetabs.com/v1/proxy/?quest=${url}`, type: 'raw' }
     ];
 
     let text;
     let lastError;
 
-    for (const proxyUrl of proxies) {
+    for (const proxy of proxies) {
         try {
             // Utiliser Promise.race avec timeout manuel pour éviter erreurs console
-            const fetchPromise = fetch(proxyUrl);
+            const fetchPromise = fetch(proxy.url);
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error('Timeout')), 10000)
             );
@@ -392,10 +392,18 @@ async function syncCalendar(giteId, platform, url) {
                 // Erreur HTTP normale (404, 500, etc.) - continuer avec proxy suivant
                 continue;
             }
-            text = await response.text();
 
-            if (!text.includes('BEGIN:VCALENDAR')) {
+            if (proxy.type === 'allorigins') {
+                // allorigins /get retourne {"contents":"...","status":{...}}
+                const json = await response.json();
+                text = json && json.contents ? json.contents : null;
+            } else {
+                text = await response.text();
+            }
+
+            if (!text || !text.includes('BEGIN:VCALENDAR')) {
                 // Réponse invalide - continuer avec proxy suivant
+                text = null;
                 continue;
             }
 

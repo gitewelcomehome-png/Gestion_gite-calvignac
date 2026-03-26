@@ -212,6 +212,7 @@ class GitesManager {
                 beds: giteData.beds || null,
                 bathrooms: giteData.bathrooms || null,
                 surface_m2: giteData.surface_m2 || null,
+                categorie_hebergement: giteData.categorie_hebergement || 'gite',
                 type_hebergement: giteData.type_hebergement || null,
                 label_classement: giteData.label_classement || null,
                 department: giteData.department || null,

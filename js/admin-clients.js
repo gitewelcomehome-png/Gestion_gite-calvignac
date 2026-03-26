@@ -125,9 +125,9 @@ function displayClients(clients) {
     tbody.innerHTML = clients.map(client => `
         <tr data-action="open-client-modal" data-client-id="${client.id}">
             <td>
-                <div style="font-weight: 600;">${[client.prenom_contact, client.nom_contact].filter(v => v && v !== 'null').join(' ').trim() || client.email_principal || '—'}</div>
+                <div style="font-weight: 600;">${[client.prenom_contact, client.nom_contact].filter(v => v && v !== 'null').join(' ').trim() || ((client.email_principal && client.email_principal !== 'null') ? client.email_principal : '—')}</div>
             </td>
-            <td>${client.email_principal}</td>
+            <td>${(client.email_principal && client.email_principal !== 'null') ? client.email_principal : '<span style="color:#94a3b8;font-style:italic;">—</span>'}</td>
             <td>${client.nom_entreprise || '-'}</td>
             <td><span class="badge badge-${client.type_abonnement}">${(client.type_abonnement || '').toUpperCase()}</span> <span class="badge badge-${client.billing_cycle || 'mensuel'}">${client.billing_cycle === 'annuel' ? 'Annuel' : 'Mensuel'}</span></td>
             <td><span class="badge badge-${client.statut}">${getStatutLabel(client.statut)}</span></td>

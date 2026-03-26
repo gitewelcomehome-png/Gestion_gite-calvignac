@@ -6217,6 +6217,39 @@ function getCreditsPersonnels() {
 // GESTION SECTION PERSONNELLE (toggle)
 // ==========================================
 
+// Cache module pour fiscalite_options_perso (évite les lectures BDD répétées)
+window._fiscaliteOptionsPersoCache = null;
+
+async function _loadFiscaliteOptionsPerso() {
+    if (window._fiscaliteOptionsPersoCache !== null) return window._fiscaliteOptionsPersoCache;
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) { window._fiscaliteOptionsPersoCache = false; return false; }
+        const { data } = await window.supabaseClient
+            .from('user_settings')
+            .select('fiscalite_options_perso')
+            .eq('user_id', user.id)
+            .maybeSingle();
+        window._fiscaliteOptionsPersoCache = data?.fiscalite_options_perso ?? false;
+    } catch (e) {
+        window._fiscaliteOptionsPersoCache = false;
+    }
+    return window._fiscaliteOptionsPersoCache;
+}
+
+async function _saveFiscaliteOptionsPerso(value) {
+    window._fiscaliteOptionsPersoCache = value;
+    try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) return;
+        await window.supabaseClient
+            .from('user_settings')
+            .upsert({ user_id: user.id, fiscalite_options_perso: value }, { onConflict: 'user_id' });
+    } catch (e) {
+        console.warn('⚠️ Erreur sauvegarde fiscalite_options_perso:', e?.message);
+    }
+}
+
 /**
  * Afficher la modal des options personnelles
  */
@@ -6224,18 +6257,11 @@ function afficherModalOptions() {
     const modal = document.getElementById('modal-options');
     if (!modal) return;
     
-    // Vérifier l'état actuel de la section
     const section = document.getElementById('section-personnelle');
     const checkbox = document.getElementById('checkbox-activer-perso');
     
     if (section && checkbox) {
-        // Charger depuis localStorage
-        const saved = localStorage.getItem('fiscalite_options_perso');
-        if (saved !== null) {
-            checkbox.checked = saved === 'true';
-        } else {
-            checkbox.checked = section.style.display === 'block';
-        }
+        checkbox.checked = window._fiscaliteOptionsPersoCache === true;
     }
     
     modal.style.display = 'flex';
@@ -6252,44 +6278,33 @@ function fermerModalOptions() {
 /**
  * Toggle les options personnelles depuis la checkbox
  */
-function toggleOptionsPersonnelles() {
+async function toggleOptionsPersonnelles() {
     const checkbox = document.getElementById('checkbox-activer-perso');
     const section = document.getElementById('section-personnelle');
     
     if (!checkbox || !section) return;
     
-    if (checkbox.checked) {
-        section.style.display = 'block';
-        localStorage.setItem('fiscalite_options_perso', 'true');
-    } else {
-        section.style.display = 'none';
-        localStorage.setItem('fiscalite_options_perso', 'false');
-    }
+    const newValue = checkbox.checked;
+    section.style.display = newValue ? 'block' : 'none';
+    await _saveFiscaliteOptionsPerso(newValue);
     
-    // Mettre à jour l'affichage du dashboard (section IR)
     if (typeof window.updateFinancialIndicators === 'function') {
         window.updateFinancialIndicators();
     }
 }
 
 /**
- * Restaurer l'état des options personnelles depuis localStorage
+ * Restaurer l'état des options personnelles depuis la BDD
  */
-function restaurerOptionsPersonnelles() {
-    const saved = localStorage.getItem('fiscalite_options_perso');
+async function restaurerOptionsPersonnelles() {
+    const value = await _loadFiscaliteOptionsPerso();
     const section = document.getElementById('section-personnelle');
     const checkbox = document.getElementById('checkbox-activer-perso');
     
     if (!section) return;
     
-    if (saved === 'true') {
-        section.style.display = 'block';
-        if (checkbox) checkbox.checked = true;
-    } else {
-        // Par défaut ou si 'false' : masquer
-        section.style.display = 'none';
-        if (checkbox) checkbox.checked = false;
-    }
+    section.style.display = value ? 'block' : 'none';
+    if (checkbox) checkbox.checked = value;
 }
 
 /**
@@ -7011,3 +7026,53 @@ function appliquerTestCA() {
 
 // Exposer la fonction globalement
 window.appliquerTestCA = appliquerTestCA;
+
+// ================================================================
+// FISCALITÉ CHAMBRES D'HÔTES — Simulateur Micro-BIC 71%
+// ================================================================
+function calculerFiscaliteCH() {
+    const ca = parseFloat(document.getElementById('ch-ca-annuel')?.value) || 0;
+    const tmi = parseFloat(document.getElementById('ch-tmi')?.value) || 0;
+
+    const resultatsEl = document.getElementById('ch-resultats');
+    if (!resultatsEl) return;
+
+    if (ca <= 0) {
+        resultatsEl.style.display = 'none';
+        return;
+    }
+
+    resultatsEl.style.display = 'block';
+
+    const ABATTEMENT = 0.71;
+    const PLAFOND_MICRO_BIC = 188700;
+    const SEUIL_TVA = 36800;
+
+    const baseImposable = ca * (1 - ABATTEMENT);
+    const irEstime = baseImposable * (tmi / 100);
+    const netApresIR = ca - irEstime;
+
+    const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+
+    document.getElementById('ch-base-imposable').textContent = fmt(baseImposable);
+    document.getElementById('ch-ir-estime').textContent = fmt(irEstime);
+    document.getElementById('ch-net-ir').textContent = fmt(netApresIR);
+
+    // Alerte plafond Micro-BIC
+    const alertePlafond = document.getElementById('ch-alerte-plafond');
+    if (alertePlafond) alertePlafond.style.display = ca > PLAFOND_MICRO_BIC ? 'block' : 'none';
+
+    // Alerte TVA para-hôtellerie
+    const alerteTva = document.getElementById('ch-alerte-tva');
+    if (alerteTva) alerteTva.style.display = ca > SEUIL_TVA ? 'block' : 'none';
+
+    // Message avantage vs gîte non classé (50%)
+    const avantage = document.getElementById('ch-avantage');
+    if (avantage) {
+        const baseGite50 = ca * 0.50;
+        const economie = Math.round(baseGite50 - baseImposable);
+        avantage.textContent = `💡 Par rapport à un gîte non classé (50%), vous économisez ${fmt(economie * tmi / 100)} d'impôt estimé grâce à l'abattement 71%.`;
+    }
+}
+
+window.calculerFiscaliteCH = calculerFiscaliteCH;

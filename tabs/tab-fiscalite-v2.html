@@ -664,9 +664,7 @@
                         <label>Salaire annuel Madame (€)</label>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="number" id="salaire_madame" step="0.01" placeholder="0.00" oninput="calculerIR(); verifierSeuilsStatut();" style="flex: 1;">
-                            <button type="button" onclick="openFraisReelsSalarieModal
-                                <i data-lucide="settings"></i> Frais
-                            </button>
+                            <button type="button" onclick="openFraisReelsSalarieModal('madame')"><i data-lucide="settings"></i> Frais</button>
                         </div>
                         <div id="frais-madame-info" class="frais-info-box" style="margin-top: 5px;">
                             <strong>Déduction :</strong> <span id="frais-madame-montant">0 €</span>
@@ -677,9 +675,7 @@
                         <label>Salaire annuel Monsieur (€)</label>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="number" id="salaire_monsieur" step="0.01" placeholder="0.00" oninput="calculerIR(); verifierSeuilsStatut();" style="flex: 1;">
-                            <button type="button" onclick="openFraisReelsSalarieModal
-                                <i data-lucide="settings"></i> Frais
-                            </button>
+                            <button type="button" onclick="openFraisReelsSalarieModal('monsieur')"><i data-lucide="settings"></i> Frais</button>
                         </div>
                         <div id="frais-monsieur-info" class="frais-info-box" style="margin-top: 5px;">
                             <strong>Déduction :</strong> <span id="frais-monsieur-montant">0 €</span>
@@ -910,6 +906,187 @@
         
         </div>
         <!-- ========== FIN SECTION PERSONNELLE ========== -->
+
+        <!-- ================================================================
+             SECTION FISCALITÉ CHAMBRES D'HÔTES
+             Régime distinct des gîtes : BIC para-hôtellerie, Micro-BIC 71%
+             ================================================================ -->
+        <div class="fiscal-bloc collapsible collapsed" style="margin-top: 30px; border: 2px solid #e67e22;">
+            <h3 class="fiscal-bloc-title" style="color: #e67e22 !important;">
+                <span class="toggle-icon">▼</span> <i data-lucide="hotel"></i> FISCALITÉ CHAMBRES D'HÔTES
+                <span style="background: #e67e22; color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px; font-weight: 600;">Régime spécifique</span>
+            </h3>
+            <div class="bloc-content">
+
+                <!-- Info : différences clés -->
+                <div style="background: #fff8f0; border-left: 4px solid #e67e22; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #e67e22; font-size: 1rem;"><i data-lucide="info"></i> Chambre d'hôtes vs Gîte : différences fiscales</h4>
+                    <p style="margin: 0; font-size: 0.88rem; color: #555; line-height: 1.7;">
+                        Une chambre d'hôtes est une <strong>prestation d'hébergement avec services</strong> (accueil, linge, ménage, petit-déjeuner).<br>
+                        Elle relève des <strong>BIC para-hôtellerie</strong> et non des meublés de tourisme classiques, ce qui change les taux et plafonds.
+                    </p>
+                </div>
+
+                <!-- Grille des régimes -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+
+                    <!-- Micro-BIC 71% -->
+                    <div class="card" style="padding: 18px; border: 2px solid #2ecc71; border-radius: 10px;">
+                        <div style="font-weight: 700; font-size: 1rem; color: #27ae60; margin-bottom: 8px;">📊 Micro-BIC 71%</div>
+                        <div style="font-size: 0.82rem; line-height: 1.7; color: #555;">
+                            <div>✅ <strong>Abattement forfaitaire : 71%</strong></div>
+                            <div>📌 Plafond CA : <strong>188 700 €</strong></div>
+                            <div>➡️ Base imposable = CA × 29%</div>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
+                                Idéal si vos charges réelles sont inférieures à 71% du CA.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Régime réel BIC -->
+                    <div class="card" style="padding: 18px; border: 2px solid #3498db; border-radius: 10px;">
+                        <div style="font-weight: 700; font-size: 1rem; color: #2980b9; margin-bottom: 8px;">📋 Régime réel BIC</div>
+                        <div style="font-size: 0.82rem; line-height: 1.7; color: #555;">
+                            <div>✅ <strong>Déduction des charges réelles</strong></div>
+                            <div>📌 Pas de plafond de CA</div>
+                            <div>➡️ Amortissements du bien possible</div>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
+                                Idéal si vos charges dépassent 71% du CA ou en début d'activité (travaux importants).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Para-hôtellerie & TVA -->
+                    <div class="card" style="padding: 18px; border: 2px solid #9b59b6; border-radius: 10px;">
+                        <div style="font-weight: 700; font-size: 1rem; color: #8e44ad; margin-bottom: 8px;">🏨 Para-hôtellerie & TVA</div>
+                        <div style="font-size: 0.82rem; line-height: 1.7; color: #555;">
+                            <div>Si vous fournissez <strong>≥ 3 services</strong> :</div>
+                            <div>• Accueil personnalisé 🤝</div>
+                            <div>• Nettoyage régulier 🧹</div>
+                            <div>• Fourniture de linge 🛏️</div>
+                            <div>• Petit-déjeuner ☕</div>
+                            <div style="margin-top: 6px; color: #e74c3c; font-weight: 600;">➡️ TVA 10% applicable si CA > 36 800 €</div>
+                        </div>
+                    </div>
+
+                    <!-- Cotisations sociales -->
+                    <div class="card" style="padding: 18px; border: 2px solid #e74c3c; border-radius: 10px;">
+                        <div style="font-weight: 700; font-size: 1rem; color: #c0392b; margin-bottom: 8px;">🏛️ Cotisations sociales</div>
+                        <div style="font-size: 0.82rem; line-height: 1.7; color: #555;">
+                            <div>Si revenus > <strong>23 000 €/an</strong> :</div>
+                            <div>➡️ Affiliation SSI obligatoire</div>
+                            <div style="margin-top: 6px;">Taux cotisations ≈ <strong>35-45%</strong> du bénéfice</div>
+                            <div>Ou forfait minimum si bénéfice faible.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulateur Micro-BIC 71% -->
+                <div style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h4 style="color: white; margin: 0 0 15px 0; font-size: 1.1rem;"><i data-lucide="calculator"></i> Simulateur Micro-BIC 71% — Chambres d'hôtes</h4>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size: 0.85rem; opacity: 0.9; display: block; margin-bottom: 6px;">CA annuel chambres d'hôtes (€)</label>
+                            <input type="number" id="ch-ca-annuel" min="0" step="100" placeholder="Ex: 25 000"
+                                oninput="calculerFiscaliteCH()"
+                                style="width: 100%; padding: 10px; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; background: rgba(255,255,255,0.15); color: white; font-size: 1rem; font-weight: 600;"
+                                onfocus="this.style.borderColor='white'" onblur="this.style.borderColor='rgba(255,255,255,0.5)'">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; opacity: 0.9; display: block; margin-bottom: 6px;">Taux marginal IR (TMI %)</label>
+                            <select id="ch-tmi" onchange="calculerFiscaliteCH()"
+                                style="width: 100%; padding: 10px; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; background: rgba(255,255,255,0.15); color: white; font-size: 1rem;">
+                                <option value="0" style="color:#333;">0% (non imposable)</option>
+                                <option value="11" selected style="color:#333;">11%</option>
+                                <option value="30" style="color:#333;">30%</option>
+                                <option value="41" style="color:#333;">41%</option>
+                                <option value="45" style="color:#333;">45%</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Résultats -->
+                    <div id="ch-resultats" style="display: none; background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+                            <div>
+                                <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px;">Base imposable (29%)</div>
+                                <div id="ch-base-imposable" style="font-size: 1.4rem; font-weight: 700;">0 €</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px;">IR estimé (TMI)</div>
+                                <div id="ch-ir-estime" style="font-size: 1.4rem; font-weight: 700;">0 €</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px;">Net après IR</div>
+                                <div id="ch-net-ir" style="font-size: 1.4rem; font-weight: 700;">0 €</div>
+                            </div>
+                        </div>
+                        <div id="ch-alerte-plafond" style="display:none; margin-top: 10px; background: rgba(231,76,60,0.4); padding: 8px 12px; border-radius: 6px; font-size: 0.83rem; font-weight: 600;">
+                            ⚠️ CA > 188 700 € : Micro-BIC non applicable, passage obligatoire au régime réel
+                        </div>
+                        <div id="ch-alerte-tva" style="display:none; margin-top: 8px; background: rgba(155,89,182,0.4); padding: 8px 12px; border-radius: 6px; font-size: 0.83rem;">
+                            🏨 <strong>TVA potentiellement applicable</strong> : CA > 36 800 € avec services para-hôteliers
+                        </div>
+                        <div id="ch-avantage" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: center;"></div>
+                    </div>
+                </div>
+
+                <!-- Tableau comparatif Gîte vs Chambre d'hôtes -->
+                <div style="background: #f8f9fa; border: 2px solid #ddd; border-radius: 10px; overflow: hidden;">
+                    <div style="background: #2c3e50; color: white; padding: 12px 16px; font-weight: 700; font-size: 0.95rem;">
+                        📊 Récapitulatif comparatif — Gîte vs Chambre d'hôtes
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem;">
+                            <thead>
+                                <tr style="background: #ecf0f1;">
+                                    <th style="padding: 10px 14px; text-align: left; border-bottom: 2px solid #ddd; color: #2c3e50;">Critère</th>
+                                    <th style="padding: 10px 14px; text-align: center; border-bottom: 2px solid #ddd; color: #00C2CB;">🏡 Gîte (meublé)</th>
+                                    <th style="padding: 10px 14px; text-align: center; border-bottom: 2px solid #ddd; color: #e67e22;">🛏️ Chambre d'hôtes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #f0f0f0;">
+                                    <td style="padding: 9px 14px; font-weight: 600;">Catégorie fiscale</td>
+                                    <td style="padding: 9px 14px; text-align: center;">Meublé de tourisme (BIC)</td>
+                                    <td style="padding: 9px 14px; text-align: center;">Para-hôtellerie (BIC)</td>
+                                </tr>
+                                <tr style="background: #fafafa; border-bottom: 1px solid #f0f0f0;">
+                                    <td style="padding: 9px 14px; font-weight: 600;">Micro-BIC — non classé</td>
+                                    <td style="padding: 9px 14px; text-align: center;">50% d'abattement</td>
+                                    <td style="padding: 9px 14px; text-align: center; color: #27ae60; font-weight: 700;">71% d'abattement ✅</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #f0f0f0;">
+                                    <td style="padding: 9px 14px; font-weight: 600;">Micro-BIC — classé ⭐</td>
+                                    <td style="padding: 9px 14px; text-align: center; color: #27ae60; font-weight: 700;">71% d'abattement ✅</td>
+                                    <td style="padding: 9px 14px; text-align: center;">71% d'abattement</td>
+                                </tr>
+                                <tr style="background: #fafafa; border-bottom: 1px solid #f0f0f0;">
+                                    <td style="padding: 9px 14px; font-weight: 600;">Plafond Micro-BIC</td>
+                                    <td style="padding: 9px 14px; text-align: center;">77 700 € (non classé)<br>188 700 € (classé)</td>
+                                    <td style="padding: 9px 14px; text-align: center; font-weight: 600;">188 700 €</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #f0f0f0;">
+                                    <td style="padding: 9px 14px; font-weight: 600;">TVA</td>
+                                    <td style="padding: 9px 14px; text-align: center;">Non (franchise) 💤</td>
+                                    <td style="padding: 9px 14px; text-align: center; color: #e67e22;">10% si ≥ 3 services & CA > 36 800€</td>
+                                </tr>
+                                <tr style="background: #fafafa;">
+                                    <td style="padding: 9px 14px; font-weight: 600;">Régime réel</td>
+                                    <td style="padding: 9px 14px; text-align: center;">LMNP ou LMP</td>
+                                    <td style="padding: 9px 14px; text-align: center;">BIC réel simplifié ou normal</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- ================================================================
+             FIN SECTION FISCALITÉ CHAMBRES D'HÔTES
+             ================================================================ -->
 
     </form>
     

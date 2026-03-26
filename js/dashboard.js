@@ -113,13 +113,12 @@ function showAdminFilterMessage(mode) {
  * @param {string} type - Type de check-list ('entree' ou 'sortie')
  */
 window.openChecklistDetail = function(reservationId, giteId, type) {
-    // Sauvegarder les infos dans localStorage pour filtrage
-    localStorage.setItem('checklistFilter', JSON.stringify({
+    // Transmettre le filtre via variable globale (sans localStorage)
+    window._checklistFilter = {
         reservationId: reservationId,
         giteId: giteId,
-        type: type,
-        timestamp: Date.now()
-    }));
+        type: type
+    };
     
     // Rediriger vers l'onglet checklists
     if (typeof switchTab === 'function') {
@@ -2196,7 +2195,7 @@ async function updateFinancialIndicators() {
     }
     
     // Afficher IR des 2 années (seulement si option personnelle activée)
-    const optionsPersoActivees = localStorage.getItem('fiscalite_options_perso') === 'true';
+    const optionsPersoActivees = window._fiscaliteOptionsPersoCache === true;
     const irContainer = document.getElementById('dashboard-ir-container');
     
     if (irContainer) {

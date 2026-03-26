@@ -12,9 +12,6 @@ let giteIdCourant = null;
 // INITIALISATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Charger le panier du localStorage
-    chargerPanier();
-    
     // Event listeners
     document.getElementById('btnPanier')?.addEventListener('click', openPanierModal);
     
@@ -186,24 +183,12 @@ function updatePanierQuantite(prestationId, delta) {
 }
 
 function savePanier() {
-    try {
-        localStorage.setItem('panier_prestations', JSON.stringify(panier));
-    } catch (e) {
-        console.error('Erreur sauvegarde panier:', e);
-    }
+    // Panier en mémoire uniquement (variable module)
 }
 
 function chargerPanier() {
-    try {
-        const saved = localStorage.getItem('panier_prestations');
-        if (saved) {
-            panier = JSON.parse(saved);
-            updatePanierUI();
-        }
-    } catch (e) {
-        console.error('Erreur chargement panier:', e);
-        panier = [];
-    }
+    // Panier en mémoire uniquement — démarrage toujours vide
+    panier = [];
 }
 
 function updatePanierUI() {
@@ -364,16 +349,39 @@ async function passerCommande() {
         
         // Succès !
         showToast('✅ Commande passée avec succès !', 'success');
-        
+
+        // Envoyer emails de confirmation (client + owner) — fire & forget
+        try {
+            const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL || window.SUPABASE_URL;
+            const supabaseKey = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY;
+            if (supabaseUrl && supabaseKey) {
+                fetch(`${supabaseUrl}/functions/v1/confirm-commande-prestations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseKey}`
+                    },
+                    body: JSON.stringify({
+                        commande,
+                        lignes,
+                        reservation: window.reservationData,
+                        gite_name: window.giteInfo?.nom || window.giteInfo?.name || window.reservationData?.gite || ''
+                    })
+                }).catch(e => console.warn('⚠️ Email confirmation commande:', e?.message));
+            }
+        } catch (e) {
+            console.warn('⚠️ Envoi email confirmation ignoré:', e?.message);
+        }
+
         // Vider le panier
         panier = [];
         savePanier();
         updatePanierUI();
         closePanierModal();
-        
+
         // Afficher confirmation
         setTimeout(() => {
-            alert(`Commande ${commande.numero_commande} confirmée !\n\nMontant : ${montantBrut.toFixed(2)} €\nCommission : ${commission.toFixed(2)} €\nTotal : ${(montantBrut + commission).toFixed(2)} €\n\nVous recevrez une confirmation par email.`);
+            showToast(`Commande ${commande.numero_commande} confirmée ! Un email vous a été envoyé.`, 'success');
         }, 500);
         
     } catch (error) {

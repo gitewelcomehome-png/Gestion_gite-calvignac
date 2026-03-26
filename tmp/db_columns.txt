@@ -1,0 +1,719 @@
+activites_gites|id|uuid|uuid|NO|gen_random_uuid()
+activites_gites|owner_user_id|uuid|uuid|NO|
+activites_gites|gite_id|uuid|uuid|NO|
+activites_gites|nom|text|text|NO|
+activites_gites|categorie|text|text|YES|
+activites_gites|description|text|text|YES|
+activites_gites|adresse|text|text|YES|
+activites_gites|latitude|numeric|numeric|YES|
+activites_gites|longitude|numeric|numeric|YES|
+activites_gites|distance_km|numeric|numeric|YES|
+activites_gites|url|text|text|YES|
+activites_gites|telephone|text|text|YES|
+activites_gites|note|numeric|numeric|YES|
+activites_gites|nb_avis|integer|int4|YES|
+activites_gites|photos|jsonb|jsonb|YES|
+activites_gites|is_active|boolean|bool|YES|true
+activites_gites|created_at|timestamp with time zone|timestamptz|YES|now()
+activites_gites|updated_at|timestamp with time zone|timestamptz|YES|now()
+auto_ticket_diagnostics|id|uuid|uuid|NO|gen_random_uuid()
+auto_ticket_diagnostics|user_id|uuid|uuid|YES|
+auto_ticket_diagnostics|error_log_id|uuid|uuid|YES|
+auto_ticket_diagnostics|ticket_id|uuid|uuid|YES|
+auto_ticket_diagnostics|severity|text|text|YES|
+auto_ticket_diagnostics|auto_created|boolean|bool|YES|true
+auto_ticket_diagnostics|diagnostic_data|jsonb|jsonb|YES|
+auto_ticket_diagnostics|recommended_solution|text|text|YES|
+auto_ticket_diagnostics|created_at|timestamp with time zone|timestamptz|YES|now()
+checklist_progress|id|uuid|uuid|NO|gen_random_uuid()
+checklist_progress|owner_user_id|uuid|uuid|NO|
+checklist_progress|reservation_id|uuid|uuid|NO|
+checklist_progress|template_id|uuid|uuid|NO|
+checklist_progress|completed|boolean|bool|YES|false
+checklist_progress|completed_at|timestamp with time zone|timestamptz|YES|
+checklist_progress|completed_by|uuid|uuid|YES|
+checklist_progress|notes|text|text|YES|
+checklist_progress|created_at|timestamp with time zone|timestamptz|YES|now()
+checklist_templates|id|uuid|uuid|NO|gen_random_uuid()
+checklist_templates|owner_user_id|uuid|uuid|NO|
+checklist_templates|gite_id|uuid|uuid|YES|
+checklist_templates|type|text|text|NO|
+checklist_templates|ordre|integer|int4|YES|1
+checklist_templates|texte|text|text|NO|
+checklist_templates|texte_en|text|text|YES|
+checklist_templates|description|text|text|YES|
+checklist_templates|description_en|text|text|YES|
+checklist_templates|actif|boolean|bool|YES|true
+checklist_templates|created_at|timestamp with time zone|timestamptz|YES|now()
+checklist_templates|updated_at|timestamp with time zone|timestamptz|YES|now()
+cleaning_rules|id|uuid|uuid|NO|gen_random_uuid()
+cleaning_rules|rule_code|text|text|NO|
+cleaning_rules|rule_name|text|text|YES|
+cleaning_rules|description|text|text|YES|
+cleaning_rules|is_enabled|boolean|bool|YES|true
+cleaning_rules|priority|integer|int4|YES|
+cleaning_rules|config|jsonb|jsonb|YES|
+cleaning_rules|created_at|timestamp with time zone|timestamptz|YES|now()
+cleaning_rules|updated_at|timestamp with time zone|timestamptz|YES|now()
+cleaning_schedule|id|uuid|uuid|NO|gen_random_uuid()
+cleaning_schedule|owner_user_id|uuid|uuid|NO|
+cleaning_schedule|gite_id|uuid|uuid|NO|
+cleaning_schedule|reservation_id|uuid|uuid|YES|
+cleaning_schedule|date|date|date|NO|
+cleaning_schedule|type|text|text|YES|
+cleaning_schedule|status|text|text|YES|'a_faire'::text
+cleaning_schedule|assignee_email|text|text|YES|
+cleaning_schedule|notes|text|text|YES|
+cleaning_schedule|photos|jsonb|jsonb|YES|
+cleaning_schedule|validated_by|uuid|uuid|YES|
+cleaning_schedule|validated_at|timestamp with time zone|timestamptz|YES|
+cleaning_schedule|created_at|timestamp with time zone|timestamptz|YES|now()
+cleaning_schedule|updated_at|timestamp with time zone|timestamptz|YES|now()
+client_access_tokens|id|uuid|uuid|NO|gen_random_uuid()
+client_access_tokens|owner_user_id|uuid|uuid|NO|
+client_access_tokens|reservation_id|uuid|uuid|NO|
+client_access_tokens|token|text|text|NO|
+client_access_tokens|expires_at|timestamp with time zone|timestamptz|NO|
+client_access_tokens|is_active|boolean|bool|YES|true
+client_access_tokens|created_at|timestamp with time zone|timestamptz|YES|now()
+client_access_tokens|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_activity_logs|id|uuid|uuid|NO|gen_random_uuid()
+cm_activity_logs|client_id|uuid|uuid|YES|
+cm_activity_logs|action|text|text|NO|
+cm_activity_logs|resource_type|text|text|YES|
+cm_activity_logs|resource_id|uuid|uuid|YES|
+cm_activity_logs|metadata|jsonb|jsonb|YES|
+cm_activity_logs|ip_address|text|text|YES|
+cm_activity_logs|user_agent|text|text|YES|
+cm_activity_logs|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_ai_content_queue|id|uuid|uuid|NO|gen_random_uuid()
+cm_ai_content_queue|client_id|uuid|uuid|YES|
+cm_ai_content_queue|content_type|text|text|YES|
+cm_ai_content_queue|status|text|text|YES|'pending'::text
+cm_ai_content_queue|priority|integer|int4|YES|0
+cm_ai_content_queue|input_data|jsonb|jsonb|YES|
+cm_ai_content_queue|output_content|text|text|YES|
+cm_ai_content_queue|model_used|text|text|YES|
+cm_ai_content_queue|tokens_used|integer|int4|YES|
+cm_ai_content_queue|cost|numeric|numeric|YES|
+cm_ai_content_queue|error_message|text|text|YES|
+cm_ai_content_queue|processed_at|timestamp with time zone|timestamptz|YES|
+cm_ai_content_queue|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_clients|id|uuid|uuid|NO|gen_random_uuid()
+cm_clients|email|text|text|NO|
+cm_clients|name|text|text|YES|
+cm_clients|company_name|text|text|YES|
+cm_clients|phone|text|text|YES|
+cm_clients|address|text|text|YES|
+cm_clients|referral_code|text|text|YES|
+cm_clients|referred_by|uuid|uuid|YES|
+cm_clients|status|text|text|YES|'trial'::text
+cm_clients|trial_ends_at|timestamp with time zone|timestamptz|YES|
+cm_clients|onboarding_completed|boolean|bool|YES|false
+cm_clients|onboarding_step|integer|int4|YES|0
+cm_clients|preferences|jsonb|jsonb|YES|
+cm_clients|metadata|jsonb|jsonb|YES|
+cm_clients|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_clients|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_error_corrections|id|uuid|uuid|NO|gen_random_uuid()
+cm_error_corrections|error_id|uuid|uuid|NO|
+cm_error_corrections|file_path|text|text|NO|
+cm_error_corrections|old_code|text|text|YES|
+cm_error_corrections|new_code|text|text|YES|
+cm_error_corrections|description|text|text|YES|
+cm_error_corrections|applied_by|text|text|YES|'copilot'::text
+cm_error_corrections|applied_at|timestamp with time zone|timestamptz|YES|now()
+cm_error_corrections|test_status|text|text|YES|
+cm_error_corrections|test_results|jsonb|jsonb|YES|
+cm_invoices|id|uuid|uuid|NO|gen_random_uuid()
+cm_invoices|client_id|uuid|uuid|NO|
+cm_invoices|subscription_id|uuid|uuid|YES|
+cm_invoices|invoice_number|text|text|YES|
+cm_invoices|amount|numeric|numeric|NO|
+cm_invoices|tax|numeric|numeric|YES|0
+cm_invoices|total|numeric|numeric|NO|
+cm_invoices|currency|text|text|YES|'EUR'::text
+cm_invoices|status|text|text|YES|'draft'::text
+cm_invoices|issued_date|date|date|YES|
+cm_invoices|due_date|date|date|YES|
+cm_invoices|paid_date|date|date|YES|
+cm_invoices|payment_method|text|text|YES|
+cm_invoices|stripe_invoice_id|text|text|YES|
+cm_invoices|pdf_url|text|text|YES|
+cm_invoices|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_invoices|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_pricing_plans|id|uuid|uuid|NO|gen_random_uuid()
+cm_pricing_plans|name|text|text|NO|
+cm_pricing_plans|slug|text|text|YES|
+cm_pricing_plans|description|text|text|YES|
+cm_pricing_plans|price_monthly|numeric|numeric|YES|
+cm_pricing_plans|price_yearly|numeric|numeric|YES|
+cm_pricing_plans|features|jsonb|jsonb|YES|
+cm_pricing_plans|limits|jsonb|jsonb|YES|
+cm_pricing_plans|is_active|boolean|bool|YES|true
+cm_pricing_plans|sort_order|integer|int4|YES|
+cm_pricing_plans|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_pricing_plans|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_promo_usage|id|uuid|uuid|NO|gen_random_uuid()
+cm_promo_usage|promotion_id|uuid|uuid|NO|
+cm_promo_usage|client_id|uuid|uuid|NO|
+cm_promo_usage|subscription_id|uuid|uuid|YES|
+cm_promo_usage|discount_amount|numeric|numeric|YES|
+cm_promo_usage|applied_at|timestamp with time zone|timestamptz|YES|now()
+cm_promo_usage|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_promotions|id|uuid|uuid|NO|gen_random_uuid()
+cm_promotions|code|text|text|NO|
+cm_promotions|name|text|text|YES|
+cm_promotions|description|text|text|YES|
+cm_promotions|type|text|text|YES|
+cm_promotions|value|numeric|numeric|YES|
+cm_promotions|max_uses|integer|int4|YES|
+cm_promotions|uses_count|integer|int4|YES|0
+cm_promotions|valid_from|timestamp with time zone|timestamptz|YES|
+cm_promotions|valid_until|timestamp with time zone|timestamptz|YES|
+cm_promotions|applicable_plans|jsonb|jsonb|YES|
+cm_promotions|is_active|boolean|bool|YES|true
+cm_promotions|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_promotions|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_referrals|id|uuid|uuid|NO|gen_random_uuid()
+cm_referrals|referrer_id|uuid|uuid|NO|
+cm_referrals|referred_id|uuid|uuid|NO|
+cm_referrals|referral_code|text|text|YES|
+cm_referrals|status|text|text|YES|'pending'::text
+cm_referrals|reward_amount|numeric|numeric|YES|
+cm_referrals|reward_type|text|text|YES|
+cm_referrals|reward_applied|boolean|bool|YES|false
+cm_referrals|completed_at|timestamp with time zone|timestamptz|YES|
+cm_referrals|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_revenue_tracking|id|uuid|uuid|NO|gen_random_uuid()
+cm_revenue_tracking|date|date|date|NO|
+cm_revenue_tracking|source|text|text|YES|
+cm_revenue_tracking|amount|numeric|numeric|NO|
+cm_revenue_tracking|currency|text|text|YES|'EUR'::text
+cm_revenue_tracking|client_id|uuid|uuid|YES|
+cm_revenue_tracking|subscription_id|uuid|uuid|YES|
+cm_revenue_tracking|description|text|text|YES|
+cm_revenue_tracking|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_subscriptions|id|uuid|uuid|NO|gen_random_uuid()
+cm_subscriptions|client_id|uuid|uuid|NO|
+cm_subscriptions|plan_id|uuid|uuid|YES|
+cm_subscriptions|status|text|text|YES|'active'::text
+cm_subscriptions|current_period_start|timestamp with time zone|timestamptz|YES|
+cm_subscriptions|current_period_end|timestamp with time zone|timestamptz|YES|
+cm_subscriptions|cancel_at_period_end|boolean|bool|YES|false
+cm_subscriptions|cancelled_at|timestamp with time zone|timestamptz|YES|
+cm_subscriptions|trial_end|timestamp with time zone|timestamptz|YES|
+cm_subscriptions|stripe_subscription_id|text|text|YES|
+cm_subscriptions|amount|numeric|numeric|YES|
+cm_subscriptions|currency|text|text|YES|'EUR'::text
+cm_subscriptions|billing_cycle|text|text|YES|
+cm_subscriptions|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_subscriptions|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_ai_usage_logs|id|uuid|uuid|NO|gen_random_uuid()
+cm_support_ai_usage_logs|endpoint|text|text|NO|'support-ai'::text
+cm_support_ai_usage_logs|request_source|text|text|NO|'unknown'::text
+cm_support_ai_usage_logs|origin|text|text|YES|
+cm_support_ai_usage_logs|client_ip_hash|text|text|YES|
+cm_support_ai_usage_logs|model|text|text|YES|
+cm_support_ai_usage_logs|prompt_chars|integer|int4|NO|0
+cm_support_ai_usage_logs|prompt_tokens|integer|int4|NO|0
+cm_support_ai_usage_logs|completion_tokens|integer|int4|NO|0
+cm_support_ai_usage_logs|total_tokens|integer|int4|NO|0
+cm_support_ai_usage_logs|estimated_cost_eur|numeric|numeric|NO|0
+cm_support_ai_usage_logs|latency_ms|integer|int4|YES|
+cm_support_ai_usage_logs|status_code|integer|int4|NO|
+cm_support_ai_usage_logs|success|boolean|bool|NO|false
+cm_support_ai_usage_logs|error_code|text|text|YES|
+cm_support_ai_usage_logs|created_at|timestamp with time zone|timestamptz|NO|now()
+cm_support_ai_usage_logs|requester_user_id|uuid|uuid|YES|
+cm_support_ai_usage_logs|requester_client_id|uuid|uuid|YES|
+cm_support_ai_usage_logs|requester_ticket_id|uuid|uuid|YES|
+cm_support_ai_usage_logs|error_signature|text|text|YES|
+cm_support_ai_usage_logs|auto_ticket_id|uuid|uuid|YES|
+cm_support_ai_usage_logs|auto_ticket_status|text|text|YES|
+cm_support_ai_usage_logs|auto_ticket_note|text|text|YES|
+cm_support_ai_usage_logs|auto_ticket_processed_at|timestamp with time zone|timestamptz|YES|
+cm_support_comments|id|uuid|uuid|NO|gen_random_uuid()
+cm_support_comments|ticket_id|uuid|uuid|NO|
+cm_support_comments|author_email|text|text|NO|
+cm_support_comments|author_role|text|text|YES|
+cm_support_comments|content|text|text|NO|
+cm_support_comments|is_internal|boolean|bool|YES|false
+cm_support_comments|attachments|jsonb|jsonb|YES|
+cm_support_comments|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_diagnostics|id|uuid|uuid|NO|gen_random_uuid()
+cm_support_diagnostics|ticket_id|uuid|uuid|YES|
+cm_support_diagnostics|client_id|uuid|uuid|YES|
+cm_support_diagnostics|symptomes|text|text|NO|
+cm_support_diagnostics|contexte|jsonb|jsonb|YES|
+cm_support_diagnostics|solution_proposee_id|uuid|uuid|YES|
+cm_support_diagnostics|status|text|text|YES|'propose'::text
+cm_support_diagnostics|feedback|text|text|YES|
+cm_support_diagnostics|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_solutions|id|uuid|uuid|NO|gen_random_uuid()
+cm_support_solutions|categorie|text|text|NO|
+cm_support_solutions|titre|text|text|NO|
+cm_support_solutions|description|text|text|YES|
+cm_support_solutions|solution|text|text|NO|
+cm_support_solutions|mots_cles|ARRAY|_text|YES|
+cm_support_solutions|erreur_texte|text|text|YES|
+cm_support_solutions|erreur_stack|text|text|YES|
+cm_support_solutions|contexte|text|text|YES|
+cm_support_solutions|plan_detaille|jsonb|jsonb|YES|
+cm_support_solutions|reussite_count|integer|int4|YES|0
+cm_support_solutions|echec_count|integer|int4|YES|0
+cm_support_solutions|score_pertinence|numeric|numeric|YES|
+cm_support_solutions|valide_par|text|text|YES|
+cm_support_solutions|is_active|boolean|bool|YES|true
+cm_support_solutions|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_solutions|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_ticket_history|id|uuid|uuid|NO|gen_random_uuid()
+cm_support_ticket_history|ticket_id|uuid|uuid|NO|
+cm_support_ticket_history|action|text|text|NO|
+cm_support_ticket_history|description|text|text|YES|
+cm_support_ticket_history|created_by|text|text|YES|'system'::text
+cm_support_ticket_history|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_tickets|id|uuid|uuid|NO|gen_random_uuid()
+cm_support_tickets|client_id|uuid|uuid|YES|
+cm_support_tickets|title|text|text|NO|
+cm_support_tickets|description|text|text|YES|
+cm_support_tickets|category|text|text|YES|
+cm_support_tickets|priority|text|text|YES|'normal'::text
+cm_support_tickets|status|text|text|YES|'open'::text
+cm_support_tickets|assigned_to|text|text|YES|
+cm_support_tickets|resolution_notes|text|text|YES|
+cm_support_tickets|resolved_at|timestamp with time zone|timestamptz|YES|
+cm_support_tickets|closed_at|timestamp with time zone|timestamptz|YES|
+cm_support_tickets|first_response_at|timestamp with time zone|timestamptz|YES|
+cm_support_tickets|tags|jsonb|jsonb|YES|
+cm_support_tickets|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_tickets|updated_at|timestamp with time zone|timestamptz|YES|now()
+cm_support_tickets|error_signature|text|text|YES|
+cm_support_tickets|error_id|uuid|uuid|YES|
+cm_support_tickets|source|text|text|YES|'manual'::text
+cm_support_tickets|resolution|text|text|YES|
+cm_support_tickets|metadata|jsonb|jsonb|YES|
+cm_website_pages|id|uuid|uuid|NO|gen_random_uuid()
+cm_website_pages|slug|text|text|NO|
+cm_website_pages|title|text|text|NO|
+cm_website_pages|description|text|text|YES|
+cm_website_pages|content|text|text|YES|
+cm_website_pages|seo_title|text|text|YES|
+cm_website_pages|seo_description|text|text|YES|
+cm_website_pages|seo_keywords|text|text|YES|
+cm_website_pages|og_image|text|text|YES|
+cm_website_pages|status|text|text|YES|'draft'::text
+cm_website_pages|published_at|timestamp with time zone|timestamptz|YES|
+cm_website_pages|created_at|timestamp with time zone|timestamptz|YES|now()
+cm_website_pages|updated_at|timestamp with time zone|timestamptz|YES|now()
+community_artisan_notes|id|bigint|int8|NO|nextval('community_artisan_notes_id_seq'::regclass)
+community_artisan_notes|artisan_id|uuid|uuid|NO|
+community_artisan_notes|owner_user_id|uuid|uuid|NO|
+community_artisan_notes|note|smallint|int2|NO|
+community_artisan_notes|commentaire|text|text|YES|
+community_artisan_notes|created_at|timestamp with time zone|timestamptz|NO|now()
+community_artisan_notes|updated_at|timestamp with time zone|timestamptz|NO|now()
+community_artisans|id|uuid|uuid|NO|uuid_generate_v4()
+community_artisans|owner_user_id|uuid|uuid|NO|
+community_artisans|creator_gite_id|uuid|uuid|YES|
+community_artisans|nom|character varying|varchar|NO|
+community_artisans|metier|character varying|varchar|NO|
+community_artisans|telephone|character varying|varchar|YES|
+community_artisans|adresse|character varying|varchar|YES|
+community_artisans|ville|character varying|varchar|YES|
+community_artisans|latitude|double precision|float8|NO|
+community_artisans|longitude|double precision|float8|NO|
+community_artisans|description|text|text|YES|
+community_artisans|created_at|timestamp with time zone|timestamptz|NO|now()
+community_artisans|updated_at|timestamp with time zone|timestamptz|NO|now()
+error_corrections|id|uuid|uuid|NO|gen_random_uuid()
+error_corrections|error_pattern|text|text|NO|
+error_corrections|solution|text|text|NO|
+error_corrections|guide_url|text|text|YES|
+error_corrections|priority|integer|int4|YES|
+error_corrections|is_active|boolean|bool|YES|true
+error_corrections|occurrences_count|integer|int4|YES|0
+error_corrections|created_at|timestamp with time zone|timestamptz|YES|now()
+error_corrections|updated_at|timestamp with time zone|timestamptz|YES|now()
+error_logs|id|uuid|uuid|NO|gen_random_uuid()
+error_logs|user_id|uuid|uuid|YES|
+error_logs|error_message|text|text|NO|
+error_logs|error_stack|text|text|YES|
+error_logs|error_type|text|text|YES|
+error_logs|url|text|text|YES|
+error_logs|user_agent|text|text|YES|
+error_logs|browser|text|text|YES|
+error_logs|os|text|text|YES|
+error_logs|timestamp|timestamp with time zone|timestamptz|YES|now()
+error_logs|severity|text|text|YES|'medium'::text
+error_logs|resolved|boolean|bool|YES|false
+error_logs|resolved_at|timestamp with time zone|timestamptz|YES|
+error_logs|metadata|jsonb|jsonb|YES|
+faq|id|uuid|uuid|NO|gen_random_uuid()
+faq|owner_user_id|uuid|uuid|NO|
+faq|gite_id|uuid|uuid|YES|
+faq|question|text|text|NO|
+faq|question_en|text|text|YES|
+faq|answer|text|text|YES|
+faq|answer_en|text|text|YES|
+faq|reponse_en|text|text|YES|
+faq|category|text|text|YES|
+faq|categorie|text|text|YES|
+faq|priority|integer|int4|YES|0
+faq|ordre|integer|int4|YES|
+faq|is_visible|boolean|bool|YES|true
+faq|created_at|timestamp with time zone|timestamptz|YES|now()
+faq|updated_at|timestamp with time zone|timestamptz|YES|now()
+gites|id|uuid|uuid|NO|gen_random_uuid()
+gites|owner_user_id|uuid|uuid|NO|
+gites|name|text|text|NO|
+gites|slug|text|text|NO|
+gites|description|text|text|YES|
+gites|address|text|text|YES|
+gites|icon|text|text|YES|'home'::text
+gites|color|text|text|YES|'#667eea'::text
+gites|capacity|integer|int4|YES|
+gites|bedrooms|integer|int4|YES|
+gites|bathrooms|integer|int4|YES|
+gites|latitude|numeric|numeric|YES|
+gites|longitude|numeric|numeric|YES|
+gites|distance_km|numeric|numeric|YES|0
+gites|ical_sources|jsonb|jsonb|YES|'{}'::jsonb
+gites|settings|jsonb|jsonb|YES|'{}'::jsonb
+gites|tarifs_calendrier|jsonb|jsonb|YES|'{}'::jsonb
+gites|regles_tarifaires|jsonb|jsonb|YES|'{}'::jsonb
+gites|display_order|integer|int4|YES|0
+gites|is_active|boolean|bool|YES|true
+gites|taxe_sejour_tarif|numeric|numeric|YES|0
+gites|taxe_sejour_plateformes|jsonb|jsonb|YES|'[]'::jsonb
+gites|created_at|timestamp with time zone|timestamptz|YES|now()
+gites|updated_at|timestamp with time zone|timestamptz|YES|now()
+gites|beds|integer|int4|YES|
+gites|surface_m2|numeric|numeric|YES|
+gites|type_hebergement|character varying|varchar|YES|
+gites|label_classement|character varying|varchar|YES|
+gites|department|character varying|varchar|YES|
+gites|region|character varying|varchar|YES|
+gites|environment|text|text|YES|
+gites|situation|text|text|YES|
+gites|cuisine_niveau|character varying|varchar|YES|
+gites|animaux_acceptes|boolean|bool|YES|false
+gites|access_pmr|boolean|bool|YES|false
+gites|parking|boolean|bool|YES|false
+gites|platform_airbnb|boolean|bool|YES|false
+gites|platform_booking|boolean|bool|YES|false
+gites|platform_abritel|boolean|bool|YES|false
+gites|platform_gdf|boolean|bool|YES|false
+gites|platform_direct|boolean|bool|YES|false
+historique_donnees|id|uuid|uuid|NO|gen_random_uuid()
+historique_donnees|owner_user_id|uuid|uuid|NO|
+historique_donnees|annee|integer|int4|NO|
+historique_donnees|donnees_mensuelles|jsonb|jsonb|YES|
+historique_donnees|ca_total|numeric|numeric|YES|
+historique_donnees|nb_reservations|integer|int4|YES|
+historique_donnees|created_at|timestamp with time zone|timestamptz|YES|now()
+historique_donnees|updated_at|timestamp with time zone|timestamptz|YES|now()
+infos_gites|id|uuid|uuid|NO|gen_random_uuid()
+infos_gites|owner_user_id|uuid|uuid|NO|
+infos_gites|gite_id|uuid|uuid|NO|
+infos_gites|adresse|text|text|YES|
+infos_gites|adresse_en|text|text|YES|
+infos_gites|telephone|text|text|YES|
+infos_gites|telephone_en|text|text|YES|
+infos_gites|email|text|text|YES|
+infos_gites|email_en|text|text|YES|
+infos_gites|latitude|numeric|numeric|YES|
+infos_gites|longitude|numeric|numeric|YES|
+infos_gites|wifi_ssid|text|text|YES|
+infos_gites|wifi_password|text|text|YES|
+infos_gites|wifi_debit|text|text|YES|
+infos_gites|wifi_debit_en|text|text|YES|
+infos_gites|wifi_localisation|text|text|YES|
+infos_gites|wifi_localisation_en|text|text|YES|
+infos_gites|wifi_zones|text|text|YES|
+infos_gites|wifi_zones_en|text|text|YES|
+infos_gites|arrivee_heure|text|text|YES|
+infos_gites|arrivee_heure_fin|text|text|YES|
+infos_gites|arrivee_parking|text|text|YES|
+infos_gites|arrivee_parking_en|text|text|YES|
+infos_gites|arrivee_acces|text|text|YES|
+infos_gites|arrivee_acces_en|text|text|YES|
+infos_gites|arrivee_codes|jsonb|jsonb|YES|
+infos_gites|arrivee_instructions_cles|text|text|YES|
+infos_gites|arrivee_instructions_cles_en|text|text|YES|
+infos_gites|arrivee_etage|text|text|YES|
+infos_gites|arrivee_etage_en|text|text|YES|
+infos_gites|chauffage_type|text|text|YES|
+infos_gites|chauffage_utilisation|text|text|YES|
+infos_gites|chauffage_utilisation_en|text|text|YES|
+infos_gites|cuisine_equipements|text|text|YES|
+infos_gites|cuisine_equipements_en|text|text|YES|
+infos_gites|electromenager_details|text|text|YES|
+infos_gites|electromenager_details_en|text|text|YES|
+infos_gites|chambre_literie|text|text|YES|
+infos_gites|chambre_literie_en|text|text|YES|
+infos_gites|tv_internet_instructions|text|text|YES|
+infos_gites|tv_internet_instructions_en|text|text|YES|
+infos_gites|dechets_tri|text|text|YES|
+infos_gites|dechets_tri_en|text|text|YES|
+infos_gites|dechets_collecte|text|text|YES|
+infos_gites|dechets_collecte_en|text|text|YES|
+infos_gites|dechets_decheterie|text|text|YES|
+infos_gites|dechets_decheterie_en|text|text|YES|
+infos_gites|securite_detecteurs|text|text|YES|
+infos_gites|securite_detecteurs_en|text|text|YES|
+infos_gites|securite_extincteur|text|text|YES|
+infos_gites|securite_extincteur_en|text|text|YES|
+infos_gites|securite_coupures|text|text|YES|
+infos_gites|securite_coupures_en|text|text|YES|
+infos_gites|depart_heure|text|text|YES|
+infos_gites|depart_checklist|text|text|YES|
+infos_gites|depart_checklist_en|text|text|YES|
+infos_gites|depart_restitution_cles|text|text|YES|
+infos_gites|depart_restitution_cles_en|text|text|YES|
+infos_gites|reglement_tabac|text|text|YES|
+infos_gites|reglement_tabac_en|text|text|YES|
+infos_gites|reglement_animaux|text|text|YES|
+infos_gites|reglement_animaux_en|text|text|YES|
+infos_gites|reglement_nb_personnes|integer|int4|YES|
+infos_gites|reglement_caution|numeric|numeric|YES|
+infos_gites|created_at|timestamp with time zone|timestamptz|YES|now()
+infos_gites|updated_at|timestamp with time zone|timestamptz|YES|now()
+km_config_auto|id|uuid|uuid|NO|gen_random_uuid()
+km_config_auto|owner_user_id|uuid|uuid|NO|
+km_config_auto|auto_menage_entree|boolean|bool|YES|false
+km_config_auto|auto_menage_sortie|boolean|bool|YES|false
+km_config_auto|auto_courses|boolean|bool|YES|false
+km_config_auto|auto_maintenance|boolean|bool|YES|false
+km_config_auto|created_at|timestamp with time zone|timestamptz|YES|now()
+km_config_auto|updated_at|timestamp with time zone|timestamptz|YES|now()
+km_lieux_favoris|id|uuid|uuid|NO|gen_random_uuid()
+km_lieux_favoris|owner_user_id|uuid|uuid|NO|
+km_lieux_favoris|nom|text|text|NO|
+km_lieux_favoris|type_lieu|text|text|YES|
+km_lieux_favoris|distance_km|numeric|numeric|NO|
+km_lieux_favoris|adresse|text|text|YES|
+km_lieux_favoris|created_at|timestamp with time zone|timestamptz|YES|now()
+km_trajets|id|uuid|uuid|NO|gen_random_uuid()
+km_trajets|owner_user_id|uuid|uuid|NO|
+km_trajets|gite_id|uuid|uuid|YES|
+km_trajets|reservation_id|uuid|uuid|YES|
+km_trajets|date_trajet|date|date|NO|
+km_trajets|motif|text|text|YES|
+km_trajets|type_trajet|text|text|YES|
+km_trajets|lieu_arrivee|text|text|YES|
+km_trajets|distance_aller|numeric|numeric|YES|
+km_trajets|aller_retour|boolean|bool|YES|true
+km_trajets|distance_totale|numeric|numeric|YES|
+km_trajets|auto_genere|boolean|bool|YES|false
+km_trajets|created_at|timestamp with time zone|timestamptz|YES|now()
+km_trajets|annee_fiscale|integer|int4|YES|
+linen_stock_items|id|uuid|uuid|NO|gen_random_uuid()
+linen_stock_items|owner_user_id|uuid|uuid|NO|
+linen_stock_items|gite_id|uuid|uuid|NO|
+linen_stock_items|item_key|text|text|NO|
+linen_stock_items|quantity|integer|int4|YES|0
+linen_stock_items|created_at|timestamp with time zone|timestamptz|YES|now()
+linen_stock_items|updated_at|timestamp with time zone|timestamptz|YES|now()
+linen_stock_transactions|id|uuid|uuid|NO|gen_random_uuid()
+linen_stock_transactions|owner_user_id|uuid|uuid|NO|
+linen_stock_transactions|gite_id|uuid|uuid|NO|
+linen_stock_transactions|reservation_id|uuid|uuid|YES|
+linen_stock_transactions|type|text|text|YES|
+linen_stock_transactions|item_type|text|text|YES|
+linen_stock_transactions|quantity_change|integer|int4|YES|
+linen_stock_transactions|quantity_after|integer|int4|YES|
+linen_stock_transactions|reason|text|text|YES|
+linen_stock_transactions|created_at|timestamp with time zone|timestamptz|YES|now()
+linen_stocks|id|uuid|uuid|NO|gen_random_uuid()
+linen_stocks|owner_user_id|uuid|uuid|NO|
+linen_stocks|gite_id|uuid|uuid|NO|
+linen_stocks|draps_plats_grands|integer|int4|YES|0
+linen_stocks|draps_plats_petits|integer|int4|YES|0
+linen_stocks|housses_couettes_grandes|integer|int4|YES|0
+linen_stocks|housses_couettes_petites|integer|int4|YES|0
+linen_stocks|taies_oreillers|integer|int4|YES|0
+linen_stocks|serviettes|integer|int4|YES|0
+linen_stocks|tapis_bain|integer|int4|YES|0
+linen_stocks|updated_at|timestamp with time zone|timestamptz|YES|now()
+notification_preferences|id|uuid|uuid|NO|gen_random_uuid()
+notification_preferences|user_id|uuid|uuid|NO|
+notification_preferences|email_enabled|boolean|bool|YES|true
+notification_preferences|push_enabled|boolean|bool|YES|true
+notification_preferences|sms_enabled|boolean|bool|YES|false
+notification_preferences|notification_types|jsonb|jsonb|YES|
+notification_preferences|updated_at|timestamp with time zone|timestamptz|YES|now()
+notification_preferences|notify_menage_modifications|boolean|bool|NO|false
+notification_preferences|menage_company_email|text|text|YES|
+notifications|id|uuid|uuid|NO|gen_random_uuid()
+notifications|user_id|uuid|uuid|NO|
+notifications|type|text|text|YES|
+notifications|title|text|text|NO|
+notifications|message|text|text|NO|
+notifications|action_url|text|text|YES|
+notifications|action_label|text|text|YES|
+notifications|is_read|boolean|bool|YES|false
+notifications|read_at|timestamp with time zone|timestamptz|YES|
+notifications|metadata|jsonb|jsonb|YES|
+notifications|created_at|timestamp with time zone|timestamptz|YES|now()
+problemes_signales|id|uuid|uuid|NO|gen_random_uuid()
+problemes_signales|owner_user_id|uuid|uuid|NO|
+problemes_signales|reservation_id|uuid|uuid|YES|
+problemes_signales|gite_id|uuid|uuid|NO|
+problemes_signales|type|text|text|YES|
+problemes_signales|description|text|text|NO|
+problemes_signales|photos|jsonb|jsonb|YES|
+problemes_signales|urgence|text|text|YES|
+problemes_signales|status|text|text|YES|'non_traite'::text
+problemes_signales|reponse|text|text|YES|
+problemes_signales|traite_par|uuid|uuid|YES|
+problemes_signales|traite_at|timestamp with time zone|timestamptz|YES|
+problemes_signales|created_at|timestamp with time zone|timestamptz|YES|now()
+reservations|id|uuid|uuid|NO|gen_random_uuid()
+reservations|owner_user_id|uuid|uuid|NO|
+reservations|gite_id|uuid|uuid|NO|
+reservations|check_in|date|date|NO|
+reservations|check_out|date|date|NO|
+reservations|client_name|text|text|NO|
+reservations|client_email|text|text|YES|
+reservations|client_phone|text|text|YES|
+reservations|client_address|text|text|YES|
+reservations|guest_count|integer|int4|YES|
+reservations|nb_personnes|integer|int4|YES|
+reservations|platform|text|text|YES|
+reservations|plateforme|text|text|YES|
+reservations|platform_booking_id|text|text|YES|
+reservations|status|text|text|YES|'confirmed'::text
+reservations|total_price|numeric|numeric|YES|
+reservations|montant|numeric|numeric|YES|
+reservations|currency|text|text|YES|'EUR'::text
+reservations|paid_amount|numeric|numeric|YES|
+reservations|acompte|numeric|numeric|YES|
+reservations|restant|numeric|numeric|YES|
+reservations|paiement|text|text|YES|
+reservations|notes|text|text|YES|
+reservations|source|text|text|YES|'manual'::text
+reservations|provenance|text|text|YES|
+reservations|synced_from|text|text|YES|
+reservations|ical_uid|text|text|YES|
+reservations|manual_override|boolean|bool|YES|false
+reservations|last_seen_in_ical|timestamp with time zone|timestamptz|YES|
+reservations|message_envoye|boolean|bool|YES|false
+reservations|check_in_time|time without time zone|time|YES|
+reservations|check_out_time|time without time zone|time|YES|
+reservations|telephone|text|text|YES|
+reservations|gite|text|text|YES|
+reservations|created_at|timestamp with time zone|timestamptz|YES|now()
+reservations|updated_at|timestamp with time zone|timestamptz|YES|now()
+reservations_details|id|uuid|uuid|YES|
+reservations_details|owner_user_id|uuid|uuid|YES|
+reservations_details|gite_id|uuid|uuid|YES|
+reservations_details|check_in|date|date|YES|
+reservations_details|check_out|date|date|YES|
+reservations_details|client_name|text|text|YES|
+reservations_details|client_email|text|text|YES|
+reservations_details|client_phone|text|text|YES|
+reservations_details|client_address|text|text|YES|
+reservations_details|guest_count|integer|int4|YES|
+reservations_details|nb_personnes|integer|int4|YES|
+reservations_details|platform|text|text|YES|
+reservations_details|plateforme|text|text|YES|
+reservations_details|platform_booking_id|text|text|YES|
+reservations_details|status|text|text|YES|
+reservations_details|total_price|numeric|numeric|YES|
+reservations_details|montant|numeric|numeric|YES|
+reservations_details|currency|text|text|YES|
+reservations_details|paid_amount|numeric|numeric|YES|
+reservations_details|acompte|numeric|numeric|YES|
+reservations_details|restant|numeric|numeric|YES|
+reservations_details|paiement|text|text|YES|
+reservations_details|notes|text|text|YES|
+reservations_details|source|text|text|YES|
+reservations_details|provenance|text|text|YES|
+reservations_details|synced_from|text|text|YES|
+reservations_details|ical_uid|text|text|YES|
+reservations_details|manual_override|boolean|bool|YES|
+reservations_details|last_seen_in_ical|timestamp with time zone|timestamptz|YES|
+reservations_details|message_envoye|boolean|bool|YES|
+reservations_details|check_in_time|time without time zone|time|YES|
+reservations_details|check_out_time|time without time zone|time|YES|
+reservations_details|telephone|text|text|YES|
+reservations_details|gite|text|text|YES|
+reservations_details|created_at|timestamp with time zone|timestamptz|YES|
+reservations_details|updated_at|timestamp with time zone|timestamptz|YES|
+reservations_details|gite_name|text|text|YES|
+reservations_details|gite_color|text|text|YES|
+reservations_details|gite_icon|text|text|YES|
+reservations_details|gite_address|text|text|YES|
+retours_menage|id|uuid|uuid|NO|gen_random_uuid()
+retours_menage|owner_user_id|uuid|uuid|NO|
+retours_menage|cleaning_schedule_id|uuid|uuid|YES|
+retours_menage|gite_id|uuid|uuid|NO|
+retours_menage|type|text|text|YES|
+retours_menage|description|text|text|NO|
+retours_menage|photos|jsonb|jsonb|YES|
+retours_menage|urgence|text|text|YES|
+retours_menage|status|text|text|YES|'non_traite'::text
+retours_menage|reponse|text|text|YES|
+retours_menage|traite_par|uuid|uuid|YES|
+retours_menage|traite_at|timestamp with time zone|timestamptz|YES|
+retours_menage|created_at|timestamp with time zone|timestamptz|YES|now()
+shopping_list_items|id|uuid|uuid|NO|gen_random_uuid()
+shopping_list_items|list_id|uuid|uuid|NO|
+shopping_list_items|name|text|text|NO|
+shopping_list_items|quantity|integer|int4|YES|1
+shopping_list_items|unit|text|text|YES|
+shopping_list_items|category|text|text|YES|
+shopping_list_items|is_checked|boolean|bool|YES|false
+shopping_list_items|price|numeric|numeric|YES|
+shopping_list_items|notes|text|text|YES|
+shopping_list_items|created_at|timestamp with time zone|timestamptz|YES|now()
+shopping_lists|id|uuid|uuid|NO|gen_random_uuid()
+shopping_lists|owner_user_id|uuid|uuid|NO|
+shopping_lists|gite_id|uuid|uuid|YES|
+shopping_lists|name|text|text|NO|
+shopping_lists|is_template|boolean|bool|YES|false
+shopping_lists|created_at|timestamp with time zone|timestamptz|YES|now()
+shopping_lists|updated_at|timestamp with time zone|timestamptz|YES|now()
+simulations_fiscales|id|uuid|uuid|NO|gen_random_uuid()
+simulations_fiscales|owner_user_id|uuid|uuid|NO|
+simulations_fiscales|annee|integer|int4|NO|
+simulations_fiscales|chiffre_affaires|numeric|numeric|YES|
+simulations_fiscales|charges_totales|numeric|numeric|YES|
+simulations_fiscales|regime|text|text|YES|
+simulations_fiscales|tmi|numeric|numeric|YES|
+simulations_fiscales|rfr|numeric|numeric|YES|
+simulations_fiscales|versement_liberatoire|boolean|bool|YES|false
+simulations_fiscales|meuble_classe|boolean|bool|YES|false
+simulations_fiscales|resultat_fiscal|numeric|numeric|YES|
+simulations_fiscales|ir_du|numeric|numeric|YES|
+simulations_fiscales|urssaf_du|numeric|numeric|YES|
+simulations_fiscales|total_a_payer|numeric|numeric|YES|
+simulations_fiscales|donnees_detaillees|jsonb|jsonb|YES|
+simulations_fiscales|created_at|timestamp with time zone|timestamptz|YES|now()
+simulations_fiscales|updated_at|timestamp with time zone|timestamptz|YES|now()
+stats_par_gite|id|uuid|uuid|YES|
+stats_par_gite|name|text|text|YES|
+stats_par_gite|owner_user_id|uuid|uuid|YES|
+stats_par_gite|nb_reservations|bigint|int8|YES|
+stats_par_gite|ca_total|numeric|numeric|YES|
+stats_par_gite|prix_moyen|numeric|numeric|YES|
+sync_logs|id|uuid|uuid|NO|gen_random_uuid()
+sync_logs|owner_user_id|uuid|uuid|NO|
+sync_logs|gite_id|uuid|uuid|YES|
+sync_logs|platform|text|text|YES|
+sync_logs|status|text|text|YES|
+sync_logs|added|integer|int4|YES|0
+sync_logs|updated|integer|int4|YES|0
+sync_logs|cancelled|integer|int4|YES|0
+sync_logs|skipped|integer|int4|YES|0
+sync_logs|errors|integer|int4|YES|0
+sync_logs|error_message|text|text|YES|
+sync_logs|duration_ms|integer|int4|YES|
+sync_logs|synced_at|timestamp with time zone|timestamptz|YES|now()
+user_roles|id|uuid|uuid|NO|gen_random_uuid()
+user_roles|user_id|uuid|uuid|NO|
+user_roles|role|text|text|NO|
+user_roles|permissions|jsonb|jsonb|YES|
+user_roles|created_at|timestamp with time zone|timestamptz|YES|now()
+user_roles|updated_at|timestamp with time zone|timestamptz|YES|now()
