@@ -1144,15 +1144,15 @@ function verifierSeuilsStatut() {
         alerteDiv.style.display = 'none';
         if (optionLMNP) {
             optionLMNP.disabled = false;
-            optionLMNP.textContent = 'LMNP';
+            optionLMNP.textContent = 'LMNP — 5NA';
         }
         if (optionMicro) {
             optionMicro.disabled = false;
-            optionMicro.textContent = 'Micro-BIC';
+            optionMicro.textContent = 'Micro-BIC — 5NW/5NG';
         }
         if (optionLMP) {
             optionLMP.disabled = true;
-            optionLMP.textContent = 'LMP (critères non remplis)';
+            optionLMP.textContent = 'LMP — 5NY (critères non remplis)';
         }
         return;
     }
@@ -1231,9 +1231,9 @@ function verifierSeuilsStatut() {
         } else {
             optionMicro.disabled = false;
             if (ca > PLAFOND_MICRO_NON_CLASSE && ca <= PLAFOND_MICRO_CLASSE) {
-                optionMicro.textContent = 'Micro-BIC (⭐ classé requis)';
+                optionMicro.textContent = 'Micro-BIC — 5NG (⭐ classé requis)';
             } else {
-                optionMicro.textContent = 'Micro-BIC';
+                optionMicro.textContent = 'Micro-BIC — 5NW/5NG';
             }
         }
     }
@@ -1242,17 +1242,17 @@ function verifierSeuilsStatut() {
     if (optionLMNP) {
         if (lmpObligatoire) {
             optionLMNP.disabled = true;
-            optionLMNP.textContent = 'LMNP (⛔ LMP obligatoire)';
+            optionLMNP.textContent = 'LMNP — 5NA (⛔ LMP obligatoire)';
         } else {
             optionLMNP.disabled = false;
-            optionLMNP.textContent = 'LMNP';
+            optionLMNP.textContent = 'LMNP — 5NA';
         }
     }
     
     // LMP : TOUJOURS disponible (choix anticipé possible)
     if (optionLMP) {
         optionLMP.disabled = false;
-        optionLMP.textContent = 'LMP';
+        optionLMP.textContent = 'LMP — 5NY';
     }
     
     // FORÇAGE AUTOMATIQUE DU STATUT
