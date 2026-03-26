@@ -791,7 +791,9 @@
                 // console.log('🔍 DEBUG: Nombre de cleaning_schedules:', cleaningSchedules?.length);
                 
                 reservations.forEach(res => {
-                    const dateFin = new Date(res.check_out);
+                    // Parser check_out en local (évite décalage UTC : new Date('2026-04-13') = 12 avr 22h en France)
+                    const [cy, cm, cd] = res.check_out.split('T')[0].split('-');
+                    const dateFin = new Date(parseInt(cy), parseInt(cm) - 1, parseInt(cd));
                     const today = new Date();
                     
                     if (dateFin < today) return; // Ignorer le passé
