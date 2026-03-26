@@ -827,19 +827,21 @@
                         console.log(`   ✅ date depuis BDD (${cleaning.status}): ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     } else if (typeof window.calculerDateMenage === 'function') {
                         // Calculer via les règles métier (même résultat que l'onglet ménage)
+                        // parseLocalDate dans validation.html attend DD/MM/YYYY
+                        const toFR = (ymd) => { const [y,m,d] = ymd.split('-'); return `${d}/${m}/${y}`; };
                         const resMapped = {
                             ...res,
-                            dateFin: res.check_out.split('T')[0],
-                            dateDebut: res.check_in.split('T')[0],
-                            date_fin: res.check_out.split('T')[0],
-                            date_debut: res.check_in.split('T')[0]
+                            dateFin: toFR(res.check_out.split('T')[0]),
+                            dateDebut: toFR(res.check_in.split('T')[0]),
+                            date_fin: toFR(res.check_out.split('T')[0]),
+                            date_debut: toFR(res.check_in.split('T')[0])
                         };
                         const allMapped = reservations.map(r => ({
                             ...r,
-                            dateFin: r.check_out ? r.check_out.split('T')[0] : null,
-                            dateDebut: r.check_in ? r.check_in.split('T')[0] : null,
-                            date_fin: r.check_out ? r.check_out.split('T')[0] : null,
-                            date_debut: r.check_in ? r.check_in.split('T')[0] : null
+                            dateFin: r.check_out ? toFR(r.check_out.split('T')[0]) : null,
+                            dateDebut: r.check_in ? toFR(r.check_in.split('T')[0]) : null,
+                            date_fin: r.check_out ? toFR(r.check_out.split('T')[0]) : null,
+                            date_debut: r.check_in ? toFR(r.check_in.split('T')[0]) : null
                         }));
                         const calcResult = window.calculerDateMenage(resMapped, allMapped);
                         scheduledDate = (calcResult.date instanceof Date && !isNaN(calcResult.date)) ? calcResult.date : dateFin;
