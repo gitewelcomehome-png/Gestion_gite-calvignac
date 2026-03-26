@@ -3964,7 +3964,7 @@ async function initFiscalite() {
 
     // Afficher la section chambres d'hôtes si applicable
     await verifierAffichageSectionCH();
-    setTimeout(() => verifierAffichageSectionCH(), 1200);
+    planifierReverificationSectionCH();
     
     // NOUVELLE APPROCHE : Délégation d'événements sur le formulaire entier
     // Cela fonctionne même pour les champs ajoutés dynamiquement !
@@ -4579,6 +4579,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!fiscaliteInitialized) {
                 setTimeout(initFiscalite, 100);
                 fiscaliteInitialized = true;
+            } else {
+                verifierAffichageSectionCH();
+                planifierReverificationSectionCH();
             }
         });
     }
@@ -7206,9 +7209,29 @@ async function verifierAffichageSectionCH() {
         }
     }
 
+    if (!Array.isArray(gites) || gites.length === 0) {
+        return;
+    }
+
     const aChambreHotes = gites.some(estChambreHotes);
 
     section.style.display = aChambreHotes ? 'block' : 'none';
+}
+
+function planifierReverificationSectionCH() {
+    let tentatives = 0;
+    const maxTentatives = 8;
+
+    const timer = setInterval(async () => {
+        tentatives += 1;
+        await verifierAffichageSectionCH();
+
+        const section = document.getElementById('section-chambres-hotes');
+        const visible = section && section.style.display !== 'none';
+        if (visible || tentatives >= maxTentatives) {
+            clearInterval(timer);
+        }
+    }, 1200);
 }
 
 window.calculerFiscaliteCH = calculerFiscaliteCH;
