@@ -152,18 +152,26 @@ class SubscriptionManager {
     try {
       const { data: client } = await supabase
         .from('cm_clients')
-        .select('statut, trial_ends_at, type_abonnement, billing_cycle')
+        .select('statut, trial_ends_at, type_abonnement, billing_cycle, created_at')
         .eq('user_id', userId)
         .maybeSingle();
 
       if (!client || client.statut !== 'trial') return;
 
       this.isInTrial = true;
-      this.trialEndsAt = client.trial_ends_at || null;
       this.billingCycle = client.billing_cycle || 'mensuel';
 
-      if (client.trial_ends_at) {
-        const msLeft = new Date(client.trial_ends_at) - new Date();
+      // Utiliser trial_ends_at si disponible, sinon calculer depuis created_at
+      let trialEnd = client.trial_ends_at
+        ? new Date(client.trial_ends_at)
+        : client.created_at
+          ? new Date(new Date(client.created_at).getTime() + 14 * 24 * 60 * 60 * 1000)
+          : null;
+
+      this.trialEndsAt = trialEnd ? trialEnd.toISOString() : null;
+
+      if (trialEnd) {
+        const msLeft = trialEnd - new Date();
         this.trialDaysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
       } else {
         this.trialDaysLeft = 14;
