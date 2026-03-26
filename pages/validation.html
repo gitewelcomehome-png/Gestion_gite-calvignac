@@ -1005,7 +1005,7 @@
             }
         }
 
-        const CLIENT_MODIFICATION_VALIDATED_MARKER = '[MODIFICATION_VALIDEE_CLIENT]';
+        // CLIENT_MODIFICATION_VALIDATED_MARKER défini dans menage.js (chargé en <head>)
 
         function hasClientValidatedModification(notes) {
             return typeof notes === 'string' && notes.includes(CLIENT_MODIFICATION_VALIDATED_MARKER);
