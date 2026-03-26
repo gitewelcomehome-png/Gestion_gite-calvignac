@@ -790,16 +790,22 @@
                 
                 const weeks = {};
                 
-                // console.log('🔍 DEBUG: Nombre de réservations:', reservations.length);
-                // console.log('🔍 DEBUG: Nombre de cleaning_schedules:', cleaningSchedules?.length);
+                console.log('🔍 DEBUG loadPlanning: réservations=', reservations.length, '| cleaningSchedules=', cleaningSchedules?.length);
+                console.log('🔍 DEBUG calculerDateMenage disponible:', typeof window.calculerDateMenage);
                 
                 reservations.forEach(res => {
                     // Ignorer les réservations sans check_out valide
-                    if (!res.check_out || !res.check_in) return;
+                    if (!res.check_out || !res.check_in) {
+                        console.warn('⚠️ Réservation ignorée (check_out/check_in manquant):', res.id);
+                        return;
+                    }
                     // Parser check_out en local (évite décalage UTC : new Date('2026-04-13') = 12 avr 22h en France)
                     const [cy, cm, cd] = res.check_out.split('T')[0].split('-');
                     const dateFin = new Date(parseInt(cy), parseInt(cm) - 1, parseInt(cd));
-                    if (isNaN(dateFin)) return;
+                    if (isNaN(dateFin)) {
+                        console.warn('⚠️ Réservation ignorée (dateFin invalide):', res.id, res.check_out);
+                        return;
+                    }
                     const today = new Date();
                     
                     if (dateFin < today) return; // Ignorer le passé
@@ -807,8 +813,7 @@
                     // Trouver le cleaning_schedule correspondant
                     const cleaning = cleaningSchedules?.find(c => c.reservation_id === res.id);
                     
-                    // console.log(`📋 Réservation ${res.id} (${res.gite_id}) - check_out: ${res.check_out}`);
-                    // console.log(`   ➡️ cleaning.scheduled_date: ${cleaning?.scheduled_date || 'AUCUN'}`);
+                    console.log(`📋 Résa ${res.id.slice(0,8)} check_out=${res.check_out} | cleaning status=${cleaning?.status || 'AUCUN'} | scheduled_date=${cleaning?.scheduled_date || 'null'} | date=${cleaning?.date || 'null'}`);
                     
                     // Calculer la date via les règles métier (même logique que l'onglet ménage)
                     // Pour les ménages déjà proposés/validés, on peut se baser sur scheduled_date si dispo
@@ -819,6 +824,7 @@
                         const rawDate = cleaning.scheduled_date || cleaning.date;
                         const [year, month, day] = rawDate.split('-');
                         scheduledDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                        console.log(`   ✅ date depuis BDD (${cleaning.status}): ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     } else if (typeof window.calculerDateMenage === 'function') {
                         // Calculer via les règles métier (même résultat que l'onglet ménage)
                         const resMapped = {
@@ -830,15 +836,17 @@
                         };
                         const allMapped = reservations.map(r => ({
                             ...r,
-                            dateFin: r.check_out.split('T')[0],
-                            dateDebut: r.check_in.split('T')[0],
-                            date_fin: r.check_out.split('T')[0],
-                            date_debut: r.check_in.split('T')[0]
+                            dateFin: r.check_out ? r.check_out.split('T')[0] : null,
+                            dateDebut: r.check_in ? r.check_in.split('T')[0] : null,
+                            date_fin: r.check_out ? r.check_out.split('T')[0] : null,
+                            date_debut: r.check_in ? r.check_in.split('T')[0] : null
                         }));
                         const calcResult = window.calculerDateMenage(resMapped, allMapped);
                         scheduledDate = (calcResult.date instanceof Date && !isNaN(calcResult.date)) ? calcResult.date : dateFin;
+                        console.log(`   🔧 date calculée (règles métier): ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     } else {
                         scheduledDate = dateFin;
+                        console.log(`   ⚠️ fallback dateFin: ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     }
                     
                     // Trouver le lundi de la semaine
@@ -848,6 +856,7 @@
                     monday.setHours(0, 0, 0, 0);
                     
                     const weekKey = monday.toISOString().split('T')[0];
+                    console.log(`   📅 semaine: ${weekKey}`);
                     
                     if (!weeks[weekKey]) {
                         const sunday = new Date(monday);
