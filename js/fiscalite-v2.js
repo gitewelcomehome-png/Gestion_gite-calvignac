@@ -3959,7 +3959,7 @@ async function initFiscalite() {
     await genererRecapitulatifCharges();
 
     // Afficher la section chambres d'hôtes si applicable
-    verifierAffichageSectionCH();
+    await verifierAffichageSectionCH();
     
     // NOUVELLE APPROCHE : Délégation d'événements sur le formulaire entier
     // Cela fonctionne même pour les champs ajoutés dynamiquement !
@@ -7095,7 +7095,31 @@ function calculerFiscaliteCH() {
 // ──────────────────────────────────────────────────────────
 // Affiche/masque la section chambres d'hôtes selon GITES_DATA
 // ──────────────────────────────────────────────────────────
-function verifierAffichageSectionCH() {
+function normaliserCategorieHebergement(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+}
+
+function estChambreHotes(gite) {
+    const candidats = [
+        gite?.categorie_hebergement,
+        gite?.type_hebergement,
+        gite?.type_logement,
+        gite?.categorie,
+        gite?.type,
+        gite?.nature
+    ];
+
+    return candidats.some((valeur) => {
+        const norm = normaliserCategorieHebergement(valeur);
+        return norm === 'chambrehotes' || norm === 'chambredhotes' || norm === 'chambrehote';
+    });
+}
+
+async function verifierAffichageSectionCH() {
     const section = document.getElementById('section-chambres-hotes');
     if (!section) return;
 
@@ -7105,8 +7129,17 @@ function verifierAffichageSectionCH() {
         blocFiscaliteGites.insertAdjacentElement('afterend', section);
     }
 
-    const gites = window.GITES_DATA || [];
-    const aChambreHotes = gites.some(g => g.categorie_hebergement === 'chambre_hotes');
+    let gites = Array.isArray(window.GITES_DATA) ? window.GITES_DATA : [];
+    if (gites.length === 0 && window.gitesManager?.getVisibleGites) {
+        try {
+            gites = await window.gitesManager.getVisibleGites();
+            window.GITES_DATA = gites;
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger les hébergements pour la section CH:', error);
+        }
+    }
+
+    const aChambreHotes = gites.some(estChambreHotes);
 
     section.style.display = aChambreHotes ? 'block' : 'none';
 }
