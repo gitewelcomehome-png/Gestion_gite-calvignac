@@ -7161,12 +7161,14 @@ function estChambreHotes(gite) {
         gite?.type_logement,
         gite?.categorie,
         gite?.type,
-        gite?.nature
+        gite?.nature,
+        gite?.name,
+        gite?.nom
     ];
 
     return candidats.some((valeur) => {
         const norm = normaliserCategorieHebergement(valeur);
-        return norm === 'chambrehotes' || norm === 'chambredhotes' || norm === 'chambrehote';
+        return norm === 'chambrehotes' || norm === 'chambredhotes' || norm === 'chambrehote' || norm.includes('chambrehote');
     });
 }
 
@@ -7174,12 +7176,18 @@ async function verifierAffichageSectionCH() {
     const section = document.getElementById('section-chambres-hotes');
     if (!section) return;
 
-    // Place la section CH à un emplacement stable: juste avant la section personnelle
-    const sectionPersonnelle = document.getElementById('section-personnelle');
-    if (sectionPersonnelle) {
-        sectionPersonnelle.parentNode.insertBefore(section, sectionPersonnelle);
+    // Place la section CH exactement dans la zone IR affichée par l'utilisateur
+    const resultatIr = document.getElementById('resultat-ir');
+    if (resultatIr && resultatIr.parentNode) {
+        resultatIr.parentNode.insertBefore(section, resultatIr.nextSibling);
     } else {
-        // Fallback: après le comparatif fiscalité gîtes
+        // Fallback: juste avant la section personnelle
+        const sectionPersonnelle = document.getElementById('section-personnelle');
+        if (sectionPersonnelle) {
+            sectionPersonnelle.parentNode.insertBefore(section, sectionPersonnelle);
+        }
+
+        // Fallback final: après le comparatif fiscalité gîtes
         const blocFiscaliteGites = document.getElementById('comparaison-reel-micro');
         if (blocFiscaliteGites && section.previousElementSibling !== blocFiscaliteGites) {
             blocFiscaliteGites.insertAdjacentElement('afterend', section);
@@ -7206,6 +7214,23 @@ async function verifierAffichageSectionCH() {
             if (Array.isArray(gites)) window.GITES_DATA = gites;
         } catch (error) {
             console.warn('⚠️ Impossible de charger les hébergements visibles pour la section CH:', error);
+        }
+    }
+
+    // Fallback ultime: lecture directe Supabase pour éviter un faux négatif d'affichage
+    if ((!Array.isArray(gites) || gites.length === 0) && window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('gites')
+                .select('name, categorie_hebergement, type_hebergement, type_logement, categorie, type, nature, is_active')
+                .eq('is_active', true);
+            if (error) throw error;
+            if (Array.isArray(data)) {
+                gites = data;
+                window.GITES_DATA = data;
+            }
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger les hébergements via fallback Supabase pour la section CH:', error);
         }
     }
 
