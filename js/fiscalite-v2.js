@@ -7099,6 +7099,12 @@ function verifierAffichageSectionCH() {
     const section = document.getElementById('section-chambres-hotes');
     if (!section) return;
 
+    // Place toujours la section CH juste après le bloc fiscalité gîtes
+    const blocFiscaliteGites = document.getElementById('comparaison-reel-micro');
+    if (blocFiscaliteGites && section.previousElementSibling !== blocFiscaliteGites) {
+        blocFiscaliteGites.insertAdjacentElement('afterend', section);
+    }
+
     const gites = window.GITES_DATA || [];
     const aChambreHotes = gites.some(g => g.categorie_hebergement === 'chambre_hotes');
 

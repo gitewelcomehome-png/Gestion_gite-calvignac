@@ -1454,6 +1454,43 @@ html.theme-light.style-apple .auto-subtitle {
     color: #00695c;
 }
 
+/* Section chambres d'hôtes : lisibilité renforcée */
+#section-chambres-hotes .card {
+    background: #0f1012;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f3f4f6;
+    box-shadow: none;
+}
+
+#section-chambres-hotes .bloc-content {
+    color: #f3f4f6;
+}
+
+#section-chambres-hotes table th,
+#section-chambres-hotes table td {
+    color: #1f2937 !important;
+}
+
+#section-chambres-hotes input,
+#section-chambres-hotes select {
+    color: #f8fafc;
+}
+
+html.theme-light #section-chambres-hotes .card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: #1f2937;
+}
+
+html.theme-light #section-chambres-hotes .bloc-content {
+    color: #1f2937;
+}
+
+html.theme-light #section-chambres-hotes input,
+html.theme-light #section-chambres-hotes select {
+    color: #1f2937;
+}
+
 html.theme-light.style-apple .btn-auto {
     background: white;
     color: #00838f;
