@@ -2035,6 +2035,10 @@ function calculerIR() {
     document.getElementById('ir-reste-final').textContent = resteFinalTotal.toFixed(2) + ' €';
     const dashIr2026El = document.getElementById('dashboard-ir-2026');
     if (dashIr2026El) dashIr2026El.textContent = Math.round(impotTotal).toLocaleString('fr-FR') + '\u00a0€';
+
+    // Synchronise automatiquement le TMI du simulateur CH avec l'IR du foyer
+    synchroniserTmiChDepuisIR();
+    calculerFiscaliteCH();
     
     // Calculer le reste à vivre après le calcul de l'IR
     setTimeout(() => calculerResteAVivre(), 100);
@@ -3960,6 +3964,7 @@ async function initFiscalite() {
 
     // Afficher la section chambres d'hôtes si applicable
     await verifierAffichageSectionCH();
+    setTimeout(() => verifierAffichageSectionCH(), 1200);
     
     // NOUVELLE APPROCHE : Délégation d'événements sur le formulaire entier
     // Cela fonctionne même pour les champs ajoutés dynamiquement !
@@ -4008,6 +4013,10 @@ async function initFiscalite() {
         } else {
             await chargerDerniereSimulation();
         }
+
+        // Aligner le TMI CH avec l'IR courant après chargement des données
+        synchroniserTmiChDepuisIR();
+        calculerFiscaliteCH();
     });
 }
 
@@ -7092,6 +7101,45 @@ function calculerFiscaliteCH() {
     }
 }
 
+function determinerTmiDepuisQuotient(quotient, bareme = []) {
+    if (!Array.isArray(bareme) || bareme.length === 0 || !Number.isFinite(quotient) || quotient <= 0) {
+        return 0;
+    }
+
+    let taux = bareme[bareme.length - 1]?.taux || 0;
+    for (const tranche of bareme) {
+        if (quotient <= tranche.max) {
+            taux = tranche.taux;
+            break;
+        }
+    }
+    return Math.round(taux * 100);
+}
+
+function synchroniserTmiChDepuisIR() {
+    const selectTmiCH = document.getElementById('ch-tmi');
+    if (!selectTmiCH) return;
+
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
+    const config = window.TAUX_FISCAUX?.getConfig?.(annee);
+    const bareme = config?.BAREME_IR || [];
+
+    const quotientTexte = document.getElementById('ir-quotient')?.textContent || '';
+    const quotient = parseFloat(
+        quotientTexte
+            .replace(/\s/g, '')
+            .replace('€', '')
+            .replace(',', '.')
+    );
+
+    const tmi = determinerTmiDepuisQuotient(quotient, bareme);
+    if (![0, 11, 30, 41, 45].includes(tmi)) return;
+
+    if (String(selectTmiCH.value) !== String(tmi)) {
+        selectTmiCH.value = String(tmi);
+    }
+}
+
 // ──────────────────────────────────────────────────────────
 // Affiche/masque la section chambres d'hôtes selon GITES_DATA
 // ──────────────────────────────────────────────────────────
@@ -7123,17 +7171,30 @@ async function verifierAffichageSectionCH() {
     const section = document.getElementById('section-chambres-hotes');
     if (!section) return;
 
-    // Place toujours la section CH juste après le bloc fiscalité gîtes
-    const blocFiscaliteGites = document.getElementById('comparaison-reel-micro');
-    if (blocFiscaliteGites && section.previousElementSibling !== blocFiscaliteGites) {
-        blocFiscaliteGites.insertAdjacentElement('afterend', section);
+    // Place la section CH à un emplacement stable: juste avant la section personnelle
+    const sectionPersonnelle = document.getElementById('section-personnelle');
+    if (sectionPersonnelle && section.parentElement === sectionPersonnelle.parentElement && section.nextElementSibling !== sectionPersonnelle) {
+        sectionPersonnelle.insertAdjacentElement('beforebegin', section);
+    } else {
+        // Fallback: après le comparatif fiscalité gîtes
+        const blocFiscaliteGites = document.getElementById('comparaison-reel-micro');
+        if (blocFiscaliteGites && section.previousElementSibling !== blocFiscaliteGites) {
+            blocFiscaliteGites.insertAdjacentElement('afterend', section);
+        }
     }
 
     let gites = Array.isArray(window.GITES_DATA) ? window.GITES_DATA : [];
-    if (gites.length === 0 && window.gitesManager?.getVisibleGites) {
+    if (gites.length === 0 && window.gitesManager) {
         try {
-            gites = await window.gitesManager.getVisibleGites();
-            window.GITES_DATA = gites;
+            if (window.gitesManager.getAll) {
+                gites = await window.gitesManager.getAll();
+            }
+            if ((!Array.isArray(gites) || gites.length === 0) && window.gitesManager.getVisibleGites) {
+                gites = await window.gitesManager.getVisibleGites();
+            }
+            if (Array.isArray(gites)) {
+                window.GITES_DATA = gites;
+            }
         } catch (error) {
             console.warn('⚠️ Impossible de charger les hébergements pour la section CH:', error);
         }
