@@ -3957,6 +3957,9 @@ async function initFiscalite() {
     
     // Générer le récapitulatif des charges (async)
     await genererRecapitulatifCharges();
+
+    // Afficher la section chambres d'hôtes si applicable
+    verifierAffichageSectionCH();
     
     // NOUVELLE APPROCHE : Délégation d'événements sur le formulaire entier
     // Cela fonctionne même pour les champs ajoutés dynamiquement !
@@ -7039,40 +7042,68 @@ function calculerFiscaliteCH() {
 
     if (ca <= 0) {
         resultatsEl.style.display = 'none';
+        document.getElementById('ch-alerte-plafond')?.style && (document.getElementById('ch-alerte-plafond').style.display = 'none');
+        document.getElementById('ch-alerte-tva')?.style && (document.getElementById('ch-alerte-tva').style.display = 'none');
+        document.getElementById('ch-alerte-cotisations')?.style && (document.getElementById('ch-alerte-cotisations').style.display = 'none');
         return;
     }
 
-    resultatsEl.style.display = 'block';
+    // ── Règles Loi Le Meur 2026 — Case 5NJ ──
+    const ABATTEMENT_CH        = 0.50;  // 50% (plus 71% depuis revenus 2025)
+    const PLAFOND_MICRO_BIC_CH = 77700; // Plafond Micro-BIC 2026
+    const SEUIL_TVA_CH         = 37500; // Franchise TVA 2026 (tolérance 41 250€)
+    const TAUX_COTIS_CH        = 0.212; // 21,2% du CA en Micro-BIC
+    const SEUIL_COTIS_CH       = 6248;  // 13% du PASS 2026 — seuil d'affiliation URSSAF
 
-    const ABATTEMENT = 0.71;
-    const PLAFOND_MICRO_BIC = 188700;
-    const SEUIL_TVA = 36800;
-
-    const baseImposable = ca * (1 - ABATTEMENT);
+    const baseImposable = ca * (1 - ABATTEMENT_CH);
+    const seuilCotisAtteint = baseImposable > SEUIL_COTIS_CH;
+    const cotisations = seuilCotisAtteint ? ca * TAUX_COTIS_CH : ca * 0.172; // 17,2% prélèvements patrimoine sinon
     const irEstime = baseImposable * (tmi / 100);
-    const netApresIR = ca - irEstime;
+    const netApresCharges = ca - cotisations - irEstime;
 
     const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
 
+    resultatsEl.style.display = 'block';
     document.getElementById('ch-base-imposable').textContent = fmt(baseImposable);
-    document.getElementById('ch-ir-estime').textContent = fmt(irEstime);
-    document.getElementById('ch-net-ir').textContent = fmt(netApresIR);
+    document.getElementById('ch-cotisations').textContent    = fmt(cotisations);
+    document.getElementById('ch-ir-estime').textContent      = fmt(irEstime);
+    document.getElementById('ch-net-ir').textContent         = fmt(netApresCharges);
 
-    // Alerte plafond Micro-BIC
+    // Alertes
     const alertePlafond = document.getElementById('ch-alerte-plafond');
-    if (alertePlafond) alertePlafond.style.display = ca > PLAFOND_MICRO_BIC ? 'block' : 'none';
+    if (alertePlafond) alertePlafond.style.display = ca > PLAFOND_MICRO_BIC_CH ? 'block' : 'none';
 
-    // Alerte TVA para-hôtellerie
     const alerteTva = document.getElementById('ch-alerte-tva');
-    if (alerteTva) alerteTva.style.display = ca > SEUIL_TVA ? 'block' : 'none';
+    if (alerteTva) alerteTva.style.display = ca >= SEUIL_TVA_CH ? 'block' : 'none';
 
-    // Message avantage vs gîte non classé (50%)
+    const alerteCotis = document.getElementById('ch-alerte-cotisations');
+    if (alerteCotis) alerteCotis.style.display = seuilCotisAtteint ? 'block' : 'none';
+
+    // Message comparatif vs gîte non classé (5NW — 30%)
     const avantage = document.getElementById('ch-avantage');
     if (avantage) {
-        const baseGite50 = ca * 0.50;
-        const economie = Math.round(baseGite50 - baseImposable);
-        avantage.textContent = `💡 Par rapport à un gîte non classé (50%), vous économisez ${fmt(economie * tmi / 100)} d'impôt estimé grâce à l'abattement 71%.`;
+        if (ca <= PLAFOND_MICRO_BIC_CH) {
+            const baseGiteNonClasse = ca * 0.70; // abattement 30%
+            const economieFiscale = Math.round((baseGiteNonClasse - baseImposable) * (tmi / 100));
+            avantage.textContent = `💡 Vs gîte non classé (5NW — abatt. 30%) : économie IR estimée de ${fmt(economieFiscale)} grâce à l'abattement 50% (case 5NJ).`;
+        } else {
+            avantage.textContent = `⚠️ CA dépassant 77 700 € : Micro-BIC non applicable — régime réel BIC obligatoire. Consultez un expert-comptable.`;
+        }
     }
 }
 
+// ──────────────────────────────────────────────────────────
+// Affiche/masque la section chambres d'hôtes selon GITES_DATA
+// ──────────────────────────────────────────────────────────
+function verifierAffichageSectionCH() {
+    const section = document.getElementById('section-chambres-hotes');
+    if (!section) return;
+
+    const gites = window.GITES_DATA || [];
+    const aChambreHotes = gites.some(g => g.categorie_hebergement === 'chambre_hotes');
+
+    section.style.display = aChambreHotes ? 'block' : 'none';
+}
+
 window.calculerFiscaliteCH = calculerFiscaliteCH;
+window.verifierAffichageSectionCH = verifierAffichageSectionCH;
