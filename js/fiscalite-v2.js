@@ -7173,8 +7173,8 @@ async function verifierAffichageSectionCH() {
 
     // Place la section CH à un emplacement stable: juste avant la section personnelle
     const sectionPersonnelle = document.getElementById('section-personnelle');
-    if (sectionPersonnelle && section.parentElement === sectionPersonnelle.parentElement && section.nextElementSibling !== sectionPersonnelle) {
-        sectionPersonnelle.insertAdjacentElement('beforebegin', section);
+    if (sectionPersonnelle) {
+        sectionPersonnelle.parentNode.insertBefore(section, sectionPersonnelle);
     } else {
         // Fallback: après le comparatif fiscalité gîtes
         const blocFiscaliteGites = document.getElementById('comparaison-reel-micro');
@@ -7183,20 +7183,26 @@ async function verifierAffichageSectionCH() {
         }
     }
 
-    let gites = Array.isArray(window.GITES_DATA) ? window.GITES_DATA : [];
-    if (gites.length === 0 && window.gitesManager) {
+    // IMPORTANT: on détecte sur TOUS les logements (pas seulement ceux visibles selon abonnement)
+    let gites = [];
+    if (window.gitesManager?.getAll) {
         try {
-            if (window.gitesManager.getAll) {
-                gites = await window.gitesManager.getAll();
-            }
-            if ((!Array.isArray(gites) || gites.length === 0) && window.gitesManager.getVisibleGites) {
-                gites = await window.gitesManager.getVisibleGites();
-            }
-            if (Array.isArray(gites)) {
-                window.GITES_DATA = gites;
-            }
+            gites = await window.gitesManager.getAll();
         } catch (error) {
-            console.warn('⚠️ Impossible de charger les hébergements pour la section CH:', error);
+            console.warn('⚠️ Impossible de charger tous les hébergements pour la section CH:', error);
+        }
+    }
+
+    if ((!Array.isArray(gites) || gites.length === 0) && Array.isArray(window.GITES_DATA) && window.GITES_DATA.length > 0) {
+        gites = window.GITES_DATA;
+    }
+
+    if ((!Array.isArray(gites) || gites.length === 0) && window.gitesManager?.getVisibleGites) {
+        try {
+                gites = await window.gitesManager.getVisibleGites();
+            if (Array.isArray(gites)) window.GITES_DATA = gites;
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger les hébergements visibles pour la section CH:', error);
         }
     }
 
