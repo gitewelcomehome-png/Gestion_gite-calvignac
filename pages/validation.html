@@ -803,14 +803,14 @@
                     // console.log(`   ➡️ cleaning.scheduled_date: ${cleaning?.scheduled_date || 'AUCUN'}`);
                     
                     // Parser scheduled_date sans décalage horaire UTC
+                    // Fallback sur cleaning.date (ancienne colonne) si scheduled_date est null
                     let scheduledDate;
-                    if (cleaning?.scheduled_date) {
-                        const [year, month, day] = cleaning.scheduled_date.split('-');
+                    const rawDate = cleaning?.scheduled_date || cleaning?.date;
+                    if (rawDate) {
+                        const [year, month, day] = rawDate.split('-');
                         scheduledDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                        // console.log(`   ➡️ scheduledDate parsée: ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     } else {
                         scheduledDate = dateFin;
-                        // console.log(`   ➡️ Utilisation check_out par défaut: ${scheduledDate.toLocaleDateString('fr-FR')}`);
                     }
                     
                     // Trouver le lundi de la semaine
