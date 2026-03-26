@@ -13,6 +13,9 @@
     
     <!-- 🏢 MULTI-TENANT: Gestionnaire dynamique des gîtes -->
     <script src="../js/gites-manager.js"></script>
+
+    <!-- 🧹 CALCUL DATE MÉNAGE : même logique que l'onglet ménage -->
+    <script src="../js/menage.js"></script>
     
     <!-- 🛡️ PHASE 3 SÉCURITÉ: Protection XSS -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
@@ -804,13 +807,33 @@
                     // console.log(`📋 Réservation ${res.id} (${res.gite_id}) - check_out: ${res.check_out}`);
                     // console.log(`   ➡️ cleaning.scheduled_date: ${cleaning?.scheduled_date || 'AUCUN'}`);
                     
-                    // Parser scheduled_date sans décalage horaire UTC
-                    // Fallback sur cleaning.date (ancienne colonne) si scheduled_date est null
+                    // Calculer la date via les règles métier (même logique que l'onglet ménage)
+                    // Pour les ménages déjà proposés/validés, on peut se baser sur scheduled_date si dispo
                     let scheduledDate;
-                    const rawDate = cleaning?.scheduled_date || cleaning?.date;
-                    if (rawDate) {
+                    const hasProposedDate = cleaning && cleaning.status !== 'pending' && (cleaning.scheduled_date || cleaning.date);
+                    if (hasProposedDate) {
+                        // Ménage proposé/validé : utiliser la date stockée
+                        const rawDate = cleaning.scheduled_date || cleaning.date;
                         const [year, month, day] = rawDate.split('-');
                         scheduledDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    } else if (typeof window.calculerDateMenage === 'function') {
+                        // Calculer via les règles métier (même résultat que l'onglet ménage)
+                        const resMapped = {
+                            ...res,
+                            dateFin: res.check_out.split('T')[0],
+                            dateDebut: res.check_in.split('T')[0],
+                            date_fin: res.check_out.split('T')[0],
+                            date_debut: res.check_in.split('T')[0]
+                        };
+                        const allMapped = reservations.map(r => ({
+                            ...r,
+                            dateFin: r.check_out.split('T')[0],
+                            dateDebut: r.check_in.split('T')[0],
+                            date_fin: r.check_out.split('T')[0],
+                            date_debut: r.check_in.split('T')[0]
+                        }));
+                        const calcResult = window.calculerDateMenage(resMapped, allMapped);
+                        scheduledDate = calcResult.date;
                     } else {
                         scheduledDate = dateFin;
                     }
