@@ -41,15 +41,24 @@ class SubscriptionManager {
       return null;
     }
 
-    const { data, error } = await supabase
+    // Résoudre cm_clients.id à partir du user_id (auth UUID ≠ cm_clients.id)
+    const { data: clientRow } = await supabase
+      .from('cm_clients')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const clientId = clientRow?.id ?? null;
+
+    const { data, error } = clientId ? await supabase
       .from('cm_subscriptions')
       .select(`
         *,
         plan:cm_pricing_plans(*)
       `)
-      .eq('client_id', user.id)
+      .eq('client_id', clientId)
       .eq('status', 'active')
-      .maybeSingle();
+      .maybeSingle() : { data: null, error: null };
 
     if (error) {
       console.error('Erreur chargement abonnement:', error);
