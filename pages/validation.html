@@ -794,9 +794,12 @@
                 // console.log('🔍 DEBUG: Nombre de cleaning_schedules:', cleaningSchedules?.length);
                 
                 reservations.forEach(res => {
+                    // Ignorer les réservations sans check_out valide
+                    if (!res.check_out || !res.check_in) return;
                     // Parser check_out en local (évite décalage UTC : new Date('2026-04-13') = 12 avr 22h en France)
                     const [cy, cm, cd] = res.check_out.split('T')[0].split('-');
                     const dateFin = new Date(parseInt(cy), parseInt(cm) - 1, parseInt(cd));
+                    if (isNaN(dateFin)) return;
                     const today = new Date();
                     
                     if (dateFin < today) return; // Ignorer le passé
@@ -833,7 +836,7 @@
                             date_debut: r.check_in.split('T')[0]
                         }));
                         const calcResult = window.calculerDateMenage(resMapped, allMapped);
-                        scheduledDate = calcResult.date;
+                        scheduledDate = (calcResult.date instanceof Date && !isNaN(calcResult.date)) ? calcResult.date : dateFin;
                     } else {
                         scheduledDate = dateFin;
                     }
