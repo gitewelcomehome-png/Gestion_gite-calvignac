@@ -81,18 +81,21 @@
     }
 
     // Fonction d'envoi vers Supabase avec DÉDUPLICATION
-    async function logError(errorData) {
+    // retries : compteur interne pour éviter une boucle infinie si supabaseClient ne s'initialise jamais
+    async function logError(errorData, retries) {
         if (!CONFIG.sendToServer) return;
+        var _retries = retries || 0;
+        var MAX_RETRIES = 5;
         
         // 🚨 PROTECTION ANTI-BOUCLE INFINIE
         if (isLoggingError) {
             return; // Ne pas logger si on est déjà en train de logger
         }
         
-        // Attendre que Supabase soit prêt
+        // Attendre que Supabase soit prêt (backoff exponentiel, max 5 tentatives)
         if (!window.supabaseClient) {
-            // Réessayer après 1 seconde
-            setTimeout(() => logError(errorData), 1000);
+            if (_retries >= MAX_RETRIES) return; // Abandon silencieux après 5 essais
+            setTimeout(function() { logError(errorData, _retries + 1); }, 1000 * (_retries + 1));
             return;
         }
 
