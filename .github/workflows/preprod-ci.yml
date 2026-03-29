@@ -29,6 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          for p in pages/admin-monitoring.html pages/admin-dashboard.html; do
+          for p in pages/admin-monitoring.html pages/admin-channel-manager.html pages/admin-support.html; do
             [ -f "$p" ] && echo "OK $p" || exit 1
           done
