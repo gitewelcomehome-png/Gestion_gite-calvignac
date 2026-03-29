@@ -201,7 +201,16 @@
             background: #f1f5f9;
             color: #64748b;
         }
-    </style>
+    
+  /* ── Tab Navigation ── */
+  .tab-nav { display:flex;gap:0;background:#fff;border-bottom:2px solid #e5e7eb;padding:0 2rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:0; }
+  .tab-btn { padding:.85rem 1.75rem;font-size:.95rem;font-weight:600;color:#6b7280;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:color .2s,border-color .2s;margin-bottom:-2px;white-space:nowrap;line-height:1.4; }
+  .tab-btn:hover { color:#10b981; }
+  .tab-btn.tab-active { color:#10b981;border-bottom-color:#10b981; }
+  .tab-panel { display:none; }
+  .tab-panel.tab-active { display:block; }
+
+  </style>
 </head>
 <body>
     <!-- Header -->
@@ -221,6 +230,10 @@
     </header>
 
     <!-- Sidebar Navigation -->
+
+  <!-- ── Panel Surveillance ── -->
+  <div id="tab-surveillance" class="tab-panel tab-active" role="tabpanel">
+
     <section class="tabs-navigation">
         <div class="tabs-sidebar">
             <h3 style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; padding: 0 15px;">Navigation</h3>
@@ -273,6 +286,11 @@
 
     <!-- Main Container -->
     <main class="admin-container">
+  <!-- ── Navigation Onglets ── -->
+  <nav class="tab-nav" role="tablist">
+    <button class="tab-btn tab-active" role="tab" aria-selected="true" aria-controls="tab-surveillance" data-tab="surveillance">📊  Surveillance</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-workflow" data-tab="workflow">🔄  Workflow &amp; Suivi &amp; Évolution</button>
+  </nav>
         
         <!-- Header structuré -->
         <header class="page-header">
@@ -508,7 +526,157 @@
     </main>
 
     <!-- Modale Auto-Fix -->
-    <div id="autoFixModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; overflow: auto;">
+    
+  </div><!-- /tab-surveillance -->
+
+  <!-- ── Panel Workflow & Suivi & Évolution ── -->
+  <div id="tab-workflow" class="tab-panel" role="tabpanel" hidden>
+    <div style="max-width:1100px;margin:0 auto;padding:2rem 1.5rem">
+
+      <!-- Statut pipeline -->
+      <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:12px;padding:1.25rem 1.5rem;display:flex;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem">
+        <span style="display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.9rem">
+          <i style="width:10px;height:10px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px #a7f3d0;display:inline-block"></i>
+          Pipeline CI/CD actif
+        </span>
+        <span style="display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.9rem">
+          <i style="width:10px;height:10px;border-radius:50%;background:#3b82f6;box-shadow:0 0 0 3px #bfdbfe;display:inline-block"></i>
+          Branche preprod opérationnelle
+        </span>
+        <span style="display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.9rem">
+          <i style="width:10px;height:10px;border-radius:50%;background:#8b5cf6;box-shadow:0 0 0 3px #ddd6fe;display:inline-block"></i>
+          Validation Claude avant merge
+        </span>
+      </div>
+
+      <!-- Architecture -->
+      <h2 style="font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:2px solid #10b981;display:flex;align-items:center;gap:.6rem">
+        🏗️ Architecture du Pipeline de Monitoring
+      </h2>
+      <div style="background:#fff;border-radius:16px;padding:2rem;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:2rem;overflow-x:auto">
+        <div style="display:flex;align-items:center;justify-content:center;gap:0;min-width:600px">
+          <div style="background:#dbeafe;border:2px solid #3b82f6;border-radius:12px;padding:1rem 1.25rem;min-width:130px;text-align:center">
+            <div style="font-size:1.5rem;margin-bottom:.4rem">⚡</div>
+            <div style="font-weight:700;font-size:.85rem;color:#1e40af">JS Client</div>
+            <div style="font-size:.75rem;color:#3b82f6;margin-top:.25rem">error-tracker.js</div>
+          </div>
+          <div style="font-size:1.5rem;color:#9ca3af;padding:0 .75rem">→</div>
+          <div style="background:#ede9fe;border:2px solid #8b5cf6;border-radius:12px;padding:1rem 1.25rem;min-width:130px;text-align:center">
+            <div style="font-size:1.5rem;margin-bottom:.4rem">🔌</div>
+            <div style="font-weight:700;font-size:.85rem;color:#6d28d9">RPC Supabase</div>
+            <div style="font-size:.75rem;color:#8b5cf6;margin-top:.25rem">upsert_error_log()</div>
+          </div>
+          <div style="font-size:1.5rem;color:#9ca3af;padding:0 .75rem">→</div>
+          <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:1rem 1.25rem;min-width:130px;text-align:center">
+            <div style="font-size:1.5rem;margin-bottom:.4rem">🗄️</div>
+            <div style="font-weight:700;font-size:.85rem;color:#92400e">PostgreSQL</div>
+            <div style="font-size:.75rem;color:#f59e0b;margin-top:.25rem">error_logs table</div>
+          </div>
+          <div style="font-size:1.5rem;color:#9ca3af;padding:0 .75rem">→</div>
+          <div style="background:#dcfce7;border:2px solid #10b981;border-radius:12px;padding:1rem 1.25rem;min-width:130px;text-align:center">
+            <div style="font-size:1.5rem;margin-bottom:.4rem">📊</div>
+            <div style="font-weight:700;font-size:.85rem;color:#065f46">Dashboard</div>
+            <div style="font-size:.75rem;color:#10b981;margin-top:.25rem">admin-monitoring</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cycle workflow -->
+      <h2 style="font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:2px solid #10b981;display:flex;align-items:center;gap:.6rem">
+        🔄 Cycle Workflow Préprod
+      </h2>
+      <div style="background:#fff;border-radius:16px;padding:2rem;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:1rem">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem">
+          <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:1.2rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:.5rem">🤖</div>
+            <div style="font-weight:700;font-size:.875rem;color:#1e40af;margin-bottom:.25rem">1. Copilot corrige</div>
+            <div style="font-size:.8rem;color:#3b82f6">Détecte &amp; fixe les erreurs signalées</div>
+          </div>
+          <div style="background:#faf5ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:1.2rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:.5rem">⚙️</div>
+            <div style="font-weight:700;font-size:.875rem;color:#6d28d9;margin-bottom:.25rem">2. CI valide</div>
+            <div style="font-size:.8rem;color:#8b5cf6">GitHub Actions : syntaxe JS + pages HTML</div>
+          </div>
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:1.2rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:.5rem">🚀</div>
+            <div style="font-weight:700;font-size:.875rem;color:#c2410c;margin-bottom:.25rem">3. Vercel déploie</div>
+            <div style="font-size:.8rem;color:#f97316">Preview URL automatique sur preprod</div>
+          </div>
+          <div style="background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:10px;padding:1.2rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:.5rem">✅</div>
+            <div style="font-weight:700;font-size:.875rem;color:#065f46;margin-bottom:.25rem">4. Claude teste live</div>
+            <div style="font-size:.8rem;color:#10b981">Validation sur URL preview Vercel</div>
+          </div>
+          <div style="background:#fdf4ff;border:1.5px solid #e9d5ff;border-radius:10px;padding:1.2rem;text-align:center">
+            <div style="font-size:2rem;margin-bottom:.5rem">🔀</div>
+            <div style="font-weight:700;font-size:.875rem;color:#86198f;margin-bottom:.25rem">5. Merge → main</div>
+            <div style="font-size:.8rem;color:#a855f7">Si OK → prod. Sinon → retour Copilot</div>
+          </div>
+        </div>
+        <div style="margin-top:1.5rem;padding:1rem 1.5rem;background:#fef9c3;border-left:4px solid #eab308;border-radius:0 8px 8px 0;font-size:.875rem;color:#713f12">
+          <strong>⚠️ Règle absolue :</strong> Ne jamais pousser directement sur <code style="background:#fde047;padding:.1rem .35rem;border-radius:3px">main</code> sans validation Claude sur la preview Vercel.
+        </div>
+      </div>
+
+      <!-- Historique corrections -->
+      <h2 style="font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:2px solid #10b981;display:flex;align-items:center;gap:.6rem;margin-top:2rem">
+        🐛 Historique des Corrections
+      </h2>
+      <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:2rem">
+        <div style="border-left:4px solid #10b981;padding:.75rem 1rem;background:#f9fafb;border-radius:0 8px 8px 0;margin-bottom:.75rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+            <div>
+              <div style="font-weight:700;font-size:.875rem;color:#111827">TypeError: window.SecurityUtils.escapeHTML is not a function</div>
+              <div style="font-size:.8rem;color:#6b7280;margin-top:.2rem">📁 js/menage.js + js/femme-menage.js &middot; <code style="background:#e5e7eb;padding:.1rem .3rem;border-radius:3px">escapeHTML</code> → <code style="background:#e5e7eb;padding:.1rem .3rem;border-radius:3px">sanitizeText</code> &middot; 4 occurrences</div>
+            </div>
+            <span style="background:#dcfce7;color:#065f46;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px">✅ Corrigé</span>
+          </div>
+        </div>
+        <div style="border-left:4px solid #8b5cf6;padding:.75rem 1rem;background:#f9fafb;border-radius:0 8px 8px 0;margin-bottom:.75rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+            <div>
+              <div style="font-weight:700;font-size:.875rem;color:#111827">CI YAML : pages/admin-dashboard.html inexistante</div>
+              <div style="font-size:.8rem;color:#6b7280;margin-top:.2rem">📁 .github/workflows/preprod-ci.yml &middot; Remplacé par admin-channel-manager.html + admin-support.html</div>
+            </div>
+            <span style="background:#dcfce7;color:#065f46;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px">✅ Corrigé par Copilot</span>
+          </div>
+        </div>
+        <div style="color:#9ca3af;font-size:.85rem;text-align:center;padding:.5rem">&mdash; Les corrections futures apparaîtront ici &mdash;</div>
+      </div>
+
+      <!-- Évolutions planifiées -->
+      <h2 style="font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:2px solid #10b981;display:flex;align-items:center;gap:.6rem">
+        📈 Évolution &amp; Améliorations Planifiées
+      </h2>
+      <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:3rem">
+        <div style="display:flex;flex-direction:column;gap:.75rem">
+          <div style="display:flex;align-items:flex-start;gap:1rem;padding:1rem;background:#f9fafb;border-radius:8px;border-left:4px solid #10b981">
+            <span style="font-size:1.25rem">✅</span>
+            <div style="flex:1"><div style="font-weight:700;font-size:.875rem;color:#111827;margin-bottom:.2rem">Pipeline CI/CD opérationnel</div><div style="font-size:.8rem;color:#6b7280">GitHub Actions + Vercel preview sur branche preprod</div></div>
+            <span style="background:#dcfce7;color:#065f46;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px;flex-shrink:0">Fait</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:1rem;padding:1rem;background:#f9fafb;border-radius:8px;border-left:4px solid #10b981">
+            <span style="font-size:1.25rem">✅</span>
+            <div style="flex:1"><div style="font-weight:700;font-size:.875rem;color:#111827;margin-bottom:.2rem">Onglet Workflow &amp; Suivi intégré</div><div style="font-size:.8rem;color:#6b7280">Cycle préprod, architecture, historique corrections dans le dashboard</div></div>
+            <span style="background:#dcfce7;color:#065f46;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px;flex-shrink:0">Fait</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:1rem;padding:1rem;background:#f9fafb;border-radius:8px;border-left:4px solid #3b82f6">
+            <span style="font-size:1.25rem">🔄</span>
+            <div style="flex:1"><div style="font-weight:700;font-size:.875rem;color:#111827;margin-bottom:.2rem">Historique dynamique des corrections</div><div style="font-size:.8rem;color:#6b7280">Charger depuis error_logs (status=resolved) automatiquement</div></div>
+            <span style="background:#dbeafe;color:#1e40af;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px;flex-shrink:0">Planifié</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:1rem;padding:1rem;background:#f9fafb;border-radius:8px;border-left:4px solid #f59e0b">
+            <span style="font-size:1.25rem">⏳</span>
+            <div style="flex:1"><div style="font-weight:700;font-size:.875rem;color:#111827;margin-bottom:.2rem">Corriger le SQL upsert_error_log</div><div style="font-size:.8rem;color:#6b7280">Mauvais noms de colonnes + ALTER TABLE sur VIEW à corriger</div></div>
+            <span style="background:#fef3c7;color:#92400e;font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px;flex-shrink:0">En cours</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /container workflow -->
+  </div><!-- /tab-workflow -->
+
+<div id="autoFixModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; overflow: auto;">
         <div style="max-width: 900px; margin: 50px auto; background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
             <div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; padding: 25px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
@@ -760,5 +928,29 @@
         lucide.createIcons();
         refreshTestValidationStatus();
     </script>
+
+  <script>
+    /* ── Tab switching ── */
+    (function () {
+      var nav = document.querySelector('.tab-nav');
+      if (!nav) return;
+      nav.addEventListener('click', function (e) {
+        var btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        var target = btn.dataset.tab;
+        nav.querySelectorAll('.tab-btn').forEach(function (b) {
+          var active = (b === btn);
+          b.classList.toggle('tab-active', active);
+          b.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        document.querySelectorAll('.tab-panel').forEach(function (p) {
+          var show = (p.id === 'tab-' + target);
+          p.classList.toggle('tab-active', show);
+          if (show) p.removeAttribute('hidden');
+          else p.setAttribute('hidden', '');
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
