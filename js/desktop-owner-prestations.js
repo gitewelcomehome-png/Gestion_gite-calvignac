@@ -127,8 +127,8 @@ async function loadStatsAnnuelles() {
             .select('*')
             .eq('gite_id', giteIdCourant)
             .eq('statut', 'paid')
-            .gte('date_commande', `${anneeActuelle}-01-01`)
-            .lte('date_commande', `${anneeActuelle}-12-31`);
+            .gte('created_at', `${anneeActuelle}-01-01`)
+            .lte('created_at', `${anneeActuelle}-12-31`);
         
         if (error) throw error;
         
@@ -376,9 +376,9 @@ async function loadRevenusMensuels() {
             .select('*')
             .eq('gite_id', giteIdCourant)
             .eq('statut', 'paid')
-            .gte('date_commande', `${anneeActuelle}-01-01`)
-            .lte('date_commande', `${anneeActuelle}-12-31`)
-            .order('date_commande', { ascending: false });
+            .gte('created_at', `${anneeActuelle}-01-01`)
+            .lte('created_at', `${anneeActuelle}-12-31`)
+            .order('created_at', { ascending: false });
         
         if (error) {
             console.error('❌ [REVENUS] Erreur SQL:', error);
@@ -390,7 +390,7 @@ async function loadRevenusMensuels() {
         // Grouper par mois
         const groupes = {};
         commandes?.forEach(cmd => {
-            const date = new Date(cmd.date_commande);
+            const date = new Date(cmd.created_at);
             const moisKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             
             if (!groupes[moisKey]) {
@@ -473,9 +473,9 @@ async function openDetailModal(moisKey) {
             `)
             .eq('gite_id', giteIdCourant)
             .eq('statut', 'paid')
-            .gte('date_commande', dateDebut)
-            .lte('date_commande', `${dateFin}T23:59:59`)
-            .order('date_commande', { ascending: false });
+            .gte('created_at', dateDebut)
+            .lte('created_at', `${dateFin}T23:59:59`)
+            .order('created_at', { ascending: false });
         
         if (error) throw error;
         
