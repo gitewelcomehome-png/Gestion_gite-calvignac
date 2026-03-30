@@ -218,6 +218,7 @@ async function sendAlertEmail(error) {
 // Handler principal
 // ----------------------------------------------------------------
 module.exports = async function handler(req, res) {
+    try {
     // Supabase envoie uniquement des POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -231,11 +232,9 @@ module.exports = async function handler(req, res) {
         // Mode 2 : HMAC-SHA256 x-supabase-signature (si Supabase le supporte)
         const hmacSignature = req.headers['x-supabase-signature'] || req.headers['x-webhook-signature'] || '';
 
-        const bufSimple = Buffer.from(simpleSecret);
-        const bufSecret = Buffer.from(secret);
-        const validSimple = simpleSecret &&
-            bufSimple.length === bufSecret.length &&
-            crypto.timingSafeEqual(bufSimple, bufSecret);
+        const bufA = Buffer.from(simpleSecret);
+        const bufB = Buffer.from(secret);
+        const validSimple = simpleSecret.length > 0 && bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
         const validHmac = hmacSignature && verifySupabaseSignature(JSON.stringify(req.body), hmacSignature, secret);
 
         if (!validSimple && !validHmac) {
@@ -275,4 +274,8 @@ module.exports = async function handler(req, res) {
         cowork_tests_pushed: pushed,
         alert_email: Boolean(process.env.ADMIN_ALERT_EMAIL)
     });
+    } catch (err) {
+        console.error('[supabase-error webhook] Erreur inattendue:', err.message);
+        return res.status(500).json({ error: 'Internal error' });
+    }
 };
