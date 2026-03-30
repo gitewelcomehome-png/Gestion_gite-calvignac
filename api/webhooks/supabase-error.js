@@ -223,14 +223,23 @@ module.exports = async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Lire le body brut pour valider la signature
-    const rawBody = JSON.stringify(req.body);
-    const signature = req.headers['x-supabase-signature'] || req.headers['x-webhook-signature'] || '';
+    // Valider le secret webhook
     const secret = process.env.SUPABASE_WEBHOOK_SECRET;
+    if (secret) {
+        // Mode 1 : header simple x-webhook-secret (configuré manuellement dans Supabase UI)
+        const simpleSecret = req.headers['x-webhook-secret'] || '';
+        // Mode 2 : HMAC-SHA256 x-supabase-signature (si Supabase le supporte)
+        const hmacSignature = req.headers['x-supabase-signature'] || req.headers['x-webhook-signature'] || '';
 
-    // Valider la signature si le secret est configuré
-    if (secret && !verifySupabaseSignature(rawBody, signature, secret)) {
-        return res.status(401).json({ error: 'Invalid signature' });
+        const validSimple = simpleSecret && crypto.timingSafeEqual(
+            Buffer.from(simpleSecret),
+            Buffer.from(secret)
+        );
+        const validHmac = hmacSignature && verifySupabaseSignature(JSON.stringify(req.body), hmacSignature, secret);
+
+        if (!validSimple && !validHmac) {
+            return res.status(401).json({ error: 'Invalid secret' });
+        }
     }
 
     const payload = req.body;
