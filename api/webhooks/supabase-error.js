@@ -231,10 +231,11 @@ module.exports = async function handler(req, res) {
         // Mode 2 : HMAC-SHA256 x-supabase-signature (si Supabase le supporte)
         const hmacSignature = req.headers['x-supabase-signature'] || req.headers['x-webhook-signature'] || '';
 
-        const validSimple = simpleSecret && crypto.timingSafeEqual(
-            Buffer.from(simpleSecret),
-            Buffer.from(secret)
-        );
+        const bufSimple = Buffer.from(simpleSecret);
+        const bufSecret = Buffer.from(secret);
+        const validSimple = simpleSecret &&
+            bufSimple.length === bufSecret.length &&
+            crypto.timingSafeEqual(bufSimple, bufSecret);
         const validHmac = hmacSignature && verifySupabaseSignature(JSON.stringify(req.body), hmacSignature, secret);
 
         if (!validSimple && !validHmac) {
