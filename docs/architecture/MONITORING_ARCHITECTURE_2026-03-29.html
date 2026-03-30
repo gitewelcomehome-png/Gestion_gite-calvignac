@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture Monitoring Pipeline — LiveOwnerUnit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.6;
+      padding: 0 0 60px;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0d1321 100%);
+      border-bottom: 1px solid #2d3748;
+      padding: 36px 48px 28px;
+    }
+    header .tag {
+      display: inline-block;
+      background: #22543d;
+      color: #68d391;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f7fafc;
+      letter-spacing: -0.3px;
+    }
+    header .subtitle {
+      margin-top: 8px;
+      color: #718096;
+      font-size: 14px;
+    }
+    header .meta-row {
+      margin-top: 20px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    header .meta-item {
+      font-size: 12px;
+      color: #718096;
+    }
+    header .meta-item strong {
+      color: #a0aec0;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    section {
+      margin-top: 48px;
+    }
+    section h2 {
+      font-size: 17px;
+      font-weight: 600;
+      color: #90cdf4;
+      border-left: 3px solid #3182ce;
+      padding-left: 12px;
+      margin-bottom: 24px;
+    }
+
+    /* ── BADGES ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-green  { background: #22543d; color: #68d391; }
+    .badge-blue   { background: #1a365d; color: #63b3ed; }
+    .badge-yellow { background: #44337a; color: #d6bcfa; }
+    .badge-gray   { background: #2d3748; color: #a0aec0; }
+    .badge-red    { background: #63171b; color: #fc8181; }
+
+    /* ── FLUX DIAGRAM ───────────────────────────────────────── */
+    .flux {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 32px 24px;
+      overflow-x: auto;
+    }
+    .flux-chain {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      min-width: 600px;
+    }
+    .flux-node {
+      background: #2d3748;
+      border: 1px solid #4a5568;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 130px;
+      flex-shrink: 0;
+    }
+    .flux-node .node-label {
+      font-size: 11px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .flux-node .node-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+    .flux-node .node-sub {
+      font-size: 11px;
+      color: #718096;
+      margin-top: 2px;
+    }
+    .flux-node.highlight {
+      border-color: #3182ce;
+      background: #1a365d;
+    }
+    .flux-node.highlight .node-name { color: #90cdf4; }
+    .flux-node.success {
+      border-color: #276749;
+      background: #1c4532;
+    }
+    .flux-node.success .node-name { color: #68d391; }
+
+    .flux-arrow {
+      flex-shrink: 0;
+      color: #4a5568;
+      font-size: 20px;
+      padding: 0 6px;
+      user-select: none;
+    }
+    .flux-arrow-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .flux-arrow-label span {
+      font-size: 10px;
+      color: #718096;
+      text-align: center;
+      max-width: 72px;
+    }
+    .flux-arrow-label .arr { color: #4a5568; font-size: 18px; }
+
+    .flux-legend {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .flux-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #718096;
+    }
+    .flux-legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── TABLE ──────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: #1a1f2e;
+      color: #a0aec0;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #2d3748;
+    }
+    tbody tr {
+      border-bottom: 1px solid #1a202c;
+      transition: background .1s;
+    }
+    tbody tr:hover { background: #1a1f2e; }
+    tbody td {
+      padding: 11px 14px;
+      color: #cbd5e0;
+      vertical-align: top;
+    }
+    tbody td:first-child {
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 12px;
+      color: #90cdf4;
+    }
+    tbody td.role { color: #e2e8f0; }
+
+    /* ── TIMELINE ───────────────────────────────────────────── */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 9px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: #2d3748;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 28px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -23px;
+      top: 6px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #3182ce;
+      border: 2px solid #0f1117;
+    }
+    .timeline-item.fixed::before { background: #68d391; }
+    .timeline-item.deployed::before { background: #9f7aea; }
+
+    .timeline-date {
+      font-size: 11px;
+      color: #718096;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+    }
+    .timeline-desc {
+      font-size: 13px;
+      color: #a0aec0;
+    }
+    .timeline-desc code {
+      background: #2d3748;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #90cdf4;
+    }
+
+    /* ── STATUS GRID ────────────────────────────────────────── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .status-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 18px 16px;
+    }
+    .status-card.pass {
+      border-color: #276749;
+    }
+    .status-card .sc-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #718096;
+      margin-bottom: 6px;
+    }
+    .status-card .sc-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .status-card .sc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .status-card .sc-priority {
+      font-size: 11px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .score-banner {
+      background: linear-gradient(135deg, #1c4532 0%, #22543d 100%);
+      border: 1px solid #276749;
+      border-radius: 10px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .score-banner .score-left h3 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #68d391;
+    }
+    .score-banner .score-left p {
+      font-size: 13px;
+      color: #9ae6b4;
+      margin-top: 2px;
+    }
+    .score-banner .score-right {
+      text-align: right;
+    }
+    .score-banner .score-right p {
+      font-size: 12px;
+      color: #9ae6b4;
+    }
+
+    footer {
+      margin-top: 60px;
+      border-top: 1px solid #1a202c;
+      padding: 24px 32px 0;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    footer p {
+      font-size: 12px;
+      color: #4a5568;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container" style="padding:0">
+    <span class="tag">Documentation Architecture</span>
+    <h1>Architecture Monitoring Pipeline — LiveOwnerUnit</h1>
+    <p class="subtitle">Pipeline de remontée et traitement des erreurs JavaScript front-end vers le dashboard admin</p>
+    <div class="meta-row">
+      <span class="meta-item"><strong>Projet</strong> LiveOwnerUnit v2.13.46</span>
+      <span class="meta-item"><strong>Date</strong> 29 mars 2026</span>
+      <span class="meta-item"><strong>Statut</strong> <span class="badge badge-green">Opérationnel</span></span>
+      <span class="meta-item"><strong>Tests</strong> <span class="badge badge-green">6/6 PASS</span></span>
+      <span class="meta-item"><strong>Branche</strong> <span class="badge badge-gray">preprod → main</span></span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── 1. DIAGRAMME DE FLUX ─────────────────────────────── -->
+  <section>
+    <h2>1. Diagramme de flux</h2>
+    <div class="flux">
+      <div class="flux-chain">
+
+        <div class="flux-node highlight">
+          <div class="node-label">Client</div>
+          <div class="node-name">Browser JS</div>
+          <div class="node-sub">error-tracker.js</div>
+        </div>
+
+        <div class="flux-arrow-label">
+          <div class="arr">→</div>
+          <span>RPC Supabase<br>retry ×5</span>
+        </div>
+
+        <div class="flux-node highlight">
+          <div class="node-label">Fonction SQL</div>
+          <div class="node-name">upsert_error_log</div>
+          <div class="node-sub">SECURITY DEFINER</div>
+        </div>
+
+        <div class="flux-arrow-label">
+          <div class="arr">→</div>
+          <span>INSERT /<br>UPDATE</span>
+        </div>
+
+        <div class="flux-node">
+          <div class="node-label">TABLE réelle</div>
+          <div class="node-name">error_logs</div>
+          <div class="node-sub">public.error_logs</div>
+        </div>
+
+        <div class="flux-arrow-label">
+          <div class="arr">→</div>
+          <span>SELECT<br>(VIEW)</span>
+        </div>
+
+        <div class="flux-node">
+          <div class="node-label">VIEW alias</div>
+          <div class="node-name">cm_error_logs</div>
+          <div class="node-sub">19 colonnes</div>
+        </div>
+
+        <div class="flux-arrow-label">
+          <div class="arr">→</div>
+          <span>Dashboard<br>admin</span>
+        </div>
+
+        <div class="flux-node success">
+          <div class="node-label">Interface</div>
+          <div class="node-name">admin-monitoring</div>
+          <div class="node-sub">.html</div>
+        </div>
+
+      </div>
+
+      <!-- Branche webhook -->
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid #2d3748;">
+        <div style="font-size:11px;color:#718096;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;">Branche auto-trigger Cowork</div>
+        <div class="flux-chain">
+
+          <div class="flux-node">
+            <div class="node-label">TABLE</div>
+            <div class="node-name">error_logs</div>
+            <div class="node-sub">INSERT event</div>
+          </div>
+
+          <div class="flux-arrow-label">
+            <div class="arr">→</div>
+            <span>Webhook<br>Supabase</span>
+          </div>
+
+          <div class="flux-node highlight">
+            <div class="node-label">Vercel Serverless</div>
+            <div class="node-name">supabase-error.js</div>
+            <div class="node-sub">POST /api/webhooks</div>
+          </div>
+
+          <div class="flux-arrow-label">
+            <div class="arr">→</div>
+            <span>Filtre<br>critical</span>
+          </div>
+
+          <div class="flux-node">
+            <div class="node-label">GitHub API</div>
+            <div class="node-name">cowork-pending</div>
+            <div class="node-sub">tmp/*.json</div>
+          </div>
+
+          <div class="flux-arrow-label">
+            <div class="arr">→</div>
+            <span>Tests<br>browser</span>
+          </div>
+
+          <div class="flux-node success">
+            <div class="node-label">Claude Cowork</div>
+            <div class="node-name">Automation</div>
+            <div class="node-sub">cowork-results.json</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="flux-legend" style="margin-top:20px;padding-top:16px;border-top:1px solid #2d3748;">
+        <div class="flux-legend-item">
+          <div class="flux-legend-dot" style="background:#3182ce;border:1px solid #63b3ed"></div>
+          <span>Composant modifié lors du fix</span>
+        </div>
+        <div class="flux-legend-item">
+          <div class="flux-legend-dot" style="background:#276749;border:1px solid #68d391"></div>
+          <span>Composant opérationnel (destination finale)</span>
+        </div>
+        <div class="flux-legend-item">
+          <div class="flux-legend-dot" style="background:#4a5568;border:1px solid #718096"></div>
+          <span>Composant stable (non modifié)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. TABLEAU DES COMPOSANTS ────────────────────────── -->
+  <section>
+    <h2>2. Composants du pipeline</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Fichier / Objet</th>
+          <th>Couche</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>js/error-tracker.js</td>
+          <td><span class="badge badge-blue">Frontend JS</span></td>
+          <td class="role">Capture les erreurs JS (window.onerror, unhandledrejection), appelle <code>upsert_error_log</code> via RPC Supabase avec retry borné (max 5, backoff 1 s–5 s)</td>
+          <td><span class="badge badge-green">Corrigé v2</span></td>
+        </tr>
+        <tr>
+          <td>public.error_logs</td>
+          <td><span class="badge badge-yellow">DB — TABLE</span></td>
+          <td class="role">Table physique PostgreSQL. Colonnes réelles : <code>error_message</code>, <code>error_stack</code>, <code>source</code>, <code>occurrence_count</code>, <code>last_occurrence</code>, <code>affected_users</code>. Clé dédup : <code>error_type + source + LEFT(error_message,200)</code></td>
+          <td><span class="badge badge-green">Migré v2</span></td>
+        </tr>
+        <tr>
+          <td>public.upsert_error_log</td>
+          <td><span class="badge badge-yellow">DB — RPC</span></td>
+          <td class="role">Fonction SECURITY DEFINER. Logique INSERT/UPDATE avec déduplication sur 24 h. Remplace le stub <code>BEGIN NULL; END</code> de la v1. Signature : 9 paramètres TEXT/JSONB/UUID.</td>
+          <td><span class="badge badge-green">Corrigé v2</span></td>
+        </tr>
+        <tr>
+          <td>public.cm_error_logs</td>
+          <td><span class="badge badge-yellow">DB — VIEW</span></td>
+          <td class="role">Vue exposant <code>error_logs</code> avec alias de colonnes pour le dashboard : <code>message</code> (← <code>error_message</code>), <code>stack_trace</code> (← <code>error_stack</code>). 19 colonnes. Reconstruite lors du fix.</td>
+          <td><span class="badge badge-green">Reconstruite v2</span></td>
+        </tr>
+        <tr>
+          <td>js/admin-monitoring.js</td>
+          <td><span class="badge badge-blue">Frontend JS</span></td>
+          <td class="role">Dashboard admin : lit <code>cm_error_logs</code>, affiche les erreurs groupées. Double-dedup simplifié (<code>Object.values(grouped).sort(…)</code>).</td>
+          <td><span class="badge badge-green">Simplifié v2</span></td>
+        </tr>
+        <tr>
+          <td>api/webhooks/supabase-error.js</td>
+          <td><span class="badge badge-blue">Vercel Serverless</span></td>
+          <td class="role">Endpoint POST déclenché par webhook Supabase sur INSERT dans <code>error_logs</code>. Filtre <code>error_type='critical' AND occurrence_count=1</code>. Sécurité : <code>x-webhook-secret</code> + <code>timingSafeEqual</code>. Push <code>tmp/cowork-pending-tests.json</code> sur GitHub pour auto-trigger Cowork.</td>
+          <td><span class="badge badge-green">Déployé v2</span></td>
+        </tr>
+        <tr>
+          <td>pages/admin-monitoring.html</td>
+          <td><span class="badge badge-gray">Interface HTML</span></td>
+          <td class="role">Page dashboard admin. Affiche <code>#errorsContainer</code> avec les erreurs non résolues et leur compteur d'occurrences.</td>
+          <td><span class="badge badge-green">Opérationnel</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 3. HISTORIQUE CORRECTIONS ────────────────────────── -->
+  <section>
+    <h2>3. Historique des corrections</h2>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-date">07 mars 2026 — Identification du problème</div>
+        <div class="timeline-title">Pipeline silencieusement cassé depuis 3 semaines</div>
+        <div class="timeline-desc">
+          La fonction <code>upsert_error_log</code> retournée par <code>pg_proc</code> était un stub (<code>BEGIN NULL; END</code>). 
+          Chaque appel RPC depuis <code>error-tracker.js</code> réussissait (code 200) mais n'écrivait rien en base. 
+          La vue <code>cm_error_logs</code> était donc toujours vide — le dashboard admin-monitoring n'affichait jamais rien.
+        </div>
+      </div>
+
+      <div class="timeline-item fixed">
+        <div class="timeline-date">28 mars 2026 — Migration v1 (partielle)</div>
+        <div class="timeline-title">Première tentative : ALTER TABLE sur VIEW</div>
+        <div class="timeline-desc">
+          Première migration ciblant <code>cm_error_logs</code> avec <code>ALTER TABLE</code> — erreur : <code>cm_error_logs</code> est une VIEW, pas une TABLE. 
+          Colonnes incorrectes utilisées (<code>message</code> au lieu de <code>error_message</code>). Migration échouée.
+        </div>
+      </div>
+
+      <div class="timeline-item fixed">
+        <div class="timeline-date">29 mars 2026 — Migration v2 (exécutée en production)</div>
+        <div class="timeline-title">Fix complet : stub → vraie fonction + VIEW reconstruite</div>
+        <div class="timeline-desc">
+          <strong>Étape 1 :</strong> <code>ALTER TABLE public.error_logs</code> (TABLE réelle) — ajout de 5 colonnes manquantes : <code>source</code>, <code>user_email</code>, <code>occurrence_count</code>, <code>last_occurrence</code>, <code>affected_users</code>.<br><br>
+          <strong>Étape 2 :</strong> <code>DROP VIEW / CREATE VIEW public.cm_error_logs</code> — reconstruction avec aliases corrects (19 colonnes).<br><br>
+          <strong>Étape 3 :</strong> <code>CREATE INDEX IF NOT EXISTS idx_error_logs_dedup</code> sur la TABLE réelle.<br><br>
+          <strong>Étape 4 :</strong> <code>CREATE OR REPLACE FUNCTION upsert_error_log</code> — logique INSERT/UPDATE avec dédup 24 h. Remplace définitivement le stub.<br><br>
+          Fichier : <code>sql/FIX_UPSERT_ERROR_LOG_2026-03-28.sql</code>
+        </div>
+      </div>
+
+      <div class="timeline-item fixed">
+        <div class="timeline-date">29 mars 2026 — error-tracker.js</div>
+        <div class="timeline-title">Retry borné + filtres IGNORED_PATTERNS allégés</div>
+        <div class="timeline-desc">
+          Retry limité à 5 tentatives avec backoff exponentiel (1 s → 5 s). 
+          Suppression des patterns trop larges de la liste <code>IGNORED_PATTERNS</code> : <code>'column'</code> et <code>'does not exist'</code> masquaient les vraies erreurs SQL.
+        </div>
+      </div>
+
+      <div class="timeline-item deployed">
+        <div class="timeline-date">30 mars 2026 — Webhook + merge preprod→main</div>
+        <div class="timeline-title">Webhook auto-trigger Cowork déployé en production</div>
+        <div class="timeline-desc">
+          Création de <code>api/webhooks/supabase-error.js</code> : endpoint Vercel déclenché par Supabase sur INSERT dans <code>error_logs</code>. 
+          Fix critique : <code>crypto.timingSafeEqual</code> crashait (500) sur GET car les buffers avaient des tailles différentes — 
+          ajout d'une vérification <code>bufA.length === bufB.length</code> + <code>try/catch</code> global. 
+          Merge <code>preprod→main</code> effectué (commit <code>b3e9c30</code>). URL prod : <code>https://liveownerunit.fr/api/webhooks/supabase-error</code>.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 4. STATUT ACTUEL ──────────────────────────────────── -->
+  <section>
+    <h2>4. Statut actuel — Validation Cowork</h2>
+
+    <div class="score-banner">
+      <div class="score-left">
+        <h3>6 / 6 PASS</h3>
+        <p>Tous les scénarios de test ont passé — pipeline opérationnel</p>
+      </div>
+      <div class="score-right">
+        <p>Exécuté le 30 mars 2026</p>
+        <p>Claude Cowork — browser automation</p>
+      </div>
+    </div>
+
+    <div class="status-grid">
+
+      <div class="status-card pass">
+        <div class="sc-id">monitor-001</div>
+        <div class="sc-name">Dashboard monitoring se charge</div>
+        <div class="sc-footer">
+          <span class="sc-priority">Critical</span>
+          <span class="badge badge-green">PASS</span>
+        </div>
+      </div>
+
+      <div class="status-card pass">
+        <div class="sc-id">monitor-002</div>
+        <div class="sc-name">Section erreurs — données ou message vide propre</div>
+        <div class="sc-footer">
+          <span class="sc-priority">Critical</span>
+          <span class="badge badge-green">PASS</span>
+        </div>
+      </div>
+
+      <div class="status-card pass">
+        <div class="sc-id">monitor-003</div>
+        <div class="sc-name">Console propre — pas d'erreur RPC</div>
+        <div class="sc-footer">
+          <span class="sc-priority">Critical</span>
+          <span class="badge badge-green">PASS</span>
+        </div>
+      </div>
+
+      <div class="status-card pass">
+        <div class="sc-id">monitor-004</div>
+        <div class="sc-name">Webhook endpoint déployé — GET → 405</div>
+        <div class="sc-footer">
+          <span class="sc-priority">Smoke</span>
+          <span class="badge badge-green">PASS</span>
+        </div>
+      </div>
+
+      <div class="status-card pass">
+        <div class="sc-id">monitor-005</div>
+        <div class="sc-name">Admin channel manager — non-régression</div>
+        <div class="sc-footer">
+          <span class="sc-priority">Smoke</span>
+          <span class="badge badge-green">PASS</span>
+        </div>
+      </div>
+
+      <div class="status-card pass">
+        <div class="sc-id">monitor-006</div>
+        <div class="sc-name">App propriétaire — non-régression</div>
+        <div class="sc-footer">
+          <span class="sc-priority">Smoke</span>
+          <span class="badge badge-green">PASS</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:28px;background:#1a1f2e;border:1px solid #2d3748;border-radius:8px;padding:18px 20px;">
+      <div style="font-size:12px;color:#718096;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;">Variables Vercel env configurées</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <span class="badge badge-green">SUPABASE_WEBHOOK_SECRET</span>
+        <span class="badge badge-green">GITHUB_TOKEN</span>
+        <span class="badge badge-green">GITHUB_REPO</span>
+        <span class="badge badge-green">ADMIN_ALERT_EMAIL</span>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<footer>
+  <p>Généré par GitHub Copilot (Claude Sonnet 4.6) — 29 mars 2026 — LiveOwnerUnit / Gestion Gîte Calvignac</p>
+</footer>
+
+</body>
+</html>
