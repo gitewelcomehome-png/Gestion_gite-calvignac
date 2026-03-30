@@ -1,0 +1,34 @@
+name: Preprod CI
+
+on:
+  push:
+    branches: [preprod]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-js:
+    name: Validation syntaxe JS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check JS syntax
+        run: |
+          ERRORS=0
+          for f in $(find js/ -name "*.js" 2>/dev/null); do
+            node --check "$f" && echo "OK $f" || ERRORS=$((ERRORS+1))
+          done
+          exit $ERRORS
+
+  validate-pages:
+    name: Pages HTML presentes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          for p in pages/admin-monitoring.html pages/admin-channel-manager.html pages/admin-support.html; do
+            [ -f "$p" ] && echo "OK $p" || exit 1
+          done

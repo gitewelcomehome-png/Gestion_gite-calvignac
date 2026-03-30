@@ -1,7 +1,7 @@
 # 🏗️ Architecture - Gestion Gîte Calvignac
 
-**Version :** 2.13.45  
-**Dernière MAJ :** 1 mars 2026  
+**Version :** 2.13.46  
+**Dernière MAJ :** 27 mars 2026  
 **Environnement :** Production (Supabase + Vercel)
 
 ---
@@ -34,6 +34,32 @@ Application SaaS de gestion de gîtes avec :
 - 👥 Interface Admin (Channel Manager)
 - 📊 Interface Owner (stats, prestations)
 - 🛒 Interface Client (fiche gîte, commande prestations)
+
+### Mise à jour fiscale CH (27/03/2026)
+- Correction du calcul CH Micro-BIC: l'IR est désormais calculé sur la base imposable micro sans déduction des cotisations.
+- Passage du taux patrimoine CH à 18,6% dans le moteur CH.
+- Seuil SSI CH rendu dynamique selon l'année simulée via PASS (13% du PASS annuel).
+- Ajout du seuil TVA majoré CH (41 250€) avec messages distincts zone de tolérance / dépassement immédiat.
+- Ajout d'un mode de traitement des frais de notaire CH (déduction immédiate ou amortissement) dans l'interface et le calcul.
+- Ajout d'un champ RFR N-2 CH pour contrôle d'éligibilité du versement libératoire.
+
+### Correctifs robustesse page fiscalité (27/03/2026)
+- Correction des handlers inline legacy de la modal "frais réels impôts" (fonctions manquantes ajoutées côté JS).
+- Correction du toggle périodicité sur frais pro (`frais_pro` / `frais-pro`) pour éviter les conversions non appliquées.
+- Durcissement anti-injection sur le détail des charges (construction DOM sûre en remplacement de `innerHTML` pour les libellés dynamiques).
+
+### Correctifs fiscaux critiques complémentaires (27/03/2026)
+- Configuration fiscale 2026 complétée dans `TAUX_FISCAUX` (barème IR 2026, abattement salaires 2026, paramètres décote/plafond QF, taux PS patrimoine BIC meublés).
+- Alignement du moteur gîtes réel: intégration des charges résidence (prorata pro) et frais véhicule dans le total des charges déductibles.
+- Correction assiette crédits en BIC réel: suppression de la mensualité brute, conservation des intérêts annuels uniquement (si renseignés).
+- Correction comparatif LMNP/micro: application des PS patrimoine 18,6% quand LMNP exonéré URSSAF (< 23 000 €), sans double comptage.
+- Correction IR foyer: blocage de l'imputation d'un déficit LMNP sur le revenu global (imputation maintenue pour LMP).
+- Ajustement du critère LMP "recettes > autres revenus pro": base salaires imposables (après abattement 10%) plutôt que salaires bruts.
+- Correction RAV mensuel: ajout de l'IR mensuel (IR annuel / 12) dans les dépenses pour éviter la surestimation du reste à vivre.
+- Contrôle VL renforcé côté gîtes: activation du versement libératoire uniquement après confirmation explicite du statut micro-entrepreneur.
+- Comparatif 4 options durci: remise à `N/A` systématique des cartes inéligibles (montants + labels) pour éviter les résidus d'affichage.
+- Synchronisation iCal Homelidays durcie: normalisation des URLs en HTTPS, suppression du fallback `corsproxy.io` pour Homelidays (403 fréquents), maintien du proxy interne Vercel en priorité.
+- API proxy CORS renforcée: les requêtes same-origin sans en-tête `Origin` ne sont plus rejetées (`403`) sur `/api/cors-proxy`.
 
 ---
 
@@ -840,6 +866,65 @@ console.log('Debug: panier =', panier);
 ---
 
 ## 📞 Support & Maintenance
+
+### Pipeline Monitoring Erreurs (v2.13.46+)
+
+#### Architecture `error_logs` / `cm_error_logs`
+
+```
+JS (error-tracker.js)
+  └─► RPC upsert_error_log()   ← SECURITY DEFINER
+        └─► TABLE public.error_logs   (données brutes)
+              └─► VIEW  public.cm_error_logs  (alias colonnes)
+                    └─► Dashboard admin-monitoring.html
+```
+
+**TABLE réelle : `public.error_logs`**
+```sql
+id               UUID PRIMARY KEY DEFAULT gen_random_uuid()
+user_id          UUID → auth.users(id)
+error_message    TEXT              -- ⚠️ Nommé error_message (pas "message")
+error_stack      TEXT              -- ⚠️ Nommé error_stack (pas "stack_trace")
+error_type       TEXT              -- 'critical' | 'warning' | 'info' | ...
+source           TEXT DEFAULT 'unknown'
+url              TEXT
+user_agent       TEXT
+browser          TEXT
+os               TEXT
+user_email       TEXT
+timestamp        TIMESTAMPTZ DEFAULT NOW()
+severity         TEXT
+resolved         BOOLEAN DEFAULT false
+resolved_at      TIMESTAMPTZ
+metadata         JSONB DEFAULT '{}'
+occurrence_count INTEGER DEFAULT 1     -- Géré par upsert_error_log()
+last_occurrence  TIMESTAMPTZ DEFAULT NOW()
+affected_users   TEXT[] DEFAULT '{}'
+
+-- Index de déduplication
+CREATE INDEX idx_error_logs_dedup
+  ON error_logs (error_type, source, LEFT(error_message, 200))
+  WHERE resolved = false;
+```
+
+**VIEW : `public.cm_error_logs`** (alias pour le front)
+- `error_message` → `message`
+- `error_stack` → `stack_trace`
+- Toutes les autres colonnes identiques
+
+**Fonction RPC : `public.upsert_error_log(...)`**
+- **Déduplication** : clé = `error_type + source + LEFT(error_message, 200)` WHERE `resolved=false AND last_occurrence > NOW()-24h`
+- Si doublon → `UPDATE occurrence_count++, last_occurrence, affected_users`
+- Si nouveau → `INSERT` avec `occurrence_count=1`
+- `SECURITY DEFINER` + `GRANT EXECUTE TO anon, authenticated`
+
+**Droits :**
+- `anon` + `authenticated` : EXECUTE sur `upsert_error_log`
+- `authenticated` : SELECT sur `cm_error_logs`
+
+**Migration appliquée :** `sql/FIX_UPSERT_ERROR_LOG_2026-03-28.sql` (2026-03-29)
+
+---
 
 ### Logs Monitoring
 
