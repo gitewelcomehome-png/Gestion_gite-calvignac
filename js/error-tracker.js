@@ -55,8 +55,6 @@
         'validation_status',  // Colonne validation_status manquante
         'monitoring_start',   // Colonne monitoring_start manquante
         'resolution_method',  // Colonne resolution_method manquante
-        'does not exist',     // Message générique colonne manquante
-        'column', // Erreurs liées aux colonnes en général
         // Erreurs du monitoring lui-même (éviter boucle infinie)
         'cm_error_corrections', // Table monitoring corrections
         'cm_clients',           // Table clients (problème permissions)

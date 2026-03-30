@@ -330,8 +330,8 @@ async function loadErrorsData() {
             }
         });
         
-        // Convertir en tableau, dédupliquer une seconde fois par sécurité, puis trier
-        const groupedArray = Array.from(new Map(Object.values(grouped).map(err => [err.signature, err])).values()).sort((a, b) => 
+        // Convertir en tableau trié (grouped est déjà dédupliqué par signature)
+        const groupedArray = Object.values(grouped).sort((a, b) => 
             new Date(b.last_occurrence) - new Date(a.last_occurrence)
         );
 
@@ -1745,13 +1745,6 @@ window.validateCorrection = async function(correctionId, errorId) {
 window.viewErrorDetails = function(errorId) {
     window.location.href = `admin-error-details.html?id=${errorId}`;
 };
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 // ================================================================
 // EVENT LISTENERS
