@@ -374,7 +374,7 @@ async function loadCommandes() {
                 )
             `)
             .eq('gite_id', currentGiteId)
-            .order('date_commande', { ascending: false });
+            .order('created_at', { ascending: false });
         
         if (error) throw error;
         
@@ -401,7 +401,7 @@ function renderCommandes() {
         return `
         <tr>
             <td><strong>${safeNumero}</strong></td>
-            <td>${new Date(c.date_commande).toLocaleDateString('fr-FR')}</td>
+            <td>${new Date(c.created_at).toLocaleDateString('fr-FR')}</td>
             <td>${safeClient}</td>
             <td><strong>${c.montant_prestations.toFixed(2)} €</strong></td>
             <td><span class="badge ${getStatutBadge(c.statut)}">${getStatutLabel(c.statut)}</span></td>
@@ -535,8 +535,8 @@ async function loadStats() {
             .select('montant_prestations, montant_commission, montant_net_owner')
             .eq('gite_id', currentGiteId)
             .neq('statut', 'cancelled')
-            .gte('date_commande', `${year}-01-01`)
-            .lte('date_commande', `${year}-12-31`);
+            .gte('created_at', `${year}-01-01`)
+            .lte('created_at', `${year}-12-31`);
         
         if (error) throw error;
         
