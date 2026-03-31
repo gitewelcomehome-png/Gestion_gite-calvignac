@@ -1168,6 +1168,24 @@
         };
         
         const tabFiles = isMobile ? mobileTabs : desktopTabs;
+
+        // Pré-remplir chaque container avec un skeleton pendant le fetch
+        const skeletonHTML = `<div class="skeleton-loader" aria-hidden="true">
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line skeleton-line--card"></div>
+            <div class="skeleton-line skeleton-line--full"></div>
+            <div class="skeleton-line skeleton-line--long"></div>
+            <div class="skeleton-line skeleton-line--medium"></div>
+            <div class="skeleton-line skeleton-line--full"></div>
+            <div class="skeleton-line skeleton-line--long"></div>
+        </div>`;
+        Object.keys(tabFiles).forEach(tabId => {
+            const el = document.getElementById(tabId);
+            if (el && !el.innerHTML.trim()) {
+                el.innerHTML = skeletonHTML;
+            }
+        });
+
         for (const [tabId, file] of Object.entries(tabFiles)) {
             fetch(file, { cache: 'no-store' })
                 .then(r => r.text())

@@ -235,6 +235,42 @@
     }
 
     // ================================================
+    // 8. SKELETONS — Chargement
+    // ================================================
+
+    /**
+     * Injecte un skeleton de chargement dans un élément.
+     * Remplace le contenu existant. Appeler hideSkeleton() pour restaurer.
+     *
+     * @param {HTMLElement|string} target — Élément ou son ID
+     * @param {number} [lines=5] — Nombre de lignes skeleton
+     */
+    function showSkeleton(target, lines) {
+        const el = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!el) return;
+        const count = lines || 5;
+        const patterns = ['short', 'full', 'long', 'medium', 'full'];
+        let html = '<div class="skeleton-loader" aria-hidden="true">';
+        for (let i = 0; i < count; i++) {
+            html += `<div class="skeleton-line skeleton-line--${patterns[i % patterns.length]}"></div>`;
+        }
+        html += '</div>';
+        el.innerHTML = html;
+    }
+
+    /**
+     * Vide le skeleton d'un élément (le contenu réel sera ensuite injecté).
+     *
+     * @param {HTMLElement|string} target
+     */
+    function hideSkeleton(target) {
+        const el = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!el) return;
+        const skeleton = el.querySelector('.skeleton-loader');
+        if (skeleton) skeleton.remove();
+    }
+
+    // ================================================
     // EXPORT
     // ================================================
 
@@ -247,7 +283,9 @@
         safeJSONParse,
         isNullOrEmpty,
         truncateText,
-        showToast
+        showToast,
+        showSkeleton,
+        hideSkeleton
     };
 
     // Namespace principal
