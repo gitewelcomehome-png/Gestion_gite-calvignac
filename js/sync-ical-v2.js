@@ -366,14 +366,21 @@ async function syncCalendar(giteId, platform, url) {
         throw new Error(`URL invalide`);
     }
 
+    // Homelidays répond mieux en HTTPS; on normalise pour éviter certains 403.
+    const normalizedUrl = url.replace(/^http:\/\/((www\.)?homelidays\.com)/i, 'https://$1');
+    const isHomelidays = /(^|\.)homelidays\.com$/i.test(new URL(normalizedUrl).hostname);
+
     // Essayer plusieurs proxies CORS
     // 1. Notre proxy Vercel serverless (toujours en premier, échoue silencieusement si absent)
     // 2. Proxies publics (fallback)
+    // Homelidays bloque les proxies externes → on tente uniquement notre proxy interne.
     const proxies = [
-        { url: `/api/cors-proxy?url=${encodeURIComponent(url)}`, type: 'raw' },
-        { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'raw' },
-        { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'allorigins' },
-        { url: `https://api.codetabs.com/v1/proxy/?quest=${url}`, type: 'raw' }
+        { url: `/api/cors-proxy?url=${encodeURIComponent(normalizedUrl)}`, type: 'raw' },
+        ...(isHomelidays ? [] : [
+            { url: `https://corsproxy.io/?${encodeURIComponent(normalizedUrl)}`, type: 'raw' },
+            { url: `https://api.allorigins.win/get?url=${encodeURIComponent(normalizedUrl)}`, type: 'allorigins' },
+            { url: `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(normalizedUrl)}`, type: 'raw' }
+        ])
     ];
 
     let text;
@@ -389,6 +396,10 @@ async function syncCalendar(giteId, platform, url) {
             
             const response = await Promise.race([fetchPromise, timeoutPromise]);
             if (!response.ok) {
+                // Homelidays bloque les accès automatiques → erreur directe, sans fallback inutile.
+                if (isHomelidays && response.status === 403) {
+                    throw new Error(`Le flux iCal Homelidays est inaccessible (accès refusé 403). Vérifiez l'URL ou contactez le support Homelidays.`);
+                }
                 // Erreur HTTP normale (404, 500, etc.) - continuer avec proxy suivant
                 continue;
             }

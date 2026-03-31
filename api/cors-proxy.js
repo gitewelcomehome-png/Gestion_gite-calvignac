@@ -64,7 +64,9 @@ function setCorsHeaders(req, res, allowedOrigin) {
 export default async function handler(req, res) {
     const allowedOrigins = getAllowedOrigins();
     const requestOrigin = getOriginFromRequest(req);
-    const isAllowed = requestOrigin ? allowedOrigins.has(requestOrigin) : false;
+    // Les requêtes same-origin GET n'envoient pas toujours l'en-tête Origin.
+    // Dans ce cas, on autorise la requête (monitoring gardé via headers de réponse).
+    const isAllowed = !requestOrigin || allowedOrigins.has(requestOrigin);
     const enforceOrigin = shouldEnforceOrigin();
 
     setCorsHeaders(req, res, (isAllowed || !enforceOrigin) ? requestOrigin : null);
@@ -109,6 +111,8 @@ export default async function handler(req, res) {
             'airbnb.com',
             'airbnb.co.uk',
             'abritel.fr',
+            'homelidays.com',
+            'www.homelidays.com',
             'booking.com',
             'homeaway.com',
             'homeaway.fr',
@@ -145,7 +149,7 @@ export default async function handler(req, res) {
         const response = await fetch(url, {
             signal: controller.signal,
             headers: {
-                'User-Agent': 'LiveOwnerUnit/1.0',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
                 'Accept': 'text/calendar, text/plain, */*'
             }
         });
