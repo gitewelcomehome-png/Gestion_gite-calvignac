@@ -2835,16 +2835,7 @@ function copyToClipboard(inputId) {
     showToast(t('copie_success'), 'success');
 }
 
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
+// showToast — défini dans js/utils.js (chargé avant ce fichier)
 
 function showError(message) {
     document.getElementById('loadingScreen').innerHTML = `

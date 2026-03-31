@@ -400,18 +400,7 @@ function generateNumeroCommande() {
 }
 
 // ==========================================
-// TOAST NOTIFICATIONS
-// ==========================================
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
+// showToast — défini dans js/utils.js (chargé avant ce fichier)
 
 // Export fonctions globales
 window.ajouterAuPanier = ajouterAuPanier;

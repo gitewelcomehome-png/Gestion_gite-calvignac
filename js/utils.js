@@ -185,6 +185,56 @@
     }
 
     // ================================================
+    // 7. NOTIFICATIONS — Toast
+    // ================================================
+
+    /**
+     * Affiche un toast de notification flottant (coin supérieur droit).
+     * Utilisé par les pages autonomes (admin, support, femme-menage, etc.)
+     * qui n'ont pas accès à shared-utils.js.
+     *
+     * Dans app.html, shared-utils.js redéfinit showToast pour le mode inline-onglet.
+     * Ce fallback ne s'applique que si aucune version plus spécifique n'est déjà définie.
+     *
+     * @param {string} message
+     * @param {'success'|'error'|'info'|'warning'} [type='success']
+     * @param {number} [duration=3500]
+     */
+    function showToast(message, type, duration) {
+        const kind = type || 'success';
+        const delay = duration || 3500;
+        const bg = kind === 'error' ? '#ef4444'
+                 : kind === 'warning' ? '#f59e0b'
+                 : kind === 'info' ? '#3b82f6'
+                 : '#10b981';
+
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = [
+            'position:fixed',
+            'top:20px',
+            'right:20px',
+            'padding:12px 20px',
+            'border-radius:8px',
+            'box-shadow:0 4px 12px rgba(0,0,0,0.2)',
+            'z-index:100000',
+            'color:#fff',
+            'font-weight:600',
+            'font-size:14px',
+            'max-width:360px',
+            'word-break:break-word',
+            'transition:opacity 0.3s ease',
+            'background:' + bg
+        ].join(';');
+
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, delay);
+    }
+
+    // ================================================
     // EXPORT
     // ================================================
 
@@ -196,7 +246,8 @@
         copyToClipboard,
         safeJSONParse,
         isNullOrEmpty,
-        truncateText
+        truncateText,
+        showToast
     };
 
     // Namespace principal
@@ -209,6 +260,9 @@
     }
     if (typeof global.debounce === 'undefined') {
         global.debounce = debounce;
+    }
+    if (typeof global.showToast === 'undefined') {
+        global.showToast = showToast;
     }
 
 }(window));
