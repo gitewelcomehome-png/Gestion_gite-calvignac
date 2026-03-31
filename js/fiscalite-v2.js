@@ -11,6 +11,63 @@ let creditsPersonnels = [];
 let configKm = null;
 let trajetsKm = [];
 let lieuxFavoris = [];
+let revenuImposableGites = 0;
+let revenuImposableCH = 0;
+let choixIrChTexte = 'Micro-BIC 50%';
+let testCACHActif = false;
+
+const PASS_PAR_ANNEE_CH = {
+    2024: 46368,
+    2025: 47100,
+    2026: 48060
+};
+
+function getPassPourAnneeCH(annee) {
+    if (PASS_PAR_ANNEE_CH[annee]) {
+        return PASS_PAR_ANNEE_CH[annee];
+    }
+
+    const annees = Object.keys(PASS_PAR_ANNEE_CH).map(Number).sort((a, b) => a - b);
+    const anneeMin = annees[0];
+    const anneeMax = annees[annees.length - 1];
+
+    if (annee <= anneeMin) {
+        return PASS_PAR_ANNEE_CH[anneeMin];
+    }
+
+    return PASS_PAR_ANNEE_CH[anneeMax];
+}
+
+function getSeuilAffiliationCh(annee) {
+    return Math.round(getPassPourAnneeCH(annee) * 0.13);
+}
+
+function getSeuilRfrVlParPart(annee) {
+    if (annee <= 2025) {
+        return 28797;
+    }
+    return 29315;
+}
+
+function getReglesFiscaliteCH(annee) {
+    const overrides = window.FISCALITE_CH_CONFIG || {};
+
+    return {
+        abattementMicro: annee <= 2024 ? 0.71 : 0.50,
+        plafondMicro: Number(overrides.plafondMicro ?? 77700),
+        seuilTva: Number(overrides.seuilTva ?? 37500),
+        seuilTvaMajore: Number(overrides.seuilTvaMajore ?? 41250),
+        tauxCotisMicro: Number(overrides.tauxCotisMicro ?? 0.212),
+        tauxPrelevPatrimoine: Number(overrides.tauxPrelevPatrimoine ?? 0.186),
+        // Taux VL CH = 1% (fourniture de logement). A surveiller si
+        // reclassification en prestation de services suite loi Le Meur: 1,7%.
+        tauxVl: Number(overrides.tauxVl ?? 0.01),
+        pass: getPassPourAnneeCH(annee),
+        seuilAffiliation: getSeuilAffiliationCh(annee),
+        dureeAmortissementNotaire: Number(overrides.dureeAmortissementNotaire ?? 25),
+        seuilRfrVlParPart: Number(overrides.seuilRfrVlParPart ?? getSeuilRfrVlParPart(annee))
+    };
+}
 
 // ==========================================
 // 🔧 HELPERS UTILITAIRES
@@ -27,8 +84,19 @@ function getFieldValue(id, defaultValue = 0) {
 }
 
 function getAutresRevenusProfessionnelsFoyer() {
-    const salaireMadame = getFieldValue('salaire_madame');
-    const salaireMonsieur = getFieldValue('salaire_monsieur');
+    const salaireMadameBrut = getFieldValue('salaire_madame');
+    const salaireMonsieurBrut = getFieldValue('salaire_monsieur');
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
+    const config = window.TAUX_FISCAUX?.getConfig?.(annee);
+    const abat = config?.ABATTEMENT_SALAIRE || { taux: 0.10, minimum: 0, maximum: Number.POSITIVE_INFINITY };
+
+    const calculSalaireImposable = (salaireBrut) => {
+        const abattement = Math.max(abat.minimum, Math.min(salaireBrut * abat.taux, abat.maximum));
+        return Math.max(0, salaireBrut - abattement);
+    };
+
+    const salaireMadame = calculSalaireImposable(salaireMadameBrut);
+    const salaireMonsieur = calculSalaireImposable(salaireMonsieurBrut);
 
     const autresChampsProfessionnels = [
         'revenus_bic_autres',
@@ -133,6 +201,73 @@ function getConfig() {
         _cachedYear = annee;
     }
     return _cachedConfig;
+}
+
+function calculerPartsFiscales(nbEnfants, options = {}) {
+    const enfants = Math.max(0, parseInt(nbEnfants || 0, 10));
+    const baseParts = Number.isFinite(options.baseParts) ? options.baseParts : 2;
+    const parentIsole = options.parentIsole === true;
+    let parts = baseParts + Math.min(enfants, 2) * 0.5 + Math.max(0, enfants - 2);
+    if (parentIsole) {
+        parts += 0.5;
+    }
+    return Math.max(1, parts);
+}
+
+function calculerIrBrutProgressif(revenuImposable, parts, bareme) {
+    const revenu = Math.max(0, Number(revenuImposable) || 0);
+    const nbParts = Math.max(1, Number(parts) || 1);
+    const tranches = Array.isArray(bareme) ? bareme : [];
+    const quotientFamilial = revenu / nbParts;
+    let impotParPart = 0;
+    let tranchePrecedente = 0;
+
+    for (const tranche of tranches) {
+        const plafond = Number.isFinite(tranche.max) ? tranche.max : Infinity;
+        const taux = Number(tranche.taux) || 0;
+        const montantDansTranche = Math.max(0, Math.min(quotientFamilial, plafond) - tranchePrecedente);
+
+        if (montantDansTranche > 0) {
+            impotParPart += montantDansTranche * taux;
+        }
+
+        tranchePrecedente = plafond;
+        if (quotientFamilial <= plafond) break;
+    }
+
+    return Math.max(0, impotParPart * nbParts);
+}
+
+function calculerIrNetAvecCorrectifs(revenuImposable, parts, config, options = {}) {
+    const tranches = config?.BAREME_IR || [];
+    const nbParts = Math.max(1, Number(parts) || 1);
+    const baseParts = Number.isFinite(options.baseParts) ? options.baseParts : 2;
+
+    let impotNet = calculerIrBrutProgressif(revenuImposable, nbParts, tranches);
+
+    const plafondParDemiPart = Number(config?.QUOTIENT_FAMILIAL?.plafond_demi_part);
+    const demiPartsSupplementaires = Math.max(0, (nbParts - baseParts) * 2);
+    if (Number.isFinite(plafondParDemiPart) && demiPartsSupplementaires > 0) {
+        const impotBase = calculerIrBrutProgressif(revenuImposable, baseParts, tranches);
+        const avantageQuotient = Math.max(0, impotBase - impotNet);
+        const plafondGlobal = demiPartsSupplementaires * plafondParDemiPart;
+        if (avantageQuotient > plafondGlobal) {
+            impotNet = Math.max(0, impotBase - plafondGlobal);
+        }
+    }
+
+    const decote = config?.DECOTE || {};
+    const estCouple = baseParts >= 2;
+    const decoteMontant = Number(estCouple ? decote?.couple?.montant : decote?.celibataire?.montant);
+    const decoteSeuil = Number(estCouple ? decote?.couple?.seuil : decote?.celibataire?.seuil);
+    const decoteTaux = Number(decote?.taux_reduction);
+
+    if (Number.isFinite(decoteMontant) && Number.isFinite(decoteSeuil) && Number.isFinite(decoteTaux) && impotNet <= decoteSeuil) {
+        const montantDecote = Math.max(0, decoteMontant - (decoteTaux * impotNet));
+        impotNet = Math.max(0, impotNet - montantDecote);
+    }
+
+    return impotNet;
 }
 
 /**
@@ -513,15 +648,23 @@ function calculerTableauComparatif() {
     
     const blocVL = document.getElementById('bloc-versement-liberatoire');
     const checkboxVL = document.getElementById('option_versement_liberatoire');
+    const checkboxMicroEntrepreneur = document.getElementById('option_micro_entrepreneur_confirmee');
     const messageVL = document.getElementById('vl-eligibilite-message');
+    const confirmeMicroEntrepreneur = checkboxMicroEntrepreneur?.checked === true;
+    const peutActiverVL = estStatutMicro && estEligibleMicroBIC && confirmeMicroEntrepreneur;
     
     // Afficher le bloc UNIQUEMENT si statut Micro-BIC ET CA dans les plafonds
     if (blocVL) {
         if (estStatutMicro && estEligibleMicroBIC) {
             blocVL.style.display = 'block';
             if (messageVL) {
-                messageVL.innerHTML = '💡 <strong>Option micro-entrepreneurs</strong> : Taux forfaitaire sur le CA (1% ou 1,7%) au lieu de l\'IR progressif';
-                messageVL.style.color = '#2ecc71';
+                if (confirmeMicroEntrepreneur) {
+                    messageVL.innerHTML = '💡 <strong>Option micro-entrepreneurs</strong> confirmée : VL activable (1% ou 1,7% du CA).';
+                    messageVL.style.color = '#2ecc71';
+                } else {
+                    messageVL.innerHTML = '⚠️ <strong>VL désactivé</strong> : cochez la confirmation micro-entrepreneur pour activer cette option.';
+                    messageVL.style.color = '#d97706';
+                }
             }
         } else {
             blocVL.style.display = 'none';
@@ -529,44 +672,27 @@ function calculerTableauComparatif() {
     }
     
     if (checkboxVL) {
-        checkboxVL.disabled = !(estStatutMicro && estEligibleMicroBIC);
-        if (!(estStatutMicro && estEligibleMicroBIC)) {
+        checkboxVL.disabled = !peutActiverVL;
+        if (!peutActiverVL) {
             checkboxVL.checked = false;
         }
     }
     
     const optionVL = checkboxVL?.checked || false;
-    const utiliserVL = optionVL && estStatutMicro && estEligibleMicroBIC;
+    const utiliserVL = optionVL && peutActiverVL;
     
     // Données communes
     const salaireMadame = getFieldValue('salaire_madame');
     const salaireMonsieur = getFieldValue('salaire_monsieur');
     const nombreEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
-    const nombreParts = 2 + (nombreEnfants * 0.5);
+    const nombreParts = calculerPartsFiscales(nombreEnfants);
     const revenusSalaries = salaireMadame + salaireMonsieur;
     const autresRevenusProfessionnels = getAutresRevenusProfessionnelsFoyer();
-    
-    const bareme = config.BAREME_IR;
+    const TAUX_PRELEVEMENTS_PATRIMOINE_BIC = config.PRELEVEMENTS_SOCIAUX?.patrimoine_bic_meuble ?? 0.186;
     
     // Fonction helper pour calculer l'IR
-    function calculerIR(revenusGlobaux, nombreParts) {
-        const quotientFamilial = revenusGlobaux / nombreParts;
-        let impotParPart = 0;
-        let tranchePrecedente = 0;
-        
-        for (let i = 0; i < bareme.length; i++) {
-            const tranche = bareme[i];
-            const montantDansTranche = Math.max(0, Math.min(quotientFamilial, tranche.max) - tranchePrecedente);
-            
-            if (montantDansTranche > 0) {
-                impotParPart += montantDansTranche * tranche.taux;
-            }
-            
-            tranchePrecedente = tranche.max;
-            if (quotientFamilial <= tranche.max) break;
-        }
-        
-        return impotParPart * nombreParts;
+    function calculerIR(revenusGlobaux, partsFoyer) {
+        return calculerIrNetAvecCorrectifs(revenusGlobaux, partsFoyer, config, { baseParts: 2 });
     }
     
     // Vérifier critères LMP
@@ -574,7 +700,11 @@ function calculerTableauComparatif() {
     const resteAvantIRReelAffiche = parseDisplayedAmount('preview-reste');
     
     // CORRECTION 1 - 2026-02-17
-    const urssafLMNP = calculerURSSAF(beneficeReel, ca, 'lmnp', config).urssaf;
+    const urssafLMNPResult = calculerURSSAF(beneficeReel, ca, 'lmnp', config);
+    const urssafLMNP = urssafLMNPResult.urssaf;
+    const prelevementsPatrimoineLMNP = urssafLMNPResult.detail.exonereLMNP && beneficeReel > 0
+        ? beneficeReel * TAUX_PRELEVEMENTS_PATRIMOINE_BIC
+        : 0;
     
     const beneficeLMNP = beneficeReel;
     const revenuLMNPRetenuIR = Math.max(0, beneficeLMNP);
@@ -605,9 +735,9 @@ function calculerTableauComparatif() {
     const partLocationLMNPReel = revenusGlobauxReel > 0 ? revenuLMNPRetenuIR / revenusGlobauxReel : 0;
     const irImpactLocation = irTotalLMNPReel * partLocationLMNPReel;
     const irPartLMNPReel = Math.max(0, irImpactLocation);
-    const totalLMNPReel = urssafLMNP + irPartLMNPReel;
+    const totalLMNPReel = urssafLMNP + prelevementsPatrimoineLMNP + irPartLMNPReel;
     
-    document.getElementById('urssaf-lmnp-reel').textContent = urssafLMNP.toFixed(0) + ' €';
+    document.getElementById('urssaf-lmnp-reel').textContent = (urssafLMNP + prelevementsPatrimoineLMNP).toFixed(0) + ' €';
     document.getElementById('ir-lmnp-reel').textContent = irPartLMNPReel.toFixed(0) + ' €';
     document.getElementById('total-lmnp-reel').textContent = totalLMNPReel.toFixed(0) + ' €';
     
@@ -648,6 +778,9 @@ function calculerTableauComparatif() {
     
     if (lmpObligatoire) {
         desactiveLMNP.style.display = 'block';
+        document.getElementById('urssaf-lmnp-reel').textContent = 'N/A';
+        document.getElementById('ir-lmnp-reel').textContent = 'N/A';
+        document.getElementById('total-lmnp-reel').textContent = 'N/A';
     } else {
         desactiveLMNP.style.display = 'none';
         options.push({ nom: 'LMNP Réel', total: totalLMNPReel, id: 'option-lmnp-reel', badge: 'badge-lmnp-reel' });
@@ -668,11 +801,15 @@ function calculerTableauComparatif() {
     if (estClasse) {
         conditionsMicroNonClasse.innerHTML = `<div style="color: #dc3545; font-weight: 600;">⭐ Meublé classé sélectionné</div>`;
         desactiveMicroNonClasse.style.display = 'block';
+        document.getElementById('cotis-micro-non-classe').textContent = 'N/A';
+        document.getElementById('ir-micro-non-classe').textContent = 'N/A';
         document.getElementById('total-micro-non-classe').textContent = 'N/A';
+        const labelIRMicro30 = document.getElementById('label-ir-micro-non-classe');
+        if (labelIRMicro30) labelIRMicro30.textContent = 'IR:';
     } else {
         // Non classé sélectionné : toujours afficher
         const messageUrssaf = ca < SEUIL_URSSAF 
-            ? '<div style="color: #28a745; font-weight: 500; font-size: 0.6rem;">✅ Pas de cotisations URSSAF</div>' 
+            ? '<div style="color: #28a745; font-weight: 500; font-size: 0.6rem;">✅ PS patrimoine 18,6% sur base imposable</div>' 
             : '<div style="color: #6c757d; font-weight: 500; font-size: 0.6rem;">(URSSAF: 21,2% du CA)</div>';
         
         conditionsMicroNonClasse.innerHTML = `
@@ -683,8 +820,9 @@ function calculerTableauComparatif() {
         if (caMicro30Ok) {
             const abattement30 = Math.max(ca * ABATTEMENT_NON_CLASSE, 305);
             const beneficeMicro30 = ca - abattement30;
-            // ✅ URSSAF = 0 si CA < 23 000€
-            const cotisMicro30 = ca >= SEUIL_URSSAF ? ca * TAUX_COTIS_MICRO_NON_CLASSE : 0;
+            const cotisMicro30 = ca >= SEUIL_URSSAF
+                ? ca * TAUX_COTIS_MICRO_NON_CLASSE
+                : beneficeMicro30 * TAUX_PRELEVEMENTS_PATRIMOINE_BIC;
             const resteAvantIRMicro30 = beneficeMicro30 - cotisMicro30;
             const revenusGlobauxMicro30 = revenusSalaries + resteAvantIRMicro30;
             
@@ -714,7 +852,11 @@ function calculerTableauComparatif() {
             options.push({ nom: 'Micro-BIC 30%', total: totalMicro30, id: 'option-micro-non-classe', badge: 'badge-micro-non-classe' });
         } else {
             desactiveMicroNonClasse.style.display = 'block';
+            document.getElementById('cotis-micro-non-classe').textContent = 'N/A';
+            document.getElementById('ir-micro-non-classe').textContent = 'N/A';
             document.getElementById('total-micro-non-classe').textContent = 'N/A';
+            const labelIRMicro30 = document.getElementById('label-ir-micro-non-classe');
+            if (labelIRMicro30) labelIRMicro30.textContent = 'IR:';
         }
     }
     
@@ -731,11 +873,15 @@ function calculerTableauComparatif() {
     if (!estClasse) {
         conditionsMicroClasse.innerHTML = `<div style="color: #dc3545; font-weight: 600;">Non classé sélectionné</div>`;
         desactiveMicroClasse.style.display = 'block';
+        document.getElementById('cotis-micro-classe').textContent = 'N/A';
+        document.getElementById('ir-micro-classe').textContent = 'N/A';
         document.getElementById('total-micro-classe').textContent = 'N/A';
+        const labelIRMicro50 = document.getElementById('label-ir-micro-classe');
+        if (labelIRMicro50) labelIRMicro50.textContent = 'IR:';
     } else {
         // Classé sélectionné : toujours afficher
         const messageUrssafClasse = ca < SEUIL_URSSAF 
-            ? '<div style="color: #28a745; font-weight: 500; font-size: 0.6rem;">✅ Pas de cotisations URSSAF</div>' 
+            ? '<div style="color: #28a745; font-weight: 500; font-size: 0.6rem;">✅ PS patrimoine 18,6% sur base imposable</div>' 
             : '<div style="color: #6c757d; font-weight: 500; font-size: 0.6rem;">(URSSAF: 6% du CA ⭐)</div>';
         
         conditionsMicroClasse.innerHTML = `
@@ -746,8 +892,9 @@ function calculerTableauComparatif() {
         if (caMicro50Ok) {
             const abattement50 = Math.max(ca * ABATTEMENT_CLASSE, 305);
             const beneficeMicro50 = ca - abattement50;
-            // ✅ URSSAF = 0 si CA < 23 000€
-            const cotisMicro50 = ca >= SEUIL_URSSAF ? ca * TAUX_COTIS_MICRO_CLASSE : 0;
+            const cotisMicro50 = ca >= SEUIL_URSSAF
+                ? ca * TAUX_COTIS_MICRO_CLASSE
+                : beneficeMicro50 * TAUX_PRELEVEMENTS_PATRIMOINE_BIC;
             const resteAvantIRMicro50 = beneficeMicro50 - cotisMicro50;
             const revenusGlobauxMicro50 = revenusSalaries + resteAvantIRMicro50;
             
@@ -777,7 +924,11 @@ function calculerTableauComparatif() {
             options.push({ nom: 'Micro-BIC 50%', total: totalMicro50, id: 'option-micro-classe', badge: 'badge-micro-classe' });
         } else {
             desactiveMicroClasse.style.display = 'block';
+            document.getElementById('cotis-micro-classe').textContent = 'N/A';
+            document.getElementById('ir-micro-classe').textContent = 'N/A';
             document.getElementById('total-micro-classe').textContent = 'N/A';
+            const labelIRMicro50 = document.getElementById('label-ir-micro-classe');
+            if (labelIRMicro50) labelIRMicro50.textContent = 'IR:';
         }
     }
     
@@ -832,6 +983,8 @@ function calculerTableauComparatif() {
         options.push({ nom: 'LMP Réel', total: totalLMPSafe, id: 'option-lmp-reel', badge: 'badge-lmp-reel' });
     } else {
         desactiveLMP.style.display = 'block';
+        document.getElementById('ssi-lmp-reel').textContent = 'N/A';
+        document.getElementById('ir-lmp-reel').textContent = 'N/A';
         document.getElementById('total-lmp-reel').textContent = 'N/A';
     }
     
@@ -948,7 +1101,12 @@ function comparerReelVsMicroBIC() {
     // ==========================================
     const abattementMicro = Math.max(ca * TAUX_ABATTEMENT_MICRO, ABATTEMENT_MIN_MICRO);
     const beneficeMicro = ca - abattementMicro; // Revenu imposable
-    const cotisationsMicro = ca >= 23000 ? ca * TAUX_COTIS_MICRO : 0;
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
+    const config = window.TAUX_FISCAUX.getConfig(annee);
+    const tauxPatrimoine = config.PRELEVEMENTS_SOCIAUX?.patrimoine_bic_meuble ?? 0.186;
+    const cotisationsMicro = ca >= 23000
+        ? ca * TAUX_COTIS_MICRO
+        : beneficeMicro * tauxPatrimoine;
     const resteAvantIRMicro = beneficeMicro - cotisationsMicro;
     
     // Calculer l'IR avec le micro-BIC
@@ -957,31 +1115,8 @@ function comparerReelVsMicroBIC() {
     
     // Calculer l'IR pour le micro (même méthode que le réel)
     const nombreEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
-    const nombreParts = 2 + (nombreEnfants * 0.5);
-    const quotientFamilialMicro = revenusGlobauxMicro / nombreParts;
-    
-    // CORRECTION 3 - 2026-02-17
-    // Utiliser le barème IR de l'année simulée
-    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
-    const config = window.TAUX_FISCAUX.getConfig(annee);
-    const bareme = config.BAREME_IR;
-    
-    let impotParPartMicro = 0;
-    let tranchePrecedente = 0;
-    
-    for (let i = 0; i < bareme.length; i++) {
-        const tranche = bareme[i];
-        const montantDansTranche = Math.max(0, Math.min(quotientFamilialMicro, tranche.max) - tranchePrecedente);
-        
-        if (montantDansTranche > 0) {
-            impotParPartMicro += montantDansTranche * tranche.taux;
-        }
-        
-        tranchePrecedente = tranche.max;
-        if (quotientFamilialMicro <= tranche.max) break;
-    }
-    
-    const irTotalMicro = impotParPartMicro * nombreParts;
+    const nombreParts = calculerPartsFiscales(nombreEnfants);
+    const irTotalMicro = calculerIrNetAvecCorrectifs(revenusGlobauxMicro, nombreParts, config, { baseParts: 2 });
     const irPartLocationMicro = irTotalMicro * partLocationMicro;
     
     const coutTotalMicro = cotisationsMicro + irPartLocationMicro;
@@ -1058,11 +1193,31 @@ function changerStatutFiscal() {
         noteLabel.textContent = 'Régime LMNP au réel';
         noteText.textContent = 'Les cotisations sont calculées uniquement sur le bénéfice imposable. Pas de cotisations minimales en LMNP.';
     }
+
+    // Masquer les sections de saisie du réel si le statut choisi ne les utilise pas
+    mettreAJourVisibiliteSectionsReel();
     
     // Recalculer avec le nouveau statut
     calculerTempsReel();
     calculerTableauComparatif();
     verifierSeuilsStatut();
+}
+
+function mettreAJourVisibiliteSectionsReel() {
+    const statutGites = document.getElementById('statut_fiscal')?.value || 'lmnp';
+    const statutCH = document.getElementById('ch-statut-fiscal')?.value || 'micro';
+
+    // Gîtes: LMNP/LMP = réel, Micro-BIC = pas de sections réel
+    const afficherReelGites = statutGites !== 'micro';
+    ['section-regime-reel-gites', 'bloc-residence-reel', 'bloc-frais-pro-reel', 'bloc-vehicule-fiscal-reel'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = afficherReelGites ? '' : 'none';
+    });
+
+    // CH: masquer la section comptable réel si micro sélectionné
+    const afficherReelCH = statutCH === 'reel';
+    const chReelComptaEl = document.getElementById('ch-section-reel-compta');
+    if (chReelComptaEl) chReelComptaEl.style.display = afficherReelCH ? '' : 'none';
 }
 
 /**
@@ -1402,26 +1557,28 @@ function calculerTempsReel() {
         const fraisPro = calculerFraisProfessionnels();
         const fraisVehicule = calculerFraisVehicule();
 
-        // ⚠️ ALIGNEMENT CALCUL PRINCIPAL:
-        // Bénéfice imposable = CA - (Charges biens + Frais pro + Crédits immobiliers)
-        // Les charges résidence principale et frais véhicule restent affichés à titre indicatif,
-        // mais ne sont pas inclus dans le total déductible fiscal.
-        const creditsListe = getCreditsListe();
-        const totalCredits = creditsListe.reduce((sum, c) => sum + (c.mensualite * 12), 0);
+        // Alignement BIC réel: charges biens + frais pro + résidence (prorata)
+        // + frais véhicule + intérêts d'emprunt complémentaires.
+        const totalCredits = calculerInteretsCreditsDeductiblesAnnuel();
 
-        const totalCharges = chargesBiens + fraisPro + totalCredits;
+        // Total fiscal annuel utilisé pour le bénéfice BIC (base des calculs URSSAF/IR).
+        const totalCharges = chargesBiens + fraisPro + chargesResidence + fraisVehicule + totalCredits;
         const benefice = ca - totalCharges;
         
         // ==========================================
         // CALCUL URSSAF avec TAUX CONFIGURABLES
         // ==========================================
-        const annee = new Date().getFullYear();
+        const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
         const config = window.TAUX_FISCAUX.getConfig(annee);
         
         const statutFiscal = document.getElementById('statut_fiscal')?.value || 'lmnp';
         // CORRECTION 1 - 2026-02-17
         const urssafResult = calculerURSSAF(benefice, ca, statutFiscal, config);
-        const urssaf = urssafResult.urssaf;
+        const tauxPatrimoine = config.PRELEVEMENTS_SOCIAUX?.patrimoine_bic_meuble ?? 0.186;
+        const prelevementsPatrimoineLMNP = urssafResult.detail.exonereLMNP && benefice > 0
+            ? benefice * tauxPatrimoine
+            : 0;
+        const urssaf = urssafResult.urssaf + prelevementsPatrimoineLMNP;
         const indemnites = urssafResult.detail.indemnites;
         const retraiteBase = urssafResult.detail.retraiteBase;
         const retraiteCompl = urssafResult.detail.retraiteCompl;
@@ -1481,6 +1638,7 @@ function calculerTempsReel() {
         const elFraisVehicule = document.getElementById('total-frais-vehicule');
         if (elFraisVehicule) elFraisVehicule.textContent = fraisVehicule.toFixed(2) + ' €';
         
+        // Synthèse affichée dans la section « Total charges annuelles ».
         const elTotalCharges = document.getElementById('total-charges-annuelles');
         if (elTotalCharges) elTotalCharges.textContent = totalCharges.toFixed(2) + ' €';
         
@@ -1492,9 +1650,9 @@ function calculerTempsReel() {
             alerteRetraite.style.display = 'none';
         }
         
-        // Mise à jour du revenu LMP pour l'IR
-        document.getElementById('revenu_lmp').value = resteAvantIR.toFixed(2);
-        calculerIR();
+        // Mise à jour du revenu reporté IR: déficit LMNP non imputable sur revenu global
+        revenuImposableGites = statutFiscal === 'lmnp' ? Math.max(0, resteAvantIR) : resteAvantIR;
+        appliquerReportRevenuLmp(true);
         
         // Vérifier les seuils de statut fiscal (LMNP/LMP)
         verifierSeuilsStatut();
@@ -1703,10 +1861,13 @@ function afficherDetailCharges(chargesBiens, amortissements, fraisPro, fraisVehi
             const div = document.createElement('div');
             div.className = 'info-box';
             div.style.cssText = 'display: flex; justify-content: space-between; padding: 12px;';
-            div.innerHTML = `
-                <span>${gite.name} (hors amortissements)</span>
-                <strong style="color: #00C2CB;">${totalGite.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</strong>
-            `;
+            const labelEl = document.createElement('span');
+            labelEl.textContent = `${gite.name} (hors amortissements)`;
+            const valueEl = document.createElement('strong');
+            valueEl.style.color = '#00C2CB';
+            valueEl.textContent = `${totalGite.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`;
+            div.appendChild(labelEl);
+            div.appendChild(valueEl);
             gitesListe.appendChild(div);
         });
     }
@@ -1733,10 +1894,13 @@ function afficherDetailCharges(chargesBiens, amortissements, fraisPro, fraisVehi
                 const div = document.createElement('div');
                 div.className = 'info-box';
                 div.style.cssText = 'display: flex; justify-content: space-between; padding: 12px; margin-left: 15px;';
-                div.innerHTML = `
-                    <span>${gite.name} (immobilier)</span>
-                    <strong style="color: #00C2CB;">${amortImmo.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</strong>
-                `;
+                const labelEl = document.createElement('span');
+                labelEl.textContent = `${gite.name} (immobilier)`;
+                const valueEl = document.createElement('strong');
+                valueEl.style.color = '#00C2CB';
+                valueEl.textContent = `${amortImmo.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`;
+                div.appendChild(labelEl);
+                div.appendChild(valueEl);
                 amortissementsListe.appendChild(div);
             }
         });
@@ -1751,10 +1915,13 @@ function afficherDetailCharges(chargesBiens, amortissements, fraisPro, fraisVehi
                 const div = document.createElement('div');
                 div.className = 'info-box';
                 div.style.cssText = 'display: flex; justify-content: space-between; padding: 12px; margin-left: 15px;';
-                div.innerHTML = `
-                    <span>${item.description} (${item.type})</span>
-                    <strong style="color: #00C2CB;">${item.montantAnnuel.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</strong>
-                `;
+                const labelEl = document.createElement('span');
+                labelEl.textContent = `${item.description} (${item.type})`;
+                const valueEl = document.createElement('strong');
+                valueEl.style.color = '#00C2CB';
+                valueEl.textContent = `${item.montantAnnuel.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`;
+                div.appendChild(labelEl);
+                div.appendChild(valueEl);
                 amortissementsListe.appendChild(div);
             });
         }
@@ -1945,10 +2112,38 @@ function validerFraisSalarie() {
     calculerIR();
 }
 
+// Compatibilité avec l'ancienne modal "frais réels impôts"
+function calculerFraisReelsImpots() {
+    const km = parseFloat(document.getElementById('km_perso_impots_modal')?.value || 0);
+    const cv = parseInt(document.getElementById('chevaux_fiscaux_impots_modal')?.value || 5);
+    const peages = parseFloat(document.getElementById('peages_impots_modal')?.value || 0);
+    const totalEl = document.getElementById('total-frais-reels-impots-modal');
+    if (!totalEl) return;
+
+    const bareme = { 3: 0.529, 4: 0.606, 5: 0.636, 6: 0.665, 7: 0.697 };
+    const tauxKm = bareme[cv] || (cv >= 7 ? 0.697 : 0.529);
+    const total = (km * tauxKm) + peages;
+
+    totalEl.textContent = `${total.toFixed(2)} €`;
+}
+
+function closeFraisReelsModal() {
+    const modal = document.getElementById('modal-frais-reels');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function validerFraisReels() {
+    calculerFraisReelsImpots();
+    closeFraisReelsModal();
+}
+
 function calculerIR() {
     const salaireMadameBrut = parseFloat(document.getElementById('salaire_madame')?.value || 0);
     const salaireMonsieurBrut = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
     const revenuLMP = parseFloat(document.getElementById('revenu_lmp')?.value || 0);
+    const statutFiscal = document.getElementById('statut_fiscal')?.value || 'lmnp';
     const nbEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
     
     // CORRECTION 3 - 2026-02-17
@@ -1984,12 +2179,15 @@ function calculerIR() {
     const salaireMadame = salaireMadameBrut - abattementMadame;
     const salaireMonsieur = salaireMonsieurBrut - abattementMonsieur;
     
-    // CORRECTION 2 - 2026-02-17
-    // Imputation du déficit LMP sur le revenu global (plancher à 0)
+    // En LMNP, le déficit n'est pas imputable sur le revenu global.
+    // En LMP, le déficit est imputable avec plancher à 0 dans ce simulateur.
     const salairesImposables = salaireMadame + salaireMonsieur;
-    const revenuTotal = revenuLMP < 0
-        ? Math.max(0, salairesImposables + revenuLMP)
-        : (salairesImposables + revenuLMP);
+    const revenuActiviteImposable = statutFiscal === 'lmnp'
+        ? Math.max(0, revenuLMP)
+        : revenuLMP;
+    const revenuTotal = revenuActiviteImposable < 0
+        ? Math.max(0, salairesImposables + revenuActiviteImposable)
+        : (salairesImposables + revenuActiviteImposable);
     
     if (revenuTotal === 0) {
         document.getElementById('resultat-ir').style.display = 'none';
@@ -1997,34 +2195,16 @@ function calculerIR() {
     }
     
     // Nombre de parts fiscales
-    let parts = 2; // Couple
-    if (nbEnfants === 1) parts += 0.5;
-    else if (nbEnfants === 2) parts += 1;
-    else if (nbEnfants >= 3) parts += 1 + (nbEnfants - 2);
+    const parts = calculerPartsFiscales(nbEnfants);
     
     // Quotient familial
     const quotient = revenuTotal / parts;
     
-    // Barème progressif IR (adaptatif selon l'année)
-    const bareme = config.BAREME_IR;
-    let impotQuotient = 0;
-    let tranchePrecedente = 0;
-    
-    for (const tranche of bareme) {
-        if (quotient <= tranchePrecedente) break;
-        
-        const baseImposable = Math.min(quotient, tranche.max) - tranchePrecedente;
-        impotQuotient += baseImposable * tranche.taux;
-        
-        tranchePrecedente = tranche.max;
-        if (quotient <= tranche.max) break;
-    }
-    
-    const impotTotal = impotQuotient * parts;
+    const impotTotal = calculerIrNetAvecCorrectifs(revenuTotal, parts, config, { baseParts: 2 });
     const resteFinalTotal = revenuTotal - impotTotal; // Reste après IR sur le revenu total
     const resteFinalLMP = revenuTotal > 0
-        ? (revenuLMP - (impotTotal * (revenuLMP / revenuTotal)))
-        : revenuLMP;
+        ? (revenuActiviteImposable - (impotTotal * (revenuActiviteImposable / revenuTotal)))
+        : revenuActiviteImposable;
     
     // Affichage
     document.getElementById('resultat-ir').style.display = 'block';
@@ -2038,10 +2218,85 @@ function calculerIR() {
 
     // Synchronise automatiquement le TMI du simulateur CH avec l'IR du foyer
     synchroniserTmiChDepuisIR();
-    calculerFiscaliteCH();
+    calculerFiscaliteCH({ skipIrRecalculation: true });
     
     // Calculer le reste à vivre après le calcul de l'IR
     setTimeout(() => calculerResteAVivre(), 100);
+}
+
+function appliquerForcageLayoutIr() {
+    const sectionPerso = document.querySelector('#tab-charges #section-personnelle');
+    if (!sectionPerso) return;
+
+    const salaireRows = sectionPerso.querySelectorAll('.ir-salary-row');
+    salaireRows.forEach((row) => {
+        row.style.setProperty('display', 'flex', 'important');
+        row.style.setProperty('align-items', 'stretch', 'important');
+        row.style.setProperty('gap', '10px', 'important');
+    });
+
+    const salaireInputs = [
+        sectionPerso.querySelector('#salaire_madame'),
+        sectionPerso.querySelector('#salaire_monsieur')
+    ].filter(Boolean);
+
+    salaireInputs.forEach((input) => {
+        input.style.setProperty('height', '44px', 'important');
+        input.style.setProperty('min-height', '44px', 'important');
+        input.style.setProperty('max-width', '220px', 'important');
+        input.style.setProperty('width', '100%', 'important');
+        input.style.setProperty('box-sizing', 'border-box', 'important');
+    });
+
+    const fraisButtons = sectionPerso.querySelectorAll('.btn-frais-inline');
+    fraisButtons.forEach((button) => {
+        button.style.setProperty('display', 'inline-flex', 'important');
+        button.style.setProperty('align-items', 'center', 'important');
+        button.style.setProperty('justify-content', 'center', 'important');
+        button.style.setProperty('gap', '6px', 'important');
+        button.style.setProperty('white-space', 'nowrap', 'important');
+        button.style.setProperty('height', '44px', 'important');
+        button.style.setProperty('min-height', '44px', 'important');
+        button.style.setProperty('min-width', '78px', 'important');
+        button.style.setProperty('padding', '0 12px', 'important');
+        button.style.setProperty('font-size', '0.9rem', 'important');
+        button.style.setProperty('line-height', '1', 'important');
+        button.style.setProperty('box-sizing', 'border-box', 'important');
+    });
+
+    const incomeRow = sectionPerso.querySelector('.ir-income-row');
+    if (incomeRow) {
+        incomeRow.style.setProperty('display', 'grid', 'important');
+        incomeRow.style.setProperty('grid-template-columns', 'minmax(160px, 220px) minmax(160px, 220px) auto', 'important');
+        incomeRow.style.setProperty('align-items', 'end', 'important');
+        incomeRow.style.setProperty('gap', '10px', 'important');
+    }
+
+    const revenuLmp = sectionPerso.querySelector('#revenu_lmp');
+    if (revenuLmp) {
+        revenuLmp.style.setProperty('height', '44px', 'important');
+        revenuLmp.style.setProperty('min-height', '44px', 'important');
+        revenuLmp.style.setProperty('width', '100%', 'important');
+        revenuLmp.style.setProperty('box-sizing', 'border-box', 'important');
+    }
+
+    const revenuCh = sectionPerso.querySelector('#ir-revenu-ch');
+    if (revenuCh) {
+        revenuCh.style.setProperty('height', '44px', 'important');
+        revenuCh.style.setProperty('min-height', '44px', 'important');
+        revenuCh.style.setProperty('width', '100%', 'important');
+        revenuCh.style.setProperty('box-sizing', 'border-box', 'important');
+    }
+
+    const selectEnfants = sectionPerso.querySelector('#nombre_enfants');
+    if (selectEnfants) {
+        selectEnfants.style.setProperty('height', '40px', 'important');
+        selectEnfants.style.setProperty('min-height', '40px', 'important');
+        selectEnfants.style.setProperty('width', '86px', 'important');
+        selectEnfants.style.setProperty('max-width', '86px', 'important');
+        selectEnfants.style.setProperty('min-width', '86px', 'important');
+        selectEnfants.style.setProperty('box-sizing', 'border-box', 'important');
+    }
 }
 
 // Attacher les événements de calcul en temps réel
@@ -2058,11 +2313,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Restaurer l'état de la section personnelle depuis localStorage
     restaurerOptionsPersonnelles();
+
+    // Appliquer la visibilité des sections "réel" dès l'initialisation
+    mettreAJourVisibiliteSectionsReel();
     
     // 🔄 Initialiser la synchronisation résidence → frais personnels
     if (typeof initSyncResidenceToFraisPerso === 'function') {
         initSyncResidenceToFraisPerso();
     }
+
+    // Force le layout IR au cas ou des styles globaux ecrasent la section
+    setTimeout(appliquerForcageLayoutIr, 150);
+    setTimeout(appliquerForcageLayoutIr, 600);
 });
 
 // ==========================================
@@ -2072,10 +2334,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // Générer les options de gîtes dynamiquement
 function genererOptionsGites() {
     let options = '';
-    if (window.GITES_DATA && window.GITES_DATA.length > 0) {
-        window.GITES_DATA.forEach(gite => {
+    const hebergements = (Array.isArray(window.HEBERGEMENTS_DATA) && window.HEBERGEMENTS_DATA.length > 0)
+        ? window.HEBERGEMENTS_DATA
+        : (window.GITES_DATA || []);
+
+    if (hebergements.length > 0) {
+        hebergements.forEach(gite => {
             const slug = gite.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            options += `<option value="${slug}">${gite.name}</option>`;
+            const suffixe = estChambreHotes(gite) ? ' (CH)' : '';
+            options += `<option value="${slug}">${gite.name}${suffixe}</option>`;
         });
     }
     options += '<option value="commun">Commun</option>';
@@ -2230,6 +2497,10 @@ function toggleEdit(itemId) {
         
         // Sauvegarder en mode silencieux pour éviter le double toast
         sauvegarderDonneesFiscales(true);
+
+        if (itemId.startsWith('ch-travaux-achats-')) {
+            calculerFiscaliteCH();
+        }
     }
 }
 
@@ -2239,6 +2510,9 @@ function supprimerItem(itemId) {
         item.remove();
         // Recalculer après suppression
         calculerTempsReel();
+        if (itemId.startsWith('ch-travaux-achats-')) {
+            calculerFiscaliteCH();
+        }
         sauvegardeAutomatique();
     }
 }
@@ -2294,6 +2568,231 @@ function getProduitsAccueilListe() {
         }
     }
     return items;
+}
+
+// Compat: l'ancienne section dédiée CH travaux/achats a été retirée du HTML.
+// On conserve ces fonctions pour ne pas casser les appels existants.
+function getTravauxAchatsCHListe() {
+    const container = document.getElementById('ch-travaux-achats-liste');
+    if (!container) {
+        return [];
+    }
+
+    const items = [];
+    const lignes = container.querySelectorAll('[id^="ch-travaux-achats-"]');
+    lignes.forEach((ligne) => {
+        const id = String(ligne.id || '').replace('ch-travaux-achats-', '');
+        const desc = document.getElementById(`ch-travaux-achats-desc-${id}`)?.value || '';
+        const montant = parseFloat(document.getElementById(`ch-travaux-achats-montant-${id}`)?.value || 0);
+        if (desc || montant > 0) {
+            items.push({ description: desc, montant });
+        }
+    });
+
+    return items;
+}
+
+function ajouterTravauxAchatsCH() {
+    const container = document.getElementById('ch-travaux-achats-liste');
+    if (!container) {
+        console.warn('⚠️ [CH] Section travaux/achats dédiée absente: utilisez les sections globales Travaux/Frais/Produits avec le tag (CH).');
+        return;
+    }
+
+    const id = Date.now();
+    const item = document.createElement('div');
+    item.className = 'liste-item';
+    item.id = `ch-travaux-achats-${id}`;
+    window.SecurityUtils.setInnerHTML(item, `
+        <input type="text" placeholder="Description" id="ch-travaux-achats-desc-${id}">
+        <input type="number" step="0.01" placeholder="Montant €" id="ch-travaux-achats-montant-${id}">
+        <div class="item-actions">
+            <button type="button" class="btn-edit" onclick="toggleEdit('ch-travaux-achats-${id}')" title="Valider">✓</button>
+            <button type="button" class="btn-delete" onclick="supprimerItem('ch-travaux-achats-${id}')">×</button>
+        </div>
+    `);
+    container.appendChild(item);
+}
+
+function restaurerComptaCHDepuisDetails(details = {}) {
+    const chCompta = details.ch_compta || {};
+    fiscaliteDebug('restaurerComptaCHDepuisDetails:input', {
+        ch_statut_fiscal: details.ch_statut_fiscal,
+        ch_option_vl: details.ch_option_vl,
+        ch_ca_annuel: details.ch_ca_annuel,
+        ch_test_ca_input: details.ch_test_ca_input,
+        ch_compta_keys: Object.keys(chCompta || {})
+    });
+    const ids = [
+        'ch-surface-totale',
+        'ch-surface-utilisee',
+        'ch-charge-electricite-maison',
+        'ch-charge-eau-maison',
+        'ch-charge-gaz-maison',
+        'ch-charge-internet-maison',
+        'ch-charge-assurance-pno',
+        'ch-charge-taxe-fonciere',
+        'ch-charge-linge',
+        'ch-charge-menage',
+        'ch-charge-commissions',
+        'ch-charge-comptable',
+        'ch-charge-frais-bancaires',
+        'ch-charge-interets-emprunt',
+        'ch-charge-assurance-emprunteur',
+        'ch-charge-frais-dossier',
+        'ch-frais-notaire',
+        'ch-frais-notaire-mode',
+        'ch-rfr-n2'
+    ];
+
+    ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && chCompta[id] !== undefined) {
+            el.value = chCompta[id];
+        }
+    });
+
+    const chStatutEl = document.getElementById('ch-statut-fiscal');
+    if (chStatutEl && details.ch_statut_fiscal) {
+        chStatutEl.value = details.ch_statut_fiscal;
+    }
+
+    const chOptionVlEl = document.getElementById('ch-option-vl');
+    if (chOptionVlEl && typeof details.ch_option_vl === 'boolean') {
+        chOptionVlEl.checked = details.ch_option_vl;
+    }
+
+    const chCaAnnuelEl = document.getElementById('ch-ca-annuel');
+    if (chCaAnnuelEl && details.ch_ca_annuel !== undefined) {
+        chCaAnnuelEl.value = details.ch_ca_annuel;
+    }
+
+    const chTestCaInputEl = document.getElementById('ch-test-ca-input');
+    if (chTestCaInputEl && details.ch_test_ca_input !== undefined) {
+        chTestCaInputEl.value = details.ch_test_ca_input;
+    }
+
+    const chRfrN2El = document.getElementById('ch-rfr-n2');
+    if (chRfrN2El && details.ch_rfr_n2 !== undefined) {
+        chRfrN2El.value = details.ch_rfr_n2;
+    }
+
+    fiscaliteDebug('restaurerComptaCHDepuisDetails:applied', {
+        ch_statut_fiscal_dom: document.getElementById('ch-statut-fiscal')?.value,
+        ch_option_vl_dom: document.getElementById('ch-option-vl')?.checked === true,
+        ch_ca_annuel_dom: document.getElementById('ch-ca-annuel')?.value,
+        ch_test_ca_input_dom: document.getElementById('ch-test-ca-input')?.value,
+        ch_surface_totale_dom: document.getElementById('ch-surface-totale')?.value,
+        ch_surface_utilisee_dom: document.getElementById('ch-surface-utilisee')?.value
+    });
+
+    mettreAJourVisibiliteSectionsReel();
+
+}
+
+function calculerChargesReellesCH() {
+    const val = (id) => parseFloat(document.getElementById(id)?.value || 0);
+    const surfaceTotale = val('ch-surface-totale');
+    const surfaceUtilisee = val('ch-surface-utilisee');
+    const anneeSimulation = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
+    const regles = getReglesFiscaliteCH(anneeSimulation);
+
+    let ratioSurface = 0;
+    if (surfaceTotale > 0) {
+        ratioSurface = Math.min(1, Math.max(0, surfaceUtilisee / surfaceTotale));
+    }
+
+    const ratioSurfaceEl = document.getElementById('ch-ratio-surface');
+    if (ratioSurfaceEl) {
+        ratioSurfaceEl.textContent = `${(ratioSurface * 100).toFixed(2)}%`;
+    }
+
+    const chargesMaisonProratisees =
+        (val('ch-charge-electricite-maison') +
+            val('ch-charge-eau-maison') +
+            val('ch-charge-gaz-maison') +
+            val('ch-charge-internet-maison') +
+            val('ch-charge-assurance-pno') +
+            val('ch-charge-taxe-fonciere')) * ratioSurface;
+
+    const fraisNotaire = val('ch-frais-notaire');
+    const fraisNotaireMode = document.getElementById('ch-frais-notaire-mode')?.value || 'immediat';
+    const fraisNotaireImmediat = fraisNotaireMode === 'immediat' ? fraisNotaire : 0;
+    const fraisNotaireAmortiAnnuel = fraisNotaireMode === 'amortissement'
+        ? fraisNotaire / Math.max(1, regles.dureeAmortissementNotaire)
+        : 0;
+
+    const fraisNotaireWarning = document.getElementById('ch-frais-notaire-warning');
+    if (fraisNotaireWarning) {
+        if (fraisNotaireMode === 'immediat') {
+            fraisNotaireWarning.textContent = 'Option art. 38 quinquies: déduction immédiate des frais de notaire. Vérifiez ce choix avec votre comptable.';
+            fraisNotaireWarning.style.display = fraisNotaire > 0 ? 'block' : 'none';
+        } else {
+            fraisNotaireWarning.textContent = `Frais de notaire amortis avec le bien sur ${Math.max(1, regles.dureeAmortissementNotaire)} ans (approximation).`;
+            fraisNotaireWarning.style.display = fraisNotaire > 0 ? 'block' : 'none';
+        }
+    }
+
+    const chargesCourantes =
+        chargesMaisonProratisees +
+        val('ch-charge-linge') +
+        val('ch-charge-menage') +
+        val('ch-charge-commissions') +
+        val('ch-charge-comptable') +
+        val('ch-charge-frais-bancaires') +
+        val('ch-charge-interets-emprunt') +
+        val('ch-charge-assurance-emprunteur') +
+        val('ch-charge-frais-dossier') +
+        fraisNotaireImmediat;
+
+    const amortissementsFixes = fraisNotaireAmortiAnnuel;
+
+    const hebergements = (Array.isArray(window.HEBERGEMENTS_DATA) && window.HEBERGEMENTS_DATA.length > 0)
+        ? window.HEBERGEMENTS_DATA
+        : (window.GITES_DATA || []);
+    const slugsCH = new Set(
+        hebergements
+            .filter((h) => estChambreHotes(h))
+            .map((h) => String(h.name || '').toLowerCase().replace(/[^a-z0-9]/g, ''))
+    );
+
+    const depensesListeGlobalesCH = [
+        ...getTravauxListe(),
+        ...getFraisDiversListe(),
+        ...getProduitsAccueilListe()
+    ].filter((item) => slugsCH.has(String(item.gite || '').toLowerCase()));
+
+    let chargesImmediatesListe = 0;
+    let amortissementsListe = 0;
+    depensesListeGlobalesCH.forEach((item) => {
+        const montant = parseFloat(item.montant || 0);
+        if (!item.type_amortissement) {
+            chargesImmediatesListe += montant;
+            return;
+        }
+
+        const infoAmort = detecterAmortissement(item.description || '', montant, item.type_amortissement);
+        if (infoAmort && infoAmort.montantAnnuel) {
+            amortissementsListe += parseFloat(infoAmort.montantAnnuel || 0);
+        } else {
+            chargesImmediatesListe += montant;
+        }
+    });
+
+    const totalCharges = chargesCourantes + chargesImmediatesListe + amortissementsFixes + amortissementsListe;
+
+    return {
+        totalCharges,
+        chargesCourantes,
+        ratioSurface,
+        chargesMaisonProratisees,
+        chargesImmediatesListe,
+        amortissementsFixes,
+        amortissementsListe,
+        fraisNotaireMode,
+        fraisNotaireImmediat,
+        fraisNotaireAmortiAnnuel
+    };
 }
 
 // ==========================================
@@ -2413,14 +2912,9 @@ function calculerFiscalite(event) {
         parseFloat(document.getElementById('formation').value || 0) +
         getAnnualValue('fournitures', 'fournitures_type');
     
-    // CRÉDIT (depuis la liste des crédits)
-    const creditsListe = getCreditsListe();
-    const totalCredits = creditsListe.reduce((sum, c) => sum + (c.mensualite * 12), 0);
+    // Intérêts d'emprunt complémentaires (seuls montants déductibles)
+    const totalCredits = calculerInteretsCreditsDeductiblesAnnuel();
     
-    // CALCUL FINAL : Biens + Pro + Crédits
-    const totalCharges = chargesBiens + fraisPro + totalCredits;
-    
-    // Garder les calculs résidence et véhicule pour affichage mais ne pas les inclure dans le total
     const ratio = calculerRatio();
     const chargesResidence = (
         getAnnualValue('interets_residence', 'interets_residence_type') +
@@ -2447,6 +2941,9 @@ function calculerFiscalite(event) {
         const usagePro = parseInt(document.getElementById('usage_pro_pourcent').value || 0) / 100;
         fraisVehicule = fraisReels * usagePro;
     }
+
+    // CALCUL FINAL BIC RÉEL : Biens + Pro + Résidence (prorata) + Véhicule + Intérêts crédits
+    const totalCharges = chargesBiens + fraisPro + chargesResidence + fraisVehicule + totalCredits;
     const benefice = ca - totalCharges;
     
     // CORRECTION 1 - 2026-02-17
@@ -2462,7 +2959,11 @@ function calculerFiscalite(event) {
         allocations: urssafResult.detail.allocations
     };
 
-    const totalCotisations = urssafResult.urssaf;
+    const tauxPatrimoine = config.PRELEVEMENTS_SOCIAUX?.patrimoine_bic_meuble ?? 0.186;
+    const prelevementsPatrimoineLMNP = urssafResult.detail.exonereLMNP && benefice > 0
+        ? benefice * tauxPatrimoine
+        : 0;
+    const totalCotisations = urssafResult.urssaf + prelevementsPatrimoineLMNP;
     
     const resteAvantIR = benefice - totalCotisations;
     
@@ -2529,7 +3030,7 @@ function afficherResultats(data) {
                     <span>${data.fraisPro.toFixed(2)} €</span>
                 </div>
                 <div class="resultat-ligne">
-                    <span>• Crédits immobiliers :</span>
+                    <span>• Intérêts crédits complémentaires :</span>
                     <span>${data.totalCredits.toFixed(2)} €</span>
                 </div>
                 <div class="resultat-ligne total">
@@ -2610,6 +3111,186 @@ function afficherResultats(data) {
 // � GESTION DES ANNÉES FISCALES
 // ==========================================
 
+const FISCALITE_DEBUG_ENABLED = (() => {
+    try {
+        return window.localStorage?.getItem('fiscaliteDebug') === '1' || window.__FISCALITE_DEBUG__ === true;
+    } catch (_) {
+        return window.__FISCALITE_DEBUG__ === true;
+    }
+})();
+
+function fiscaliteDebug(step, payload) {
+    if (!FISCALITE_DEBUG_ENABLED) return;
+    if (payload === undefined) {
+        console.log(`[FISCALITE-DEBUG] ${step}`);
+        return;
+    }
+    console.log(`[FISCALITE-DEBUG] ${step}`, payload);
+}
+
+function getFiscaliteSnapshotDebug() {
+    return {
+        annee: document.getElementById('annee_simulation')?.value,
+        statut_fiscal: document.getElementById('statut_fiscal')?.value,
+        option_micro_entrepreneur_confirmee: document.getElementById('option_micro_entrepreneur_confirmee')?.checked === true,
+        option_versement_liberatoire: document.getElementById('option_versement_liberatoire')?.checked === true,
+        ch_statut_fiscal: document.getElementById('ch-statut-fiscal')?.value,
+        ch_option_vl: document.getElementById('ch-option-vl')?.checked === true,
+        ch_ca_annuel: document.getElementById('ch-ca-annuel')?.value,
+        ch_test_ca_input: document.getElementById('ch-test-ca-input')?.value,
+        ch_surface_totale: document.getElementById('ch-surface-totale')?.value,
+        ch_surface_utilisee: document.getElementById('ch-surface-utilisee')?.value
+    };
+}
+
+function isFiscalHistoryLegacySchemaError(error) {
+    const message = String(error?.message || '').toLowerCase();
+    const details = String(error?.details || '').toLowerCase();
+    const combined = `${message} ${details}`;
+    return combined.includes('gite') || combined.includes('revenus') || combined.includes('charges') || combined.includes('resultat');
+}
+
+async function chargerFiscalHistoryParAnnee(annee) {
+    const year = parseInt(annee, 10);
+    fiscaliteDebug('chargerFiscalHistoryParAnnee:start', { year });
+
+    const requeteLegacy = await window.supabaseClient
+        .from('fiscal_history')
+        .select('*')
+        .eq('year', year)
+        .eq('gite', 'multi')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (!requeteLegacy.error) {
+        fiscaliteDebug('chargerFiscalHistoryParAnnee:legacy_ok', {
+            id: requeteLegacy.data?.id,
+            year: requeteLegacy.data?.year,
+            updated_at: requeteLegacy.data?.updated_at,
+            details_exists: Boolean(requeteLegacy.data?.donnees_detaillees)
+        });
+        return requeteLegacy;
+    }
+
+    fiscaliteDebug('chargerFiscalHistoryParAnnee:legacy_error', {
+        message: requeteLegacy.error?.message,
+        details: requeteLegacy.error?.details,
+        code: requeteLegacy.error?.code
+    });
+
+    if (!isFiscalHistoryLegacySchemaError(requeteLegacy.error)) {
+        return requeteLegacy;
+    }
+
+    const requeteCompat = await window.supabaseClient
+        .from('fiscal_history')
+        .select('*')
+        .eq('year', year)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (requeteCompat.error) {
+        fiscaliteDebug('chargerFiscalHistoryParAnnee:compat_error', {
+            message: requeteCompat.error?.message,
+            details: requeteCompat.error?.details,
+            code: requeteCompat.error?.code
+        });
+    } else {
+        fiscaliteDebug('chargerFiscalHistoryParAnnee:compat_ok', {
+            id: requeteCompat.data?.id,
+            year: requeteCompat.data?.year,
+            updated_at: requeteCompat.data?.updated_at,
+            details_exists: Boolean(requeteCompat.data?.donnees_detaillees)
+        });
+    }
+
+    return requeteCompat;
+}
+
+async function upsertFiscalHistoryCompat({ payloadLegacy, payloadCompat }) {
+    fiscaliteDebug('upsertFiscalHistoryCompat:start', {
+        legacy_keys: Object.keys(payloadLegacy || {}),
+        compat_keys: Object.keys(payloadCompat || {}),
+        year: payloadCompat?.year
+    });
+
+    const essaiLegacy = await window.supabaseClient
+        .from('fiscal_history')
+        .upsert(payloadLegacy, {
+            onConflict: 'owner_user_id,year,gite',
+            ignoreDuplicates: false
+        })
+        .select();
+
+    if (!essaiLegacy.error) {
+        fiscaliteDebug('upsertFiscalHistoryCompat:legacy_ok', {
+            id: essaiLegacy.data?.[0]?.id,
+            year: essaiLegacy.data?.[0]?.year
+        });
+        return essaiLegacy;
+    }
+
+    fiscaliteDebug('upsertFiscalHistoryCompat:legacy_error', {
+        message: essaiLegacy.error?.message,
+        details: essaiLegacy.error?.details,
+        code: essaiLegacy.error?.code
+    });
+
+    const essaiCompat = await window.supabaseClient
+        .from('fiscal_history')
+        .upsert(payloadCompat, {
+            onConflict: 'owner_user_id,year',
+            ignoreDuplicates: false
+        })
+        .select();
+
+    if (!essaiCompat.error) {
+        fiscaliteDebug('upsertFiscalHistoryCompat:compat_ok', {
+            id: essaiCompat.data?.[0]?.id,
+            year: essaiCompat.data?.[0]?.year
+        });
+        return essaiCompat;
+    }
+
+    fiscaliteDebug('upsertFiscalHistoryCompat:compat_error', {
+        message: essaiCompat.error?.message,
+        details: essaiCompat.error?.details,
+        code: essaiCompat.error?.code
+    });
+
+    const { data: ligneExistante, error: readError } = await window.supabaseClient
+        .from('fiscal_history')
+        .select('id')
+        .eq('year', payloadCompat.year)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (readError) {
+        fiscaliteDebug('upsertFiscalHistoryCompat:read_existing_error', {
+            message: readError?.message,
+            details: readError?.details,
+            code: readError?.code
+        });
+        return { data: null, error: readError };
+    }
+
+    if (ligneExistante?.id) {
+        return window.supabaseClient
+            .from('fiscal_history')
+            .update(payloadCompat)
+            .eq('id', ligneExistante.id)
+            .select();
+    }
+
+    return window.supabaseClient
+        .from('fiscal_history')
+        .insert(payloadCompat)
+        .select();
+}
+
 // Charger la liste des années disponibles
 async function chargerListeAnnees() {
     try {
@@ -2676,14 +3357,7 @@ async function chargerAnnee(annee) {
         // Stocker l'année sélectionnée globalement
         window.anneeSelectionnee = parseInt(annee);
         
-        const { data, error } = await window.supabaseClient
-            .from('fiscal_history')
-            .select('*')
-            .eq('year', parseInt(annee))
-            .eq('gite', 'multi')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        const { data, error } = await chargerFiscalHistoryParAnnee(annee);
         
         if (error) {
             console.error(`❌ [LOAD-ANNEE-ERROR] Erreur chargement données fiscales ${annee}:`, error);
@@ -2697,18 +3371,13 @@ async function chargerAnnee(annee) {
             // Si pas l'année en cours, pré-remplir avec les données de l'année en cours
             if (parseInt(annee) !== anneeActuelle) {
                 // Charger les données de l'année en cours pour pré-remplissage
-                const { data: dataAnneeCourante } = await window.supabaseClient
-                    .from('fiscal_history')
-                    .select('*')
-                    .eq('year', anneeActuelle)
-                    .eq('gite', 'multi')
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .maybeSingle();
+                const { data: dataAnneeCourante } = await chargerFiscalHistoryParAnnee(anneeActuelle);
                 
                 if (dataAnneeCourante && dataAnneeCourante.donnees_detaillees) {
                     // Pré-remplir avec les frais de l'année en cours
                     const detailsCourante = dataAnneeCourante.donnees_detaillees;
+
+                    _mergeFiscaliteOptionsPersoFromDetails(detailsCourante.fiscalite_options_perso);
                     
                     // Véhicule
                     const vehiculeTypeEl = document.getElementById('vehicule_type');
@@ -2770,6 +3439,8 @@ async function chargerAnnee(annee) {
                     if (detailsCourante.frais_comptabilite) document.getElementById('frais_comptabilite').value = detailsCourante.frais_comptabilite;
                     if (detailsCourante.frais_bancaires) document.getElementById('frais_bancaires').value = detailsCourante.frais_bancaires;
                     if (detailsCourante.frais_papeterie) document.getElementById('frais_papeterie').value = detailsCourante.frais_papeterie;
+
+                    restaurerComptaCHDepuisDetails(detailsCourante);
                     
                     showToast(`Frais pré-remplis depuis ${anneeActuelle}`, 'info');
                 }
@@ -2795,6 +3466,8 @@ async function chargerAnnee(annee) {
         
         // Charger les données depuis donnees_detaillees JSONB
         const details = data.donnees_detaillees || {};
+
+        _mergeFiscaliteOptionsPersoFromDetails(details.fiscalite_options_perso);
         
         // ✅ RESTAURER VÉHICULE EN PREMIER pour éviter que sauvegardeAutomatique() écrase avec valeurs par défaut
         const vehiculeTypeEl = document.getElementById('vehicule_type');
@@ -2889,10 +3562,22 @@ async function chargerAnnee(annee) {
             document.getElementById('statut_fiscal').value = details.statut_fiscal;
             changerStatutFiscal(); // Mettre à jour l'interface
         }
+
+        restaurerComptaCHDepuisDetails(details);
         
         // Classement meublé
         if (details.classement_meuble) {
             document.getElementById('classement_meuble').value = details.classement_meuble;
+        }
+
+        const microEntrepreneurConfirmeEl = document.getElementById('option_micro_entrepreneur_confirmee');
+        if (microEntrepreneurConfirmeEl && typeof details.option_micro_entrepreneur_confirmee === 'boolean') {
+            microEntrepreneurConfirmeEl.checked = details.option_micro_entrepreneur_confirmee;
+        }
+
+        const optionVLEl = document.getElementById('option_versement_liberatoire');
+        if (optionVLEl && typeof details.option_versement_liberatoire === 'boolean') {
+            optionVLEl.checked = details.option_versement_liberatoire;
         }
         
         // IR (Impôts sur le Revenu)
@@ -3000,6 +3685,8 @@ async function chargerAnnee(annee) {
                 toggleEdit(`produits-${id}`);
             });
         }
+
+        restaurerComptaCHDepuisDetails(details);
         
         // Restaurer les crédits (reste à vivre)
         if (details.credits_liste) {
@@ -3015,6 +3702,7 @@ async function chargerAnnee(annee) {
                     const descEl = document.getElementById(`credit-desc-${id}`);
                     const mensuelEl = document.getElementById(`credit-mensuel-${id}`);
                     const capitalEl = document.getElementById(`credit-capital-${id}`);
+                    const interetsEl = document.getElementById(`credit-interets-${id}`);
                     
                     if (!descEl || !mensuelEl || !capitalEl) {
                         return;
@@ -3023,6 +3711,9 @@ async function chargerAnnee(annee) {
                     descEl.value = item.description || '';
                     mensuelEl.value = item.mensuel || 0;
                     capitalEl.value = item.capital || 0;
+                    if (interetsEl) {
+                        interetsEl.value = item.interets_annuels || item.interetsAnnuels || item.interets || 0;
+                    }
                     
                     // Mettre en readonly après restauration
                     toggleEdit(`credit-${id}`);
@@ -3183,10 +3874,7 @@ async function creerNouvelleAnnee() {
         const nouvellesDonnees = {
             owner_user_id: user.id,  // 🔒 OBLIGATOIRE pour RLS
             year: nouvelleAnnee,
-            gite: 'multi',
-            revenus: 0,
-            charges: 0,
-            resultat: 0,
+            regime: prevDetails.regime || 'reel',
             donnees_detaillees: {
                 regime: prevDetails.regime || 'reel',
                 gite: 'multi',
@@ -3203,6 +3891,7 @@ async function creerNouvelleAnnee() {
                 travaux_liste: [],
                 frais_divers_liste: [],
                 produits_accueil_liste: [],
+                ch_compta: prevDetails.ch_compta || {},
                 
                 // Copier résidence principale
                 surface_bureau: prevDetails.surface_bureau,
@@ -3241,6 +3930,8 @@ async function creerNouvelleAnnee() {
                 salaire_madame: prevDetails.salaire_madame,
                 salaire_monsieur: prevDetails.salaire_monsieur,
                 nombre_enfants: prevDetails.nombre_enfants,
+                option_micro_entrepreneur_confirmee: prevDetails.option_micro_entrepreneur_confirmee === true,
+                option_versement_liberatoire: prevDetails.option_versement_liberatoire === true,
                 
                 // Copier crédits et frais perso
                 credits_liste: prevDetails.credits_liste || [],
@@ -3280,10 +3971,16 @@ async function creerNouvelleAnnee() {
 async function sauvegarderDonneesFiscales(silencieux = false) {
     
     const anneeValue = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear());
+    fiscaliteDebug('sauvegarderDonneesFiscales:start', {
+        silencieux,
+        anneeValue,
+        snapshot: getFiscaliteSnapshotDebug()
+    });
     
     // Récupérer l'utilisateur connecté
     const { data: { user } } = await window.supabaseClient.auth.getUser();
     if (!user) {
+        fiscaliteDebug('sauvegarderDonneesFiscales:no_user');
         showToast('Vous devez être connecté', 'error');
         return;
     }
@@ -3292,10 +3989,7 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     const data = {
         owner_user_id: user.id,  // 🔒 OBLIGATOIRE pour RLS
         year: anneeValue,
-        gite: 'multi',
-        revenus: parseFloat(document.getElementById('ca')?.value || 0),
-        charges: 0, // Sera calculé
-        resultat: 0, // Sera calculé
+        regime: 'reel',
         donnees_detaillees: {} // JSONB - VRAIE colonne
     };
     
@@ -3303,7 +3997,7 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     // Priorité à la valeur affichée (source unique alignée avec calculerTempsReel)
     let totalChargesCalcul = parseDisplayedAmount('total-charges-annuelles');
 
-    // Fallback si le DOM n'est pas prêt : recalcul aligné sans charges résidence/véhicule
+    // Fallback si le DOM n'est pas prêt : recalcul aligné avec le BIC réel
     if (!Number.isFinite(totalChargesCalcul) || totalChargesCalcul <= 0) {
         totalChargesCalcul = 0;
 
@@ -3321,9 +4015,12 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
         ].reduce((sum, item) => sum + item.montant, 0);
 
         const amortissements = calculerAmortissementsAnneeCourante();
-        const totalCredits = getCreditsListe().reduce((sum, c) => sum + (c.mensualite * 12), 0);
+        const ratio = calculerRatio();
+        const chargesResidence = calculerChargesResidence() * ratio;
+        const fraisVehicule = calculerFraisVehicule();
+        const totalCredits = calculerInteretsCreditsDeductiblesAnnuel();
 
-        totalChargesCalcul += chargesImmediates + amortissements.montantAnnuel + calculerFraisProfessionnels() + totalCredits;
+        totalChargesCalcul += chargesImmediates + amortissements.montantAnnuel + calculerFraisProfessionnels() + chargesResidence + fraisVehicule + totalCredits;
     }
     
     // console.log('💾 Total charges calculé pour sauvegarde:', totalChargesCalcul.toFixed(2), '€');
@@ -3365,6 +4062,28 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     detailsData.travaux_liste = getTravauxListe();
     detailsData.frais_divers_liste = getFraisDiversListe();
     detailsData.produits_accueil_liste = getProduitsAccueilListe();
+    detailsData.ch_compta = {
+        'ch-surface-totale': parseFloat(document.getElementById('ch-surface-totale')?.value || 0),
+        'ch-surface-utilisee': parseFloat(document.getElementById('ch-surface-utilisee')?.value || 0),
+        'ch-charge-electricite-maison': parseFloat(document.getElementById('ch-charge-electricite-maison')?.value || 0),
+        'ch-charge-eau-maison': parseFloat(document.getElementById('ch-charge-eau-maison')?.value || 0),
+        'ch-charge-gaz-maison': parseFloat(document.getElementById('ch-charge-gaz-maison')?.value || 0),
+        'ch-charge-internet-maison': parseFloat(document.getElementById('ch-charge-internet-maison')?.value || 0),
+        'ch-charge-assurance-pno': parseFloat(document.getElementById('ch-charge-assurance-pno')?.value || 0),
+        'ch-charge-taxe-fonciere': parseFloat(document.getElementById('ch-charge-taxe-fonciere')?.value || 0),
+        'ch-charge-linge': parseFloat(document.getElementById('ch-charge-linge')?.value || 0),
+        'ch-charge-menage': parseFloat(document.getElementById('ch-charge-menage')?.value || 0),
+        'ch-charge-commissions': parseFloat(document.getElementById('ch-charge-commissions')?.value || 0),
+        'ch-charge-comptable': parseFloat(document.getElementById('ch-charge-comptable')?.value || 0),
+        'ch-charge-frais-bancaires': parseFloat(document.getElementById('ch-charge-frais-bancaires')?.value || 0),
+        'ch-charge-interets-emprunt': parseFloat(document.getElementById('ch-charge-interets-emprunt')?.value || 0),
+        'ch-charge-assurance-emprunteur': parseFloat(document.getElementById('ch-charge-assurance-emprunteur')?.value || 0),
+        'ch-charge-frais-dossier': parseFloat(document.getElementById('ch-charge-frais-dossier')?.value || 0),
+        'ch-frais-notaire': parseFloat(document.getElementById('ch-frais-notaire')?.value || 0),
+        'ch-frais-notaire-mode': document.getElementById('ch-frais-notaire-mode')?.value || 'immediat',
+        'ch-rfr-n2': parseFloat(document.getElementById('ch-rfr-n2')?.value || 0),
+        travaux_achats_liste: getTravauxAchatsCHListe()
+    };
     
     // Résidence
     detailsData.surface_bureau = parseFloat(document.getElementById('surface_bureau')?.value || 0);
@@ -3396,6 +4115,13 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     
     // Statut fiscal LMNP/LMP
     detailsData.statut_fiscal = document.getElementById('statut_fiscal')?.value || 'lmnp';
+    detailsData.ch_statut_fiscal = document.getElementById('ch-statut-fiscal')?.value || 'micro';
+    detailsData.ch_option_vl = document.getElementById('ch-option-vl')?.checked === true;
+    detailsData.ch_ca_annuel = parseFloat(document.getElementById('ch-ca-annuel')?.value || 0);
+    detailsData.ch_test_ca_input = parseFloat(document.getElementById('ch-test-ca-input')?.value || 0);
+    detailsData.ch_rfr_n2 = parseFloat(document.getElementById('ch-rfr-n2')?.value || 0);
+    detailsData.option_micro_entrepreneur_confirmee = document.getElementById('option_micro_entrepreneur_confirmee')?.checked === true;
+    detailsData.option_versement_liberatoire = document.getElementById('option_versement_liberatoire')?.checked === true;
     
     // Classement meublé (classé/non classé)
     detailsData.classement_meuble = document.getElementById('classement_meuble')?.value || 'non_classe';
@@ -3421,6 +4147,10 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     detailsData.salaire_madame = parseFloat(document.getElementById('salaire_madame')?.value || 0);
     detailsData.salaire_monsieur = parseFloat(document.getElementById('salaire_monsieur')?.value || 0);
     detailsData.nombre_enfants = parseInt(document.getElementById('nombre_enfants')?.value || 0);
+    const checkboxOptionsPersoEl = document.getElementById('checkbox-activer-perso');
+    detailsData.fiscalite_options_perso = checkboxOptionsPersoEl
+        ? checkboxOptionsPersoEl.checked === true
+        : window._fiscaliteOptionsPersoCache === true;
     
     // Frais réels impôts - Données individuelles par personne
     detailsData.frais_madame = window.fraisMadameData || { option: 'forfaitaire', km: 0, cv: 5, peages: 0, montant: 0 };
@@ -3455,22 +4185,44 @@ async function sauvegarderDonneesFiscales(silencieux = false) {
     const dataString = JSON.stringify(data);
     
     if (silencieux && dataString === lastSavedData) {
+        fiscaliteDebug('sauvegarderDonneesFiscales:skip_same_payload');
         return;
     }
     
     try {
-        const { data: result, error } = await window.supabaseClient
-            .from('fiscal_history')
-            .upsert(data, { 
-                onConflict: 'owner_user_id,year,gite',  // Clé unique
-                ignoreDuplicates: false  // Remplacer si existe
-            })
-            .select();
+        const payloadLegacy = {
+            ...data,
+            gite: 'multi',
+            revenus: parseFloat(document.getElementById('ca')?.value || 0),
+            charges: totalChargesCalcul,
+            resultat: parseFloat(document.getElementById('preview-benefice')?.textContent?.replace(/[€\s]/g, '') || 0)
+        };
+
+        const payloadCompat = {
+            owner_user_id: data.owner_user_id,
+            year: data.year,
+            regime: data.regime,
+            donnees_detaillees: data.donnees_detaillees
+        };
+
+        const { data: result, error } = await upsertFiscalHistoryCompat({ payloadLegacy, payloadCompat });
         
         if (error) {
             console.error('❌ [SAVE-ERROR] Erreur Supabase:', error);
+            fiscaliteDebug('sauvegarderDonneesFiscales:upsert_error', {
+                message: error?.message,
+                details: error?.details,
+                code: error?.code
+            });
             throw error;
         }
+
+        fiscaliteDebug('sauvegarderDonneesFiscales:success', {
+            saved_id: result?.[0]?.id,
+            saved_year: result?.[0]?.year,
+            saved_updated_at: result?.[0]?.updated_at,
+            snapshot: getFiscaliteSnapshotDebug()
+        });
         
         lastSavedData = dataString;
         
@@ -3491,27 +4243,34 @@ async function chargerDerniereSimulation() {
     try {
         // Récupérer l'année sélectionnée ou l'année en cours
         const anneeSelectionnee = document.getElementById('annee_simulation')?.value || new Date().getFullYear();
+        fiscaliteDebug('chargerDerniereSimulation:start', { anneeSelectionnee });
         
         // console.log(`📅 [LOAD] Chargement pour année: ${anneeSelectionnee}`);
         
-        const { data, error } = await window.supabaseClient
-            .from('fiscal_history')
-            .select('*')
-            .eq('year', anneeSelectionnee)
-            .eq('gite', 'multi')
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        const { data, error } = await chargerFiscalHistoryParAnnee(anneeSelectionnee);
         
         if (error) {
             console.error('❌ [LOAD-ERROR] Erreur chargement données fiscales:', error);
+            fiscaliteDebug('chargerDerniereSimulation:error', {
+                message: error?.message,
+                details: error?.details,
+                code: error?.code
+            });
             return;
         }
         
         if (!data) {
+            fiscaliteDebug('chargerDerniereSimulation:no_data', { anneeSelectionnee });
             // console.log(`ℹ️ [LOAD-EMPTY] Aucune donnée fiscale pour ${anneeSelectionnee}`);
             return;
         }
+
+        fiscaliteDebug('chargerDerniereSimulation:data_loaded', {
+            id: data.id,
+            year: data.year,
+            updated_at: data.updated_at,
+            has_details: Boolean(data.donnees_detaillees)
+        });
         
         // console.log(`✅ Données fiscales ${anneeSelectionnee} chargées:`, {
         //     ca: data.revenus,
@@ -3639,6 +4398,8 @@ async function chargerDerniereSimulation() {
                 infoMonsieur.style.display = 'block';
             }
         }
+
+        restaurerComptaCHDepuisDetails(details);
         
         // Reste à vivre - Frais personnels
         if (document.getElementById('frais_perso_internet')) {
@@ -3759,6 +4520,10 @@ async function chargerDerniereSimulation() {
                     document.getElementById(`credit-desc-${id}`).value = item.description || '';
                     document.getElementById(`credit-mensuel-${id}`).value = item.mensuel || 0;
                     document.getElementById(`credit-capital-${id}`).value = item.capital || 0;
+                    const interetsEl = document.getElementById(`credit-interets-${id}`);
+                    if (interetsEl) {
+                        interetsEl.value = item.interets_annuels || item.interetsAnnuels || item.interets || 0;
+                    }
                 });
             }
         }
@@ -3796,6 +4561,31 @@ function nouvelleSimulation() {
     travauxCounter = 0;
     fraisDiversCounter = 0;
     produitsCounter = 0;
+
+    const chComptaFields = [
+        'ch-surface-totale',
+        'ch-surface-utilisee',
+        'ch-charge-electricite-maison',
+        'ch-charge-eau-maison',
+        'ch-charge-gaz-maison',
+        'ch-charge-internet-maison',
+        'ch-charge-assurance-pno',
+        'ch-charge-taxe-fonciere',
+        'ch-charge-linge',
+        'ch-charge-menage',
+        'ch-charge-commissions',
+        'ch-charge-comptable',
+        'ch-charge-frais-bancaires',
+        'ch-charge-interets-emprunt',
+        'ch-charge-assurance-emprunteur',
+        'ch-charge-frais-dossier',
+        'ch-frais-notaire'
+    ];
+    chComptaFields.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
     calculerRatio();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -3828,11 +4618,23 @@ async function genererBlocsChargesGites() {
         return;
     }
 
+    // Conserver la liste complète des hébergements pour permettre le tag CH dans les listes globales
+    window.HEBERGEMENTS_DATA = gites;
+
+    // Exclure explicitement les chambres d'hôtes: ce bloc ne concerne que les gîtes
+    gites = gites.filter((gite) => !estChambreHotes(gite));
+
+    if (gites.length === 0) {
+        container.innerHTML = '<div class="info-box">⚠️ Aucun gîte configuré (hors chambres d\'hôtes).</div>';
+        window.GITES_DATA = [];
+        return;
+    }
+
     // Créer UN SEUL bloc déroulant englobant pour tous les gîtes
     let html = `
     <div class="fiscal-bloc collapsible collapsed">
         <h3 class="fiscal-bloc-title">
-            <span class="toggle-icon">▼</span> <svg style="width:16px;height:16px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Charges des gîtes (100% déductibles)
+            <span class="toggle-icon">▼</span> <svg style="width:16px;height:16px;stroke:currentColor;display:inline;vertical-align:middle;margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Charges des gîtes uniquement (hors CH)
         </h3>
         <div class="bloc-content">
             <!-- Toggle Mensuel/Annuel pour toutes les charges des gîtes -->
@@ -3897,6 +4699,7 @@ async function genererRecapitulatifCharges() {
     if (gites.length === 0 && window.gitesManager) {
         try {
             gites = await window.gitesManager.getVisibleGites();
+            gites = Array.isArray(gites) ? gites.filter((gite) => !estChambreHotes(gite)) : [];
             window.GITES_DATA = gites;
         } catch (error) {
             console.error('❌ Erreur chargement gîtes:', error);
@@ -3955,6 +4758,9 @@ async function initFiscalite() {
         setTimeout(initFiscalite, 500);
         return;
     }
+
+    // Verrouille le layout de la section IR des que l'onglet est charge
+    appliquerForcageLayoutIr();
     
     // Générer les blocs de charges par gîte (async)
     await genererBlocsChargesGites();
@@ -3978,6 +4784,19 @@ async function initFiscalite() {
     form.addEventListener('input', handleFormInput);
     form.addEventListener('change', handleFormChange);
     form.addEventListener('focusout', handleFormBlur);
+
+    const debugFields = ['statut_fiscal', 'ch-statut-fiscal', 'ch-option-vl', 'annee_simulation', 'ch-ca-annuel'];
+    debugFields.forEach((fieldId) => {
+        const fieldEl = document.getElementById(fieldId);
+        if (!fieldEl) return;
+        fieldEl.addEventListener('change', () => {
+            fiscaliteDebug('ui:change', {
+                field: fieldId,
+                value: fieldEl.type === 'checkbox' ? fieldEl.checked : fieldEl.value,
+                snapshot: getFiscaliteSnapshotDebug()
+            });
+        });
+    });
     
     // Empêcher la soumission du formulaire avec Entrée (qui déclencherait le premier bouton trouvé)
     form.addEventListener('submit', (e) => {
@@ -4017,6 +4836,10 @@ async function initFiscalite() {
         // Aligner le TMI CH avec l'IR courant après chargement des données
         synchroniserTmiChDepuisIR();
         calculerFiscaliteCH();
+
+        // Re-applique apres chargement des donnees, certains blocs etant remplis dynamiquement
+        appliquerForcageLayoutIr();
+        setTimeout(appliquerForcageLayoutIr, 200);
     });
 }
 
@@ -4036,6 +4859,12 @@ function handleFormInput(e) {
 function handleFormChange(e) {
     const target = e.target;
     if (target.type === 'number' || target.tagName === 'SELECT') {
+        if (target.id === 'annee_simulation') {
+            synchroniserCaChDepuisReservations(true).then(() => {
+                calculerFiscaliteCH();
+            });
+        }
+
         calculerTempsReel();
         
         // Si c'est un champ de la section reste à vivre, recalculer immédiatement
@@ -4078,6 +4907,7 @@ function ajouterCredit() {
         <input type="text" placeholder="Description du crédit" id="credit-desc-${id}" readonly>
         <input type="number" step="0.01" placeholder="Mensualité €" id="credit-mensuel-${id}" readonly>
         <input type="number" step="0.01" placeholder="Capital restant €" id="credit-capital-${id}" readonly>
+        <input type="number" step="0.01" placeholder="Intérêts annuels €" id="credit-interets-${id}" readonly>
         <div class="item-actions">
             <button type="button" class="btn-edit" onclick="toggleEdit('credit-${id}')" title="Modifier">✏️</button>
             <button type="button" class="btn-delete" onclick="supprimerCreditDOM('credit-${id}')">×</button>
@@ -4108,11 +4938,24 @@ function getCreditsListe() {
             items.push({
                 description: desc.value,
                 mensuel: parseFloat(document.getElementById(`credit-mensuel-${i}`).value || 0),
-                capital: parseFloat(document.getElementById(`credit-capital-${i}`).value || 0)
+                capital: parseFloat(document.getElementById(`credit-capital-${i}`).value || 0),
+                interets_annuels: parseFloat(document.getElementById(`credit-interets-${i}`)?.value || 0)
             });
         }
     }
     return items;
+}
+
+function calculerInteretsCreditsDeductiblesAnnuel() {
+    // En BIC réel, seuls les intérêts d'emprunt sont déductibles.
+    return getCreditsListe().reduce((sum, credit) => {
+        const interetsAnnuels =
+            Number(credit.interets_annuels) ||
+            Number(credit.interetsAnnuels) ||
+            Number(credit.interets) ||
+            0;
+        return sum + Math.max(0, interetsAnnuels);
+    }, 0);
 }
 
 function calculerResteAVivre() {
@@ -4161,10 +5004,10 @@ function calculerResteAVivre() {
     const totalCreditsImmobiliers = credits.reduce((sum, c) => sum + c.mensuel, 0);
     const totalCapital = credits.reduce((sum, c) => sum + c.capital, 0);
     
-    // Crédits personnels (nouveau système)
+    // Crédits personnels (mensualités) saisis dans la section dédiée.
     const totalCreditsPersonnels = calculerTotalCredits();
     
-    // Total tous les crédits
+    // Total mensuel des crédits pris en compte dans le reste à vivre.
     const totalCredits = totalCreditsImmobiliers + totalCreditsPersonnels;
     
     // Frais personnels mensuels (saisis dans la section Reste à vivre)
@@ -4197,10 +5040,15 @@ function calculerResteAVivre() {
     
     const totalFraisPerso = fraisInternet + fraisElec + fraisEau + fraisAssurance + 
                            (fraisTaxeAnnuel / 12) + fraisAutres + chargesResPersonnellesMensuel;
+
+    const irAnnuelTexte = document.getElementById('ir-montant')?.textContent || '0';
+    const irAnnuel = parseFloat(irAnnuelTexte.replace(/[^0-9,.-]/g, '').replace(',', '.')) || 0;
+    const irMensuel = irAnnuel / 12;
     
-    const totalDepenses = totalCredits + totalFraisPerso;
+    // Dépenses mensuelles complètes: crédits + charges perso + IR mensualisé.
+    const totalDepenses = totalCredits + totalFraisPerso + irMensuel;
     
-    // ==================== RESTE À VIVRE ====================
+    // ==================== RESTE À VIVRE APRÈS CRÉDITS ====================
     const resteAVivre = totalRevenus - totalDepenses;
     
     // ==================== AFFICHAGE (tout en MENSUEL) ====================
@@ -4260,6 +5108,7 @@ async function verifierSauvegardeAnnee(annee) {
 window.ajouterTravaux = ajouterTravaux;
 window.ajouterFraisDivers = ajouterFraisDivers;
 window.ajouterProduitAccueil = ajouterProduitAccueil;
+window.ajouterTravauxAchatsCH = ajouterTravauxAchatsCH;
 window.supprimerItem = supprimerItem;
 window.calculerFiscalite = calculerFiscalite;
 window.calculerRatio = calculerRatio;
@@ -4290,6 +5139,9 @@ window.fermerFraisSalarieModal = closeFraisReelsSalarieModal; // Alias
 window.toggleOptionFraisSalarie = toggleOptionFraisSalarie;
 window.calculerFraisSalarieModal = calculerFraisSalarieModal;
 window.validerFraisSalarie = validerFraisSalarie;
+window.calculerFraisReelsImpots = calculerFraisReelsImpots;
+window.closeFraisReelsModal = closeFraisReelsModal;
+window.validerFraisReels = validerFraisReels;
 
 // Nouvelles fonctions pour le suivi des soldes bancaires
 window.genererTableauSoldes = genererTableauSoldes;
@@ -4623,19 +5475,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1100);
 });
 
-// Fonction debounce pour éviter trop de sauvegardes
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
 // Sauvegarde automatique sans toast
 async function sauvegarderSoldesBancairesAuto() {
     return; // ❌ Table suivi_soldes_bancaires supprimée - 23/01/2026
@@ -4740,7 +5579,7 @@ function togglePeriodSection(section, period) {
             '#eau_residence',
             '#assurance_hab_residence'
         ];
-    } else if (section === 'frais-pro') {
+    } else if (section === 'frais-pro' || section === 'frais_pro') {
         // Frais professionnels
         inputsSelectors = [
             '#telephone',
@@ -5065,7 +5904,7 @@ window.chargerAmortissementsAnnee = chargerAmortissementsAnnee;
 // 🚗 GESTION DES KILOMÈTRES PROFESSIONNELS
 // ==========================================
 
-let trajetsAnnee = [];
+var trajetsAnnee = [];
 // configKm et lieuxFavoris sont déclarés au début du fichier
 
 /**
@@ -6191,6 +7030,7 @@ function mettreAJourCredit(id, champ, valeur) {
  * Calculer le total des crédits
  */
 function calculerTotalCredits() {
+    // Somme des mensualités de crédits personnels pour le module RAV.
     const total = creditsPersonnels.reduce((sum, c) => sum + (parseFloat(c.montant_mensuel) || 0), 0);
     
     // Afficher dans le bloc crédits
@@ -6221,6 +7061,7 @@ function chargerCreditsPersonnels(details) {
  * Obtenir les crédits pour la sauvegarde
  */
 function getCreditsPersonnels() {
+    // Retourne l'état brut pour sauvegarde/restauration en base.
     return creditsPersonnels;
 }
 
@@ -6234,32 +7075,82 @@ function getCreditsPersonnels() {
 
 // Cache module pour fiscalite_options_perso (évite les lectures BDD répétées)
 window._fiscaliteOptionsPersoCache = null;
+window._fiscaliteOptionsPersoCacheFromDb = false;
+
+function _readFiscaliteOptionsPersoLocal() {
+    try {
+        const saved = localStorage.getItem('fiscalite_options_perso');
+        if (saved === 'true') return true;
+        if (saved === 'false') return false;
+    } catch (e) {
+        // Ignore erreurs storage (mode privé / blocage navigateur)
+    }
+    return null;
+}
+
+function _writeFiscaliteOptionsPersoLocal(value) {
+    try {
+        localStorage.setItem('fiscalite_options_perso', value ? 'true' : 'false');
+    } catch (e) {
+        // Ignore erreurs storage (mode privé / blocage navigateur)
+    }
+}
+
+function _mergeFiscaliteOptionsPersoFromDetails(rawValue) {
+    if (typeof rawValue !== 'boolean') return;
+    const localValue = _readFiscaliteOptionsPersoLocal();
+    // Ne jamais écraser une valeur déjà restaurée (DB/local prioritaire)
+    if (window._fiscaliteOptionsPersoCache !== null || localValue !== null) return;
+    window._fiscaliteOptionsPersoCache = rawValue;
+    window._fiscaliteOptionsPersoCacheFromDb = false;
+    _writeFiscaliteOptionsPersoLocal(rawValue);
+}
 
 async function _loadFiscaliteOptionsPerso() {
-    if (window._fiscaliteOptionsPersoCache !== null) return window._fiscaliteOptionsPersoCache;
+    if (window._fiscaliteOptionsPersoCache !== null && window._fiscaliteOptionsPersoCacheFromDb === true) {
+        return window._fiscaliteOptionsPersoCache;
+    }
+    const localValue = _readFiscaliteOptionsPersoLocal();
     try {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (!user) { window._fiscaliteOptionsPersoCache = false; return false; }
+        if (!user) {
+            window._fiscaliteOptionsPersoCache = localValue ?? false;
+            window._fiscaliteOptionsPersoCacheFromDb = false;
+            return window._fiscaliteOptionsPersoCache;
+        }
         const { data } = await window.supabaseClient
             .from('user_settings')
             .select('fiscalite_options_perso')
             .eq('user_id', user.id)
             .maybeSingle();
-        window._fiscaliteOptionsPersoCache = data?.fiscalite_options_perso ?? false;
+
+        if (typeof data?.fiscalite_options_perso === 'boolean') {
+            window._fiscaliteOptionsPersoCache = data.fiscalite_options_perso;
+            window._fiscaliteOptionsPersoCacheFromDb = true;
+        } else {
+            window._fiscaliteOptionsPersoCache = localValue ?? false;
+            window._fiscaliteOptionsPersoCacheFromDb = false;
+        }
     } catch (e) {
-        window._fiscaliteOptionsPersoCache = false;
+        window._fiscaliteOptionsPersoCache = localValue ?? false;
+        window._fiscaliteOptionsPersoCacheFromDb = false;
     }
+
+    _writeFiscaliteOptionsPersoLocal(window._fiscaliteOptionsPersoCache === true);
     return window._fiscaliteOptionsPersoCache;
 }
 
 async function _saveFiscaliteOptionsPerso(value) {
     window._fiscaliteOptionsPersoCache = value;
+    window._fiscaliteOptionsPersoCacheFromDb = false;
+    _writeFiscaliteOptionsPersoLocal(value);
     try {
         const { data: { user } } = await window.supabaseClient.auth.getUser();
         if (!user) return;
         await window.supabaseClient
             .from('user_settings')
             .upsert({ user_id: user.id, fiscalite_options_perso: value }, { onConflict: 'user_id' });
+        window._fiscaliteOptionsPersoCacheFromDb = true;
     } catch (e) {
         console.warn('⚠️ Erreur sauvegarde fiscalite_options_perso:', e?.message);
     }
@@ -7042,54 +7933,583 @@ function appliquerTestCA() {
 // Exposer la fonction globalement
 window.appliquerTestCA = appliquerTestCA;
 
+function appliquerTestCACH() {
+    const input = document.getElementById('ch-test-ca-input');
+    const caInput = document.getElementById('ch-ca-annuel');
+    const sourceEl = document.getElementById('ch-ca-source');
+    if (!input || !caInput) return;
+
+    const caTest = parseFloat(input.value.trim());
+    if (!Number.isFinite(caTest) || caTest < 0) {
+        alert('⚠️ Saisissez un montant de CA CH valide');
+        return;
+    }
+
+    const caReel = parseFloat(caInput.value || 0);
+    caInput.value = caTest.toFixed(2);
+    testCACHActif = true;
+    if (sourceEl) {
+        sourceEl.textContent = `Mode test CH actif : ${caTest.toFixed(2)} €`;
+    }
+    calculerFiscaliteCH();
+
+    let btnRestaurer = document.getElementById('btn-restaurer-ca-ch');
+    if (!btnRestaurer) {
+        btnRestaurer = document.createElement('button');
+        btnRestaurer.id = 'btn-restaurer-ca-ch';
+        btnRestaurer.className = 'btn-neo-secondary';
+        btnRestaurer.style.cssText = 'margin-left: 8px; font-size: 0.85rem; padding: 6px 12px; background: #ff6b6b; color: white; border: 1px solid #ff6b6b;';
+        btnRestaurer.innerHTML = '<i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> Restaurer CA auto';
+        btnRestaurer.onclick = async function() {
+            testCACHActif = false;
+            caInput.value = String(caReel);
+            await synchroniserCaChDepuisReservations(true);
+            calculerFiscaliteCH();
+            btnRestaurer.remove();
+            input.value = '';
+        };
+        input.parentElement.appendChild(btnRestaurer);
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    input.value = '';
+}
+
+window.appliquerTestCACH = appliquerTestCACH;
+
 // ================================================================
 // FISCALITÉ CHAMBRES D'HÔTES — Simulateur Micro-BIC 71%
 // ================================================================
-function calculerFiscaliteCH() {
+function parseDateForYear(value) {
+    if (!value) return null;
+    const d = new Date(value);
+    if (!Number.isFinite(d.getTime())) return null;
+    return d;
+}
+
+function normaliserTexteComparaison(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+}
+
+function appliquerReportRevenuLmp(recalculerIR = false) {
+    const revenuLmpTotal = revenuImposableGites + revenuImposableCH;
+    const revenuLmpInput = document.getElementById('revenu_lmp');
+    if (revenuLmpInput) {
+        revenuLmpInput.value = revenuLmpTotal.toFixed(2);
+    }
+
+    const formatMontantIr = (montant) => Number(montant || 0).toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + ' €';
+
+    const revenuGitesEl = document.getElementById('ir-revenu-gites');
+    if (revenuGitesEl) {
+        revenuGitesEl.value = formatMontantIr(revenuImposableGites);
+    }
+
+    const revenuChEl = document.getElementById('ir-revenu-ch');
+    if (revenuChEl) {
+        const montantCH = formatMontantIr(revenuImposableCH);
+        const choixCH = choixIrChTexte || 'Aucune option';
+        revenuChEl.value = `${montantCH} · ${choixCH}`;
+    }
+
+    const reportEl = document.getElementById('ch-report-lmp');
+    if (reportEl) {
+        reportEl.textContent = `Revenu imposable CH reporté dans "Revenu LMP" : ${Number(revenuImposableCH || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    }
+
+    if (recalculerIR) {
+        calculerIR();
+    }
+}
+
+async function chargerHebergementsPourCH() {
+    let gites = [];
+
+    if (Array.isArray(window.HEBERGEMENTS_DATA) && window.HEBERGEMENTS_DATA.length > 0) {
+        gites = window.HEBERGEMENTS_DATA;
+    }
+
+    if (window.gitesManager?.getAll) {
+        try {
+            const allHebergements = await window.gitesManager.getAll();
+            if (Array.isArray(allHebergements) && allHebergements.length > 0) {
+                gites = allHebergements;
+                window.HEBERGEMENTS_DATA = allHebergements;
+            }
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger tous les hébergements pour la section CH:', error);
+        }
+    }
+
+    if ((!Array.isArray(gites) || gites.length === 0) && Array.isArray(window.GITES_DATA) && window.GITES_DATA.length > 0) {
+        gites = window.GITES_DATA;
+    }
+
+    if ((!Array.isArray(gites) || gites.length === 0) && window.gitesManager?.getVisibleGites) {
+        try {
+            gites = await window.gitesManager.getVisibleGites();
+            if (Array.isArray(gites) && gites.length > 0) {
+                window.HEBERGEMENTS_DATA = gites;
+            }
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger les hébergements visibles pour la section CH:', error);
+        }
+    }
+
+    if ((!Array.isArray(gites) || gites.length === 0) && window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('gites')
+                .select('id, name, categorie_hebergement, type_hebergement, type_logement, categorie, type, nature, is_active')
+                .eq('is_active', true);
+            if (error) throw error;
+            if (Array.isArray(data)) {
+                gites = data;
+                window.HEBERGEMENTS_DATA = data;
+            }
+        } catch (error) {
+            console.warn('⚠️ Impossible de charger les hébergements via fallback Supabase pour la section CH:', error);
+        }
+    }
+
+    return Array.isArray(gites) ? gites : [];
+}
+
+async function synchroniserCaChDepuisReservations(forceRefresh = false) {
+    const input = document.getElementById('ch-ca-annuel');
+    const sourceEl = document.getElementById('ch-ca-source');
+    if (!input) return 0;
+
+    if (testCACHActif && !forceRefresh) {
+        const valeurTest = parseFloat(input.value || 0);
+        if (sourceEl) {
+            sourceEl.textContent = `Mode test CH actif : ${Number.isFinite(valeurTest) ? valeurTest.toFixed(2) : '0.00'} €`;
+        }
+        return Number.isFinite(valeurTest) ? valeurTest : 0;
+    }
+
+    const gites = await chargerHebergementsPourCH();
+    const gitesCH = gites.filter(estChambreHotes);
+
+    if (!gitesCH.length) {
+        input.value = '0';
+        if (sourceEl) {
+            sourceEl.textContent = 'Aucun hébergement tagué chambre d\'hôtes détecté';
+        }
+        return 0;
+    }
+
+    if (typeof window.getAllReservations !== 'function') {
+        if (sourceEl) {
+            sourceEl.textContent = 'Source réservations indisponible pour calculer le CA chambre d\'hôtes';
+        }
+        input.value = '0';
+        return 0;
+    }
+
+    const idsCH = new Set(gitesCH.map(g => String(g.id)));
+    const nomsCH = new Set(gitesCH.map(g => normaliserTexteComparaison(g.name || g.nom || g.slug)));
+    const reservations = await window.getAllReservations(forceRefresh);
+    const anneeSimulation = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
+
+    const reservationsCH = (Array.isArray(reservations) ? reservations : []).filter((reservation) => {
+        const giteId = String(reservation?.gite_id || reservation?.giteId || '');
+        const giteNom = normaliserTexteComparaison(
+            reservation?.gite || reservation?.gite_name || reservation?.nom_gite || reservation?.logement || ''
+        );
+
+        const matchId = giteId && idsCH.has(giteId);
+        const matchNom = giteNom && nomsCH.has(giteNom);
+        if (!matchId && !matchNom) return false;
+
+        const checkIn = parseDateForYear(reservation?.check_in || reservation?.dateDebut);
+        if (!checkIn) return false;
+        return checkIn.getFullYear() === anneeSimulation;
+    });
+
+    const caCH = reservationsCH.reduce((sum, reservation) => {
+        const montant = Number(reservation?.total_price ?? reservation?.montant ?? 0);
+        return sum + (Number.isFinite(montant) ? montant : 0);
+    }, 0);
+
+    input.value = caCH.toFixed(2);
+
+    if (sourceEl) {
+        sourceEl.textContent = `CA automatique ${anneeSimulation} : ${reservationsCH.length} réservation(s) sur ${gitesCH.length} hébergement(s) chambre d'hôtes`;
+    }
+
+    return caCH;
+}
+
+function calculerFiscaliteCH(options = {}) {
+    const { skipIrRecalculation = false } = options;
     const ca = parseFloat(document.getElementById('ch-ca-annuel')?.value) || 0;
-    const tmi = parseFloat(document.getElementById('ch-tmi')?.value) || 0;
+    const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
+    const regles = getReglesFiscaliteCH(annee);
+    const tmi = synchroniserTmiChDepuisIR();
+    const statutCH = document.getElementById('ch-statut-fiscal')?.value || 'micro';
+    const chOptionVlCheckbox = document.getElementById('ch-option-vl');
+    const chOptionVlWrap = document.getElementById('ch-option-vl-wrap');
+
+    // En regime reel, le versement liberatoire (1%) n'est pas applicable
+    if (chOptionVlCheckbox) {
+        if (statutCH === 'reel') {
+            chOptionVlCheckbox.checked = false;
+            chOptionVlCheckbox.disabled = true;
+        } else {
+            chOptionVlCheckbox.disabled = false;
+        }
+    }
+
+    if (chOptionVlWrap) {
+        chOptionVlWrap.style.opacity = statutCH === 'reel' ? '0.55' : '1';
+        chOptionVlWrap.style.pointerEvents = statutCH === 'reel' ? 'none' : 'auto';
+        chOptionVlWrap.style.cursor = statutCH === 'reel' ? 'not-allowed' : 'pointer';
+    }
+
+    const optionVlActive = statutCH !== 'reel' && Boolean(chOptionVlCheckbox?.checked);
+
+    mettreAJourVisibiliteSectionsReel();
 
     const resultatsEl = document.getElementById('ch-resultats');
     if (!resultatsEl) return;
 
+    const cardIds = ['ch-option-micro-standard', 'ch-option-vl-card', 'ch-option-reel'];
+    const badgeIds = ['ch-badge-micro-standard', 'ch-badge-vl', 'ch-badge-reel'];
+    const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+
+    const seuilObligationsEl = document.getElementById('ch-alerte-obligations');
+    const seuilObligationsMessageEl = document.getElementById('ch-alerte-obligations-message');
+    const choixIrEl = document.getElementById('ch-choix-ir');
+    const optionIrAppliqueeEl = document.getElementById('ch-option-appliquee-ir');
+
+    const setDisabled = (optionKey, disabled, reason) => {
+        const overlay = document.getElementById(`ch-desactive-${optionKey}`);
+        const conditions = document.getElementById(`ch-conditions-${optionKey}`);
+        const totalEl = document.getElementById(`ch-total-${optionKey}`);
+        if (overlay) overlay.style.display = disabled ? 'block' : 'none';
+        if (conditions && reason) {
+            conditions.innerHTML = `<div style="color:${disabled ? '#dc3545' : '#28a745'}; font-weight: 600;">${reason}</div>`;
+        }
+        if (totalEl && disabled) totalEl.textContent = 'N/A';
+    };
+
+    // Mettre à jour les éléments comptables CH (prorata, frais km) même si le CA est à 0
+    calculerChargesReellesCH();
+
     if (ca <= 0) {
-        resultatsEl.style.display = 'none';
+        revenuImposableCH = 0;
+        appliquerReportRevenuLmp(!skipIrRecalculation);
+        resultatsEl.style.display = 'block';
+        document.getElementById('ch-cotis-micro-standard').textContent = '0 €';
+        document.getElementById('ch-ir-micro-standard').textContent = '0 €';
+        document.getElementById('ch-total-micro-standard').textContent = '0 €';
+        document.getElementById('ch-cotis-vl').textContent = '0 €';
+        document.getElementById('ch-ir-vl').textContent = '0 €';
+        document.getElementById('ch-total-vl').textContent = '0 €';
+        document.getElementById('ch-cotis-reel').textContent = '0 €';
+        document.getElementById('ch-ir-reel').textContent = '0 €';
+        document.getElementById('ch-total-reel').textContent = '0 €';
+        const meilleureOptionEl = document.getElementById('ch-meilleure-option');
+        if (meilleureOptionEl) {
+            meilleureOptionEl.textContent = '💡 Saisissez/chargez un CA CH pour comparer les 3 solutions';
+            meilleureOptionEl.style.background = '#f8f9fa';
+            meilleureOptionEl.style.border = '2px solid #ddd';
+            meilleureOptionEl.style.borderLeft = '5px solid #ddd';
+            meilleureOptionEl.style.color = '#555';
+        }
+        if (optionIrAppliqueeEl) {
+            optionIrAppliqueeEl.textContent = 'Option appliquée au report IR: aucune option';
+        }
         document.getElementById('ch-alerte-plafond')?.style && (document.getElementById('ch-alerte-plafond').style.display = 'none');
         document.getElementById('ch-alerte-tva')?.style && (document.getElementById('ch-alerte-tva').style.display = 'none');
         document.getElementById('ch-alerte-cotisations')?.style && (document.getElementById('ch-alerte-cotisations').style.display = 'none');
+        if (seuilObligationsEl) seuilObligationsEl.style.display = 'none';
+        badgeIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        cardIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.border = '3px solid var(--border-color)';
+                el.style.transform = 'none';
+                el.style.boxShadow = 'none';
+            }
+        });
         return;
     }
 
     // ── Règles Loi Le Meur 2026 — Case 5NJ ──
-    const ABATTEMENT_CH        = 0.50;  // 50% (plus 71% depuis revenus 2025)
-    const PLAFOND_MICRO_BIC_CH = 77700; // Plafond Micro-BIC 2026
-    const SEUIL_TVA_CH         = 37500; // Franchise TVA 2026 (tolérance 41 250€)
-    const TAUX_COTIS_CH        = 0.212; // 21,2% du CA en Micro-BIC
-    const SEUIL_COTIS_CH       = 6248;  // 13% du PASS 2026 — seuil d'affiliation URSSAF
+    const ABATTEMENT_CH = regles.abattementMicro;
+    const PLAFOND_MICRO_BIC_CH = regles.plafondMicro;
+    const SEUIL_TVA_CH = regles.seuilTva;
+    const SEUIL_TVA_MAJORE_CH = regles.seuilTvaMajore;
+    const TAUX_COTIS_CH = regles.tauxCotisMicro;
+    const TAUX_PRELEV_PATRIMOINE = regles.tauxPrelevPatrimoine;
+    const TAUX_VL_CH = regles.tauxVl;
+    const SEUIL_COTIS_CH = regles.seuilAffiliation;
 
     const baseImposable = ca * (1 - ABATTEMENT_CH);
     const seuilCotisAtteint = baseImposable > SEUIL_COTIS_CH;
-    const cotisations = seuilCotisAtteint ? ca * TAUX_COTIS_CH : ca * 0.172; // 17,2% prélèvements patrimoine sinon
-    const irEstime = baseImposable * (tmi / 100);
-    const netApresCharges = ca - cotisations - irEstime;
+    // CH Micro-BIC: si seuil social non atteint, prélèvements patrimoine sur la base imposable
+    const cotisationsMicro = seuilCotisAtteint
+        ? ca * TAUX_COTIS_CH
+        : baseImposable * TAUX_PRELEV_PATRIMOINE;
+    const revenusSalaries = getFieldValue('salaire_madame') + getFieldValue('salaire_monsieur');
+    const nombreEnfants = parseInt(document.getElementById('nombre_enfants')?.value || 0, 10);
+    const nombreParts = calculerPartsFiscales(nombreEnfants);
+    const config = window.TAUX_FISCAUX?.getConfig?.(annee) || null;
+    const bareme = config?.BAREME_IR || [];
 
-    const fmt = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+    function calculIRFoyer(revenus) {
+        if (!Array.isArray(bareme) || bareme.length === 0) return Math.max(0, revenus) * (tmi / 100);
+        return calculerIrNetAvecCorrectifs(revenus, nombreParts, config, { baseParts: 2 });
+    }
+
+    function calculIrImpactLocation(revenuLocation) {
+        const irSansLocation = calculIRFoyer(revenusSalaries);
+        const irAvecLocation = calculIRFoyer(revenusSalaries + revenuLocation);
+        return irAvecLocation - irSansLocation;
+    }
+
+    const irMicro = calculIrImpactLocation(baseImposable);
+    const totalMicro = cotisationsMicro + irMicro;
+
+    // Option Micro-BIC + VL 1% (activable)
+    const irVL = ca * TAUX_VL_CH;
+    const totalVL = cotisationsMicro + irVL;
+
+    // Régime réel CH basé sur la comptabilité dédiée CH (charges réelles + amortissements)
+    const chargesReellesCH = calculerChargesReellesCH();
+    const beneficeReelCH = ca - chargesReellesCH.totalCharges;
+    // CH Réel BIC: approximation dédiée CH (sans minima/forçage LMP)
+    const urssafReelCH = beneficeReelCH > SEUIL_COTIS_CH
+        ? beneficeReelCH * TAUX_COTIS_CH
+        : Math.max(0, beneficeReelCH) * TAUX_PRELEV_PATRIMOINE;
+    const revenuImposableReelCH = Math.max(0, beneficeReelCH - urssafReelCH);
+    const irReelCH = calculIrImpactLocation(revenuImposableReelCH);
+    const totalReelCH = urssafReelCH + irReelCH;
 
     resultatsEl.style.display = 'block';
-    document.getElementById('ch-base-imposable').textContent = fmt(baseImposable);
-    document.getElementById('ch-cotisations').textContent    = fmt(cotisations);
-    document.getElementById('ch-ir-estime').textContent      = fmt(irEstime);
-    document.getElementById('ch-net-ir').textContent         = fmt(netApresCharges);
+    document.getElementById('ch-cotis-micro-standard').textContent = fmt(cotisationsMicro);
+    document.getElementById('ch-ir-micro-standard').textContent = fmt(irMicro);
+    document.getElementById('ch-total-micro-standard').textContent = fmt(totalMicro);
+    document.getElementById('ch-conditions-micro-standard').innerHTML = `
+        <div style="color:${ca <= PLAFOND_MICRO_BIC_CH ? '#d4f8df' : '#ffd5d5'}; font-weight: 600;">• CA ${ca <= PLAFOND_MICRO_BIC_CH ? '≤' : '>'} ${fmt(PLAFOND_MICRO_BIC_CH)}</div>
+        <div style="color:#fef3c7; font-weight: 600;">• Base imposable : ${fmt(baseImposable)}</div>
+        <div style="color:#d4f8df; font-weight: 600;">• Seuil SSI ${annee} : ${fmt(SEUIL_COTIS_CH)} (13% PASS ${fmt(regles.pass)})</div>
+    `;
+
+    document.getElementById('ch-cotis-vl').textContent = fmt(cotisationsMicro);
+    document.getElementById('ch-ir-vl').textContent = fmt(irVL);
+    document.getElementById('ch-total-vl').textContent = fmt(totalVL);
+    document.getElementById('ch-conditions-vl').innerHTML = optionVlActive
+        ? `<div style="color:#28a745; font-weight: 600;">• VL ${(TAUX_VL_CH * 100).toFixed(1)}% activé (sous conditions RFR)</div>`
+        : '<div style="color:#856404; font-weight: 600;">• VL non sélectionné (option disponible)</div>';
+
+    document.getElementById('ch-cotis-reel').textContent = fmt(urssafReelCH);
+    document.getElementById('ch-ir-reel').textContent = fmt(irReelCH);
+    document.getElementById('ch-total-reel').textContent = fmt(totalReelCH);
+    document.getElementById('ch-conditions-reel').innerHTML = `
+        <div style="color:#d4f8df; font-weight: 600;">• Charges réelles saisies : ${fmt(chargesReellesCH.totalCharges)}</div>
+        <div style="color:#fef3c7; font-weight: 600;">• Bénéfice comptable estimé : ${fmt(beneficeReelCH)}</div>
+        <div style="color:#d4f8df; font-weight: 600;">• Cotisations CH : ${beneficeReelCH > SEUIL_COTIS_CH ? `${(TAUX_COTIS_CH * 100).toFixed(1)}% (activité)` : `${(TAUX_PRELEV_PATRIMOINE * 100).toFixed(1)}% (patrimoine)`}</div>
+    `;
+
+    badgeIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    cardIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.border = '3px solid var(--border-color)';
+            el.style.transform = 'none';
+            el.style.boxShadow = 'none';
+        }
+    });
+
+    const alertesObligations = [];
+    const microEligible = ca <= PLAFOND_MICRO_BIC_CH;
+    const rfrN2 = parseFloat(document.getElementById('ch-rfr-n2')?.value || 0);
+    const seuilRfrFoyer = regles.seuilRfrVlParPart * nombreParts;
+    let vlEligible = statutCH !== 'reel';
+    let vlIneligibiliteMessage = '';
+
+    if (vlEligible && rfrN2 > 0 && rfrN2 > seuilRfrFoyer) {
+        vlEligible = false;
+        vlIneligibiliteMessage = `• VL non éligible: RFR N-2 (${fmt(rfrN2)}) > seuil foyer (${fmt(seuilRfrFoyer)})`;
+    }
+
+    if (rfrN2 <= 0) {
+        alertesObligations.push(`VL: renseignez le RFR N-2 pour vérifier l'éligibilité (seuil indicatif ${fmt(regles.seuilRfrVlParPart)} par part).`);
+    } else if (tmi >= 30) {
+        alertesObligations.push('VL: TMI du foyer élevé, vérifiez attentivement l\'éligibilité RFR N-2.');
+    }
+
+    setDisabled('micro-standard', false);
+    setDisabled('vl', false);
+    setDisabled('reel', false);
+    if (statutCH === 'reel') {
+        setDisabled('vl', true, '• Statut réel sélectionné : option VL 1% indisponible');
+    }
+    if (!vlEligible) {
+        if (chOptionVlCheckbox) {
+            chOptionVlCheckbox.checked = false;
+        }
+        setDisabled('vl', true, vlIneligibiliteMessage || '• VL non disponible selon les critères du foyer');
+    }
+
+    if (!microEligible) {
+        setDisabled('micro-standard', true, '• CA > 77 700€ : Micro-BIC interdit');
+        setDisabled('vl', true, '• CA > 77 700€ : VL indisponible');
+        alertesObligations.push('CH 5NJ: dépassement du plafond micro. Règle légale: perte définitive du micro après 2 années consécutives de dépassement. Simulation affichée en mode prudent (réel).');
+    }
+
+    const optionsComparatif = [
+        { key: 'micro-standard', nom: 'Micro-BIC', total: totalMicro, cardId: 'ch-option-micro-standard', badgeId: 'ch-badge-micro-standard', revenuImposable: Math.max(0, baseImposable) },
+        { key: 'reel', nom: 'Régime réel BIC', total: totalReelCH, cardId: 'ch-option-reel', badgeId: 'ch-badge-reel', revenuImposable: revenuImposableReelCH }
+    ];
+
+    if (microEligible && statutCH !== 'reel' && vlEligible) {
+        optionsComparatif.push({
+            key: 'vl',
+            nom: `Micro-BIC + VL ${(TAUX_VL_CH * 100).toFixed(1)}%`,
+            total: totalVL,
+            cardId: 'ch-option-vl-card',
+            badgeId: 'ch-badge-vl',
+            revenuImposable: 0
+        });
+    }
+
+    const optionsFiltrees = optionsComparatif.filter((option) => {
+        const overlay = document.getElementById(`ch-desactive-${option.key}`);
+        return !(overlay && overlay.style.display === 'block');
+    });
+
+    if (seuilObligationsEl && seuilObligationsMessageEl) {
+        if (alertesObligations.length > 0) {
+            seuilObligationsEl.style.display = 'block';
+            seuilObligationsMessageEl.textContent = alertesObligations.join(' ');
+        } else {
+            seuilObligationsEl.style.display = 'none';
+        }
+    }
+
+    const meilleureOptionEl = document.getElementById('ch-meilleure-option');
+    if (optionsFiltrees.length > 0) {
+        const meilleure = optionsFiltrees.reduce((min, option) => option.total < min.total ? option : min);
+        const meilleureCard = document.getElementById(meilleure.cardId);
+        const meilleureBadge = document.getElementById(meilleure.badgeId);
+        if (meilleureCard) {
+            meilleureCard.style.border = '3px solid #00C2CB';
+            meilleureCard.style.transform = 'scale(1.02)';
+            meilleureCard.style.boxShadow = '0 4px 12px rgba(0, 194, 203, 0.35)';
+        }
+        if (meilleureBadge) meilleureBadge.style.display = 'block';
+
+        const economieMax = Math.max(...optionsFiltrees.map((o) => o.total)) - meilleure.total;
+        if (meilleureOptionEl) {
+            meilleureOptionEl.innerHTML = `🏆 <strong>${meilleure.nom}</strong> est la meilleure option CH (économie jusqu'à ${Math.max(0, economieMax).toFixed(0)} €/an)`;
+            meilleureOptionEl.style.background = '#d4edda';
+            meilleureOptionEl.style.border = '2px solid #28a745';
+            meilleureOptionEl.style.borderLeft = '5px solid #28a745';
+            meilleureOptionEl.style.color = '#155724';
+        }
+        // Le report IR utilise le choix explicite Micro/Réel, pas forcément l'option la moins coûteuse
+        let optionAppliquee = null;
+        if (statutCH === 'reel') {
+            optionAppliquee = optionsComparatif.find((o) => o.key === 'reel');
+        } else {
+            if (!microEligible) {
+                optionAppliquee = optionsComparatif.find((o) => o.key === 'reel');
+                alertesObligations.push('Micro sélectionné mais non autorisé: report IR basculé sur Réel BIC.');
+            } else {
+                optionAppliquee = (optionVlActive && vlEligible)
+                    ? optionsComparatif.find((o) => o.key === 'vl')
+                    : optionsComparatif.find((o) => o.key === 'micro-standard');
+            }
+        }
+
+        revenuImposableCH = optionAppliquee?.revenuImposable ?? 0;
+        choixIrChTexte = optionAppliquee?.nom || 'Aucune option';
+        if (choixIrEl && optionAppliquee) {
+            choixIrEl.textContent = `Choix CH IR : ${optionAppliquee.nom}`;
+        }
+        if (optionIrAppliqueeEl && optionAppliquee) {
+            optionIrAppliqueeEl.textContent = `Option appliquée au report IR: ${optionAppliquee.nom}`;
+        }
+        const irLabelChoixChEl = document.getElementById('ir-label-choix-ch');
+        if (irLabelChoixChEl && optionAppliquee) {
+            irLabelChoixChEl.textContent = 'Ch. d\'hôtes';
+        }
+    } else {
+        if (meilleureOptionEl) {
+            meilleureOptionEl.textContent = '⚠️ Aucune option active: ajustez le statut ou les critères.';
+            meilleureOptionEl.style.background = '#fff3cd';
+            meilleureOptionEl.style.border = '2px solid #ffc107';
+            meilleureOptionEl.style.borderLeft = '5px solid #ffc107';
+            meilleureOptionEl.style.color = '#856404';
+        }
+        revenuImposableCH = 0;
+        choixIrChTexte = 'Aucune option';
+        if (choixIrEl) {
+            choixIrEl.textContent = 'Choix CH IR : aucune option';
+        }
+        if (optionIrAppliqueeEl) {
+            optionIrAppliqueeEl.textContent = 'Option appliquée au report IR: aucune option';
+        }
+        const irLabelChoixChEl = document.getElementById('ir-label-choix-ch');
+        if (irLabelChoixChEl) {
+            irLabelChoixChEl.textContent = 'Ch. d\'hôtes';
+        }
+    }
+
+    if (seuilObligationsEl && seuilObligationsMessageEl) {
+        if (alertesObligations.length > 0) {
+            seuilObligationsEl.style.display = 'block';
+            seuilObligationsMessageEl.textContent = alertesObligations.join(' ');
+        } else {
+            seuilObligationsEl.style.display = 'none';
+        }
+    }
 
     // Alertes
     const alertePlafond = document.getElementById('ch-alerte-plafond');
     if (alertePlafond) alertePlafond.style.display = ca > PLAFOND_MICRO_BIC_CH ? 'block' : 'none';
 
     const alerteTva = document.getElementById('ch-alerte-tva');
-    if (alerteTva) alerteTva.style.display = ca >= SEUIL_TVA_CH ? 'block' : 'none';
+    if (alerteTva) {
+        if (ca >= SEUIL_TVA_MAJORE_CH) {
+            alerteTva.style.display = 'block';
+            alerteTva.style.background = 'rgba(231,76,60,0.35)';
+            alerteTva.innerHTML = `🧾 <strong>Seuil majoré TVA dépassé</strong> : CA ≥ ${fmt(SEUIL_TVA_MAJORE_CH)}. TVA applicable immédiatement dès le jour du dépassement.`;
+        } else if (ca >= SEUIL_TVA_CH) {
+            alerteTva.style.display = 'block';
+            alerteTva.style.background = 'rgba(241,196,15,0.35)';
+            alerteTva.innerHTML = `🧾 <strong>Franchise TVA dépassée</strong> : CA ≥ ${fmt(SEUIL_TVA_CH)}. TVA applicable au 1er janvier N+1 si le dépassement est confirmé.`;
+        } else {
+            alerteTva.style.display = 'none';
+        }
+    }
 
     const alerteCotis = document.getElementById('ch-alerte-cotisations');
-    if (alerteCotis) alerteCotis.style.display = seuilCotisAtteint ? 'block' : 'none';
+    if (alerteCotis) {
+        alerteCotis.style.display = seuilCotisAtteint ? 'block' : 'none';
+        if (seuilCotisAtteint) {
+            alerteCotis.innerHTML = `🏛️ <strong>Affiliation URSSAF obligatoire</strong> : revenu imposable (${fmt(baseImposable)}) > seuil ${annee} (${fmt(SEUIL_COTIS_CH)}).`;
+        }
+    }
 
     // Message comparatif vs gîte non classé (5NW — 30%)
     const avantage = document.getElementById('ch-avantage');
@@ -7097,11 +8517,13 @@ function calculerFiscaliteCH() {
         if (ca <= PLAFOND_MICRO_BIC_CH) {
             const baseGiteNonClasse = ca * 0.70; // abattement 30%
             const economieFiscale = Math.round((baseGiteNonClasse - baseImposable) * (tmi / 100));
-            avantage.textContent = `💡 Vs gîte non classé (5NW — abatt. 30%) : économie IR estimée de ${fmt(economieFiscale)} grâce à l'abattement 50% (case 5NJ).`;
+            avantage.textContent = `💡 Vs gîte non classé (5NW — abatt. 30%) : économie IR estimée de ${fmt(economieFiscale)} grâce à l'abattement ${(ABATTEMENT_CH * 100).toFixed(0)}% (case 5NJ).`;
         } else {
-            avantage.textContent = `⚠️ CA dépassant 77 700 € : Micro-BIC non applicable — régime réel BIC obligatoire. Consultez un expert-comptable.`;
+            avantage.textContent = `⚠️ CA dépassant ${fmt(PLAFOND_MICRO_BIC_CH)} : simulation en réel. Règle légale à confirmer sur 2 années consécutives.`;
         }
     }
+
+    appliquerReportRevenuLmp(!skipIrRecalculation);
 }
 
 function determinerTmiDepuisQuotient(quotient, bareme = []) {
@@ -7120,8 +8542,7 @@ function determinerTmiDepuisQuotient(quotient, bareme = []) {
 }
 
 function synchroniserTmiChDepuisIR() {
-    const selectTmiCH = document.getElementById('ch-tmi');
-    if (!selectTmiCH) return;
+    const tmiDisplay = document.getElementById('ch-tmi-auto');
 
     const annee = parseInt(document.getElementById('annee_simulation')?.value || new Date().getFullYear(), 10);
     const config = window.TAUX_FISCAUX?.getConfig?.(annee);
@@ -7136,11 +8557,13 @@ function synchroniserTmiChDepuisIR() {
     );
 
     const tmi = determinerTmiDepuisQuotient(quotient, bareme);
-    if (![0, 11, 30, 41, 45].includes(tmi)) return;
+    const tmiValide = [0, 11, 30, 41, 45].includes(tmi) ? tmi : 0;
 
-    if (String(selectTmiCH.value) !== String(tmi)) {
-        selectTmiCH.value = String(tmi);
+    if (tmiDisplay) {
+        tmiDisplay.textContent = `${tmiValide}%`;
     }
+
+    return tmiValide;
 }
 
 // ──────────────────────────────────────────────────────────
@@ -7176,63 +8599,13 @@ async function verifierAffichageSectionCH() {
     const section = document.getElementById('section-chambres-hotes');
     if (!section) return;
 
-    // Place la section CH exactement dans la zone IR affichée par l'utilisateur
-    const resultatIr = document.getElementById('resultat-ir');
-    if (resultatIr && resultatIr.parentNode) {
-        resultatIr.parentNode.insertBefore(section, resultatIr.nextSibling);
-    } else {
-        // Fallback: juste avant la section personnelle
-        const sectionPersonnelle = document.getElementById('section-personnelle');
-        if (sectionPersonnelle) {
-            sectionPersonnelle.parentNode.insertBefore(section, sectionPersonnelle);
-        }
-
-        // Fallback final: après le comparatif fiscalité gîtes
-        const blocFiscaliteGites = document.getElementById('comparaison-reel-micro');
-        if (blocFiscaliteGites && section.previousElementSibling !== blocFiscaliteGites) {
-            blocFiscaliteGites.insertAdjacentElement('afterend', section);
-        }
+    const ancreSectionCH = document.getElementById('section-chambres-hotes-anchor');
+    if (ancreSectionCH && ancreSectionCH.parentNode && section.previousElementSibling !== ancreSectionCH) {
+        ancreSectionCH.parentNode.insertBefore(section, ancreSectionCH.nextSibling);
     }
 
     // IMPORTANT: on détecte sur TOUS les logements (pas seulement ceux visibles selon abonnement)
-    let gites = [];
-    if (window.gitesManager?.getAll) {
-        try {
-            gites = await window.gitesManager.getAll();
-        } catch (error) {
-            console.warn('⚠️ Impossible de charger tous les hébergements pour la section CH:', error);
-        }
-    }
-
-    if ((!Array.isArray(gites) || gites.length === 0) && Array.isArray(window.GITES_DATA) && window.GITES_DATA.length > 0) {
-        gites = window.GITES_DATA;
-    }
-
-    if ((!Array.isArray(gites) || gites.length === 0) && window.gitesManager?.getVisibleGites) {
-        try {
-                gites = await window.gitesManager.getVisibleGites();
-            if (Array.isArray(gites)) window.GITES_DATA = gites;
-        } catch (error) {
-            console.warn('⚠️ Impossible de charger les hébergements visibles pour la section CH:', error);
-        }
-    }
-
-    // Fallback ultime: lecture directe Supabase pour éviter un faux négatif d'affichage
-    if ((!Array.isArray(gites) || gites.length === 0) && window.supabaseClient) {
-        try {
-            const { data, error } = await window.supabaseClient
-                .from('gites')
-                .select('name, categorie_hebergement, type_hebergement, type_logement, categorie, type, nature, is_active')
-                .eq('is_active', true);
-            if (error) throw error;
-            if (Array.isArray(data)) {
-                gites = data;
-                window.GITES_DATA = data;
-            }
-        } catch (error) {
-            console.warn('⚠️ Impossible de charger les hébergements via fallback Supabase pour la section CH:', error);
-        }
-    }
+    const gites = await chargerHebergementsPourCH();
 
     if (!Array.isArray(gites) || gites.length === 0) {
         return;
@@ -7241,6 +8614,16 @@ async function verifierAffichageSectionCH() {
     const aChambreHotes = gites.some(estChambreHotes);
 
     section.style.display = aChambreHotes ? 'block' : 'none';
+
+    if (aChambreHotes) {
+        await synchroniserCaChDepuisReservations(false);
+        calculerFiscaliteCH();
+    } else {
+        const input = document.getElementById('ch-ca-annuel');
+        if (input) input.value = '0';
+        revenuImposableCH = 0;
+        appliquerReportRevenuLmp(true);
+    }
 }
 
 function planifierReverificationSectionCH() {

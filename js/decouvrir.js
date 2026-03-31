@@ -728,16 +728,6 @@ function genererGuidePDF() {
 }
 
 // ==================== HELPERS ====================
-function escapeHtml(text) {
-    if (!text) return '';
-    if (window.SecurityUtils) {
-        return window.SecurityUtils.sanitizeText(text);
-    }
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 function escapeForOnclick(text) {
     if (!text) return '';
     return text.replace(/'/g, '&#39;')

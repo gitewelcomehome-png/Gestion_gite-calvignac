@@ -1632,15 +1632,6 @@ function parseFiscalRulesFromSources(sources) {
     };
 }
 
-function escapeHtml(value) {
-    return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
 function buildFiscalRulesBusinessHtmlReport({ exportedAt, exportedBy, rules }) {
         const formatNumber = (value) => Number.isFinite(value) ? new Intl.NumberFormat('fr-FR').format(value) : 'N/D';
     const formatPercent = (value) => Number.isFinite(value) ? `${(value * 100).toFixed(2)}%` : 'N/D';

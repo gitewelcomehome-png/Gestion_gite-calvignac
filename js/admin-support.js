@@ -1736,13 +1736,6 @@ function setupRealtime() {
 // ================================================================
 // 🛠️ UTILITAIRES
 // ================================================================
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 function getTimeAgo(date) {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     
@@ -1760,14 +1753,6 @@ function getWeekNumber(date) {
     const yearStart = new Date(d.getFullYear(), 0, 1);
     const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     return `S${weekNo}`;
-}
-
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
 }
 
 // console.log('✅ Module Support chargé');

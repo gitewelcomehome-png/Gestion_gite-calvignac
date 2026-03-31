@@ -80,12 +80,6 @@ async function getCommandesPrestationsCount() {
 /**
  * Échapper les caractères HTML pour éviter les erreurs de syntaxe
  */
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 function applyInstantReservationUpdate(reservationId, updates) {
     if (!reservationId) return;
