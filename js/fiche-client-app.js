@@ -1355,11 +1355,11 @@ async function initTimelineSection() {
 // ✨ Chargement météo WeatherAPI.com (gratuit 1M appels/mois, usage commercial autorisé)
 async function loadWeatherData() {
     const weatherWidget = document.getElementById('weatherWidget');
-    if (!weatherWidget || !giteInfo.gps_lat || !giteInfo.gps_lon) return;
+    const lat = giteInfo.latitude || giteInfo.gps_lat;
+    const lon = giteInfo.longitude || giteInfo.gps_lon;
+    if (!weatherWidget || !lat || !lon) return;
     
     try {
-        const lat = giteInfo.gps_lat;
-        const lon = giteInfo.gps_lon;
         const lang = currentLanguage === 'fr' ? 'fr' : 'en';
         
         // WeatherAPI.com : 5M appels/mois (trial Pro Plus → Free plan auto après 16/02/2026)
