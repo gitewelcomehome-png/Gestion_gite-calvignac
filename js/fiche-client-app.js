@@ -860,6 +860,7 @@ function initializeUI() {
     
     // Onglet Pendant
     initOngletPendant();
+    loadWeatherData(); // widget météo dans l'onglet Pendant (appel async non-bloquant)
     
     // Onglet Sortie
     initOngletSortie();
