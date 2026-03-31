@@ -451,38 +451,7 @@ function capitalize(str) {
     ).join('');
 }
 
-/**
- * Affiche un toast de notification
- * @param {string} message - Message à afficher
- * @param {string} type - Type (success, error, info)
- */
-function showToast(message, type = 'info') {
-    // Vérifier si la fonction globale existe
-    if (typeof window.showToast === 'function') {
-        window.showToast(message, type);
-        return;
-    }
-
-    // Fallback simple si pas de fonction toast globale
-    const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
+// showToast — défini dans js/shared-utils.js (chargé avant ce fichier)
 
 // Exposer les fonctions au scope global
 window.handlePhotoUploadInfosGites = handlePhotoUploadInfosGites;
