@@ -1323,15 +1323,15 @@ async function initTimelineSection() {
         timelineAvant.classList.remove('active');
         timelinePendant.classList.add('active');
         timelineApres.classList.remove('active');
-        
-        // Charger météo
-        await loadWeatherData();
     } else {
         // Après départ (dans les 7 jours)
         timelineAvant.classList.remove('active');
         timelinePendant.classList.remove('active');
         timelineApres.classList.add('active');
     }
+
+    // Météo affichée dans toutes les phases
+    await loadWeatherData();
     
     // Afficher les dates
     const formatDate = (date) => {
