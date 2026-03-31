@@ -1270,11 +1270,6 @@ window.viewCorrections = async function(errorId) {
     });
 };
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 // ================================================================
 // ENREGISTRER LES CORRECTIONS (Appelé par Copilot après fix)

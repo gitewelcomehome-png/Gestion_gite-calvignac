@@ -491,12 +491,6 @@ function handleActionClick(event) {
     }
 }
 
-function escapeHtml(value) {
-    const div = document.createElement('div');
-    div.textContent = String(value || '');
-    return div.innerHTML;
-}
-
 function getStatutLabel(statut) {
     const labels = {
         'paid': '💳 Payée',

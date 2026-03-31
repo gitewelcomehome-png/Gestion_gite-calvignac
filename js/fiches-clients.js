@@ -1343,11 +1343,6 @@ async function backfillChecklistConfigTranslations(type) {
 }
 
 // ==================== UTILITAIRES ====================
-function escapeHtml(text) {
-    if (!text) return '';
-    // Utiliser SecurityUtils pour sanitiser le texte (retire tous les tags HTML)
-    return window.SecurityUtils.sanitizeText(text);
-}
 
 function formatTime(timeString) {
     if (!timeString) return '';

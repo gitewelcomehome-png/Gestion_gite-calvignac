@@ -93,6 +93,7 @@
     <!-- config.local.js désactivé (fichier absent) - Configuration en dur dans shared-config.js -->
     
     <!-- Scripts modulaires de l'application -->
+    <script src="js/utils.js"></script>
     <script src="js/shared-config.js"></script>
     <script src="js/gites-manager.js?v=1.1"></script>
     <!-- 🔒 PHASE 1 SÉCURITÉ: Authentification obligatoire -->
@@ -125,7 +126,7 @@
     <script src="js/client-communications.js"></script>
     <!-- 💰 FISCALITÉ CHARGÉE EN PREMIER pour exposer window.calculerChargesParGiteSansAmortissement -->
     <script src="js/taux-fiscaux-config.js?v=2.0"></script>
-    <script src="js/fiscalite-v2.js?v=1738860000"></script>
+    <script src="js/fiscalite-v2.js?v=1738861800"></script>
     <!-- 📊 DASHBOARD utilise les fonctions de fiscalité -->
     <script src="js/dashboard.js?v=12.50"></script>
     <script src="js/dashboard-support-widget.js?v=1.0"></script>
@@ -175,7 +176,7 @@
     <link rel="stylesheet" href="css/notifications.css?v=2.2" />
     <link rel="stylesheet" href="css/tab-reservations.css?v=2.3" />
     <link rel="stylesheet" href="css/tab-menage.css?v=1739380400" />
-    <link rel="stylesheet" href="css/tab-fiscalite.css?v=1.0" />
+    <link rel="stylesheet" href="css/tab-fiscalite.css?v=1.3" />
     <link rel="stylesheet" href="css/tab-infos-gites.css?v=1.7" />
     <link rel="stylesheet" href="css/tab-calendrier-tarifs.css?v=1.5" />
     <link rel="stylesheet" href="css/tab-calendrier.css?v=1.0" />
@@ -1064,9 +1065,17 @@
             setTimeout(() => clearInterval(waitForSupabase), 5000);
             
             // Vérifier si on doit ouvrir un onglet spécifique (URL prioritaire puis fallback localStorage)
+            // Accepte les deux formats: ?tab=charges et ?tab=tab-charges
+            const normalizeTabName = (value) => {
+                if (!value || typeof value !== 'string') return '';
+                return value.replace(/^tab-/, '').trim();
+            };
+
             const initialUrlParams = new URLSearchParams(window.location.search);
-            const requestedTab = initialUrlParams.get('tab');
-            const pendingTab = requestedTab || localStorage.getItem('pendingTabSwitch');
+            const requestedTabRaw = initialUrlParams.get('tab');
+            const requestedTab = normalizeTabName(requestedTabRaw);
+            const pendingTabStored = normalizeTabName(localStorage.getItem('pendingTabSwitch'));
+            const pendingTab = requestedTab || pendingTabStored;
 
             if (pendingTab) {
                 if (!requestedTab) {
@@ -1130,7 +1139,7 @@
             'tab-archives': 'tabs/tab-archives.html',
             'tab-statistiques': 'tabs/tab-statistiques.html',
             'tab-prestations': 'tabs/tab-prestations.html' + cacheBuster,
-            'tab-charges': 'tabs/tab-fiscalite-v2.html?v=1737243700',
+            'tab-charges': 'tabs/tab-fiscalite-v2.html' + cacheBuster,
             'tab-menage': 'tabs/tab-menage.html?v=4.1' + cacheBuster,
             'tab-infos-gites': 'tabs/tab-infos-gites.html?v=1737649300' + cacheBuster,
             'tab-fiches-clients': 'tabs/tab-fiches-clients.html',
@@ -1232,7 +1241,8 @@
         // Activer le premier onglet (dashboard) après chargement
         setTimeout(() => {
             const urlParams = new URLSearchParams(window.location.search);
-            const hasRequestedTab = !!urlParams.get('tab');
+            const requestedTabFromUrl = (urlParams.get('tab') || '').replace(/^tab-/, '').trim();
+            const hasRequestedTab = !!(requestedTabFromUrl && document.getElementById(`tab-${requestedTabFromUrl}`));
 
             const dashboardTab = document.getElementById('tab-dashboard');
             if (!hasRequestedTab && dashboardTab) {

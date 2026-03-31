@@ -741,12 +741,6 @@ function showToast(message, type = 'success') {
 // ================================================================
 // 🛠️ UTILITAIRES
 // ================================================================
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 function getTimeAgo(date) {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);

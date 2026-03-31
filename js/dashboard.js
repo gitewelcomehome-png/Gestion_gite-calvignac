@@ -4301,13 +4301,6 @@ window.toggleChecklistDetails = toggleChecklistDetails;
 // ═══════════════════════════════════════════════════════════════════════// GESTION DES LISTES DE COURSES
 // ═══════════════════════════════════════════════════════════════════════
 
-// Fonction pour échapper le HTML et prévenir les XSS
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 let currentShoppingList = null;
 let shoppingListItems = [];
