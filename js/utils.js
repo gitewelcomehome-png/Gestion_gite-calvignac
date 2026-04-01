@@ -354,7 +354,6 @@
         copyToClipboard,
         safeJSONParse,
         isNullOrEmpty,
-        truncateText
         truncateText,
         showToast,
         showSkeleton,
