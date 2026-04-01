@@ -31,6 +31,183 @@ Ce qu'il faut faire pour éviter que ça se reproduise
 
 ## 🔴 Erreurs Référencées
 
+### [28 Mars 2026] - iCal Homelidays: erreurs 403 sur proxy CORS et fallbacks publics
+
+**Contexte:**
+La synchronisation iCal depuis Homelidays remontait des erreurs `403` répétées dans la console, malgré des fallbacks partiellement fonctionnels.
+
+**Erreur:**
+- `GET /api/cors-proxy?...homelidays...` retournait `403`
+- `GET https://corsproxy.io/?...homelidays...` retournait `403`
+- bruit console en production lors des tentatives de fallback
+
+**Cause:**
+1. le proxy interne considérait certaines requêtes same-origin sans header `Origin` comme non autorisées
+2. `corsproxy.io` est instable/filtré sur Homelidays
+3. certaines URLs Homelidays en `http` augmentaient les risques de refus en amont
+
+**Solution:**
+✅ Correctifs appliqués:
+- assouplissement contrôlé de la validation d'origine dans `api/cors-proxy.js` pour accepter les requêtes sans `Origin` (same-origin)
+- normalisation des URLs Homelidays en `https` dans le moteur de sync
+- exclusion de `corsproxy.io` pour Homelidays afin d'éviter les 403 récurrents
+- maintien du proxy interne en priorité, puis fallbacks restants
+
+**Prévention:**
+1. privilégier le proxy interne Vercel sur les flux iCal externes
+2. éviter les dépendances non maîtrisées quand un fallback public est connu instable
+3. tracer les 403 par plateforme pour ajuster les stratégies de fallback
+
+**Fichiers concernés:**
+- `api/cors-proxy.js`
+- `js/sync-ical-v2.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [27 Mars 2026] - Reste à vivre: omission de l'IR mensuel dans les dépenses
+
+**Contexte:**
+Après correctifs fiscaux gîtes/LMNP/IR, le module "Reste à vivre" continuait d'afficher une capacité mensuelle surévaluée.
+
+**Erreur:**
+Le total des dépenses mensuelles n'intégrait pas l'IR du foyer, alors qu'il est bien calculé annuellement dans la simulation.
+
+**Cause:**
+Le calcul RAV additionnait crédits + frais personnels + charges résidence perso, sans ajouter la charge IR mensualisée.
+
+**Solution:**
+✅ Correctif appliqué:
+- récupération de la valeur annuelle `ir-montant`
+- conversion robuste en nombre puis mensualisation (IR annuel / 12)
+- ajout de l'IR mensuel dans `totalDepenses` du RAV
+
+**Prévention:**
+1. garder une checklist des flux de trésorerie obligatoires (impôts, crédits, charges fixes)
+2. valider le RAV sur cas de contrôle avec et sans IR pour détecter les omissions
+
+**Fichiers concernés:**
+- `js/fiscalite-v2.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [27 Mars 2026] - Fiscalité gîtes/LMNP: assiette de charges réelle inexacte et déficit LMNP imputé à tort
+
+**Contexte:**
+Après mise à jour du document d'audit complet fiscalité, plusieurs points CRITIQUES restaient ouverts sur le moteur gîtes/IR/comparatif.
+
+**Erreur:**
+- Calcul BIC réel basé sur mensualités de crédits au lieu des seuls intérêts déductibles
+- Charges résidence (prorata pro) et frais véhicule calculés mais non intégrés dans le total réel
+- En LMNP < 23k€, URSSAF à 0 sans ajout systématique des PS patrimoine 18,6%
+- Revenu reporté vers l'IR permettant la baisse du revenu global via déficit LMNP
+- Critère LMP "recettes > autres revenus pro" comparé aux salaires bruts
+
+**Cause:**
+1. héritage de logique "trésorerie" injectée dans une assiette fiscale
+2. divergence entre affichage détaillé et formule de total réel
+3. non-uniformisation des règles LMNP entre calcul principal, comparatif et IR
+
+**Solution:**
+✅ Correctifs appliqués:
+- ajout d'un calcul dédié des intérêts de crédits déductibles annuels (et suppression des mensualités comme charge fiscale)
+- inclusion des charges résidence proratisées + frais véhicule dans le total des charges BIC réel
+- application des PS patrimoine 18,6% pour LMNP exonéré URSSAF dans le calcul principal et le comparatif
+- neutralisation du déficit LMNP dans le revenu global IR (imputation maintenue pour LMP)
+- recalcul des "autres revenus professionnels" sur salaires imposables (abattement 10% appliqué)
+- mise à jour de la configuration `TAUX_FISCAUX` 2026 (barème IR + paramètres 2026 complémentaires)
+
+**Prévention:**
+1. séparer explicitement logique fiscale et logique trésorerie dans les helpers partagés
+2. centraliser les taux réglementaires annuels dans `TAUX_FISCAUX` puis interdire les constantes locales
+3. valider les règles LMNP/LMP via cas de tests croisés (comparatif + IR + aperçu temps réel)
+
+**Fichiers concernés:**
+- `js/fiscalite-v2.js`
+- `js/taux-fiscaux-config.js`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [27 Mars 2026] - Page fiscalité: handlers inline orphelins + toggle frais pro incohérent
+
+**Contexte:**
+Audit global de la page fiscalité après évolutions CH et ajustements UI.
+
+**Erreur:**
+- Appels inline vers fonctions absentes: `calculerFraisReelsImpots`, `closeFraisReelsModal`, `validerFraisReels`
+- Toggle période non appliqué sur frais pro quand la section est transmise en `frais_pro`
+- Injection HTML de libellés dynamiques via `innerHTML` dans l'affichage détaillé des charges
+
+**Cause:**
+1. reliquat d'une ancienne modal encore branchée dans le HTML
+2. divergence de nommage section (`frais_pro` côté HTML vs `frais-pro` côté JS)
+3. rendu historique basé sur templates string pour des valeurs dynamiques
+
+**Solution:**
+✅ Correctifs appliqués:
+- ajout des fonctions de compatibilité modal (`calculerFraisReelsImpots`, `closeFraisReelsModal`, `validerFraisReels`)
+- export global `window.*` pour les handlers inline existants
+- prise en charge des deux clés de section (`frais_pro` et `frais-pro`) dans `togglePeriodSection`
+- remplacement ciblé de `innerHTML` par création DOM sûre pour les lignes de détail charges/amortissements
+
+**Prévention:**
+1. valider automatiquement la correspondance handlers inline ↔ fonctions déclarées après chaque refactor
+2. imposer un nommage canonique des clés de section UI
+3. éviter `innerHTML` pour tout texte issu de données dynamiques
+
+**Fichiers concernés:**
+- `js/fiscalite-v2.js`
+- `tabs/tab-fiscalite-v2.html`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
+### [27 Mars 2026] - Moteur fiscal CH: base IR micro faussée et seuils réglementaires incomplets
+
+**Contexte:**
+Les simulations Chambres d'hôtes (CH) présentaient des écarts de comparaison Micro vs Réel et des alertes réglementaires incomplètes.
+
+**Erreur:**
+- base IR micro CH calculée après déduction des cotisations sociales
+- seuil SSI CH codé en dur (6 248€) sans variation annuelle
+- taux patrimoine CH à 17,2% au lieu de 18,6%
+- absence du seuil TVA majoré (41 250€)
+- frais de notaire CH traités uniquement en charge immédiate
+- absence de contrôle d'éligibilité VL via RFR N-2
+
+**Cause:**
+1. logique de calcul micro CH implémentée avec revenu net de cotisations
+2. constantes réglementaires figées dans la fonction CH
+3. interface CH sans paramètres métier complémentaires (RFR N-2, mode notaire)
+
+**Solution:**
+✅ Correctifs appliqués dans le moteur CH:
+- IR micro CH calculé sur la base imposable micro (sans déduction cotisations)
+- taux patrimoine CH passé à 18,6%
+- seuil SSI CH calculé dynamiquement: 13% du PASS annuel
+- ajout seuil TVA majoré 41 250€ avec messages différenciés
+- ajout mode frais de notaire: déduction immédiate ou amortissement
+- ajout champ RFR N-2 et alerte d'éligibilité VL
+
+**Prévention:**
+1. centraliser les paramètres fiscaux CH dans une structure configurable annuelle
+2. éviter les constantes réglementaires figées dans les fonctions de calcul
+3. maintenir une checklist de conformité CH à chaque changement de millésime fiscal
+
+**Fichiers concernés:**
+- `js/fiscalite-v2.js`
+- `tabs/tab-fiscalite-v2.html`
+- `docs/ARCHITECTURE.md`
+- `docs/architecture/ERREURS_CRITIQUES.md`
+
+---
+
 ### [1 Mars 2026] - Doublons de phases manifest (progression >100%) en reprise de charge
 
 **Contexte:**

@@ -65,6 +65,160 @@
     transition: all 0.2s;
 }
 
+/* Règle spécifique pour l'alignement des champs de revenus */
+.ir-calculation-row .form-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Aligne les éléments en bas */
+}
+
+.ir-calculation-row input,
+.ir-calculation-row button {
+    height: 44px; /* Hauteur uniforme */
+    box-sizing: border-box; /* Inclut padding et bordure dans la hauteur */
+    width: 100%;
+}
+
+/* Override local: ligne IR section personnelle (evite l'ecrasement par main.css) */
+#tab-charges #section-personnelle .ir-salary-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+#tab-charges #section-personnelle .ir-salary-row input[type="number"] {
+    flex: 1 1 190px !important;
+    max-width: 220px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+}
+
+#tab-charges #section-personnelle .btn-frais-inline {
+    height: 44px !important;
+    min-height: 44px !important;
+    min-width: 78px !important;
+    padding: 0 12px !important;
+    font-size: 0.9rem !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+#tab-charges #section-personnelle .ir-income-row {
+    display: grid !important;
+    grid-template-columns: minmax(160px, 220px) minmax(160px, 220px) auto !important;
+    align-items: end !important;
+    gap: 10px !important;
+}
+
+#tab-charges #section-personnelle .ir-income-row input[type="number"],
+#tab-charges #section-personnelle .ir-income-row input[type="text"] {
+    min-height: 44px !important;
+    height: 44px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Verrouillage strict de la ligne IR (largeur + hauteur homogenes) */
+#tab-charges #section-personnelle .ir-hard-grid-wrap {
+    display: grid !important;
+    gap: 8px !important;
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    padding: 2px 0 4px !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-labels,
+#tab-charges #section-personnelle .ir-hard-grid-inputs,
+#tab-charges #section-personnelle .ir-hard-grid-meta {
+    display: grid !important;
+    grid-template-columns: 188px 78px 188px 78px 170px 170px 150px 86px !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    width: max-content !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-labels {
+    align-items: end !important;
+    margin-bottom: 2px !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-labels label {
+    margin: 0 !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1.2 !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-inputs {
+    align-items: center !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-inputs input[type="number"],
+#tab-charges #section-personnelle .ir-hard-grid-inputs input[type="text"],
+#tab-charges #section-personnelle .ir-hard-grid-inputs .btn-frais-inline,
+#tab-charges #section-personnelle .ir-hard-grid-inputs select {
+    height: 40px !important;
+    min-height: 40px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-inputs .btn-frais-inline {
+    min-width: 78px !important;
+    padding: 0 10px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    font-size: 0.9rem !important;
+}
+
+#tab-charges #section-personnelle #ch-choix-ir {
+    align-self: center !important;
+    padding: 0 !important;
+    font-size: 0.78rem !important;
+    color: #666 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    visibility: hidden !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-inputs #nombre_enfants {
+    min-width: 86px !important;
+    max-width: 86px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-meta {
+    align-items: start !important;
+    margin-top: 2px !important;
+}
+
+#tab-charges #section-personnelle .ir-hard-grid-meta .frais-info-box {
+    margin-top: 0 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    color: var(--text-primary) !important;
+}
+
+@media (max-width: 1200px) {
+    #tab-charges #section-personnelle .ir-hard-grid-wrap {
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    MODE SIDEBAR - NEO-BRUTALISM
    ═══════════════════════════════════════════════════════════════════════ */

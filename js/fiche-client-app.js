@@ -3774,6 +3774,26 @@ async function submitRetourDemande(event) {
     event.preventDefault();
     
     // ✅ Feature réactivée - Table problemes_signales restaurée - 28/01/2026
+
+    // Validation inline des champs requis
+    if (window.Utils && Utils.clearFieldErrors) {
+        Utils.clearFieldErrors(document.getElementById('formRetoursDemande'));
+    }
+    const sujetEl = document.getElementById('sujetRetourDemande');
+    const descEl  = document.getElementById('descriptionRetourDemande');
+    let formValid = true;
+    if (sujetEl && !sujetEl.value.trim()) {
+        if (window.Utils) Utils.showFieldError(sujetEl, 'Ce champ est requis');
+        formValid = false;
+    }
+    if (descEl && !descEl.value.trim()) {
+        if (window.Utils) Utils.showFieldError(descEl, 'Ce champ est requis');
+        formValid = false;
+    }
+    if (!formValid) {
+        showToast('Veuillez remplir tous les champs requis', 'error');
+        return;
+    }
     
     try {
         const type = document.getElementById('typeRetourDemande').value;
@@ -3783,8 +3803,8 @@ async function submitRetourDemande(event) {
             reservation_id: reservationData.id, // ✅ FIX: Utiliser reservationData.id au lieu de giteInfo.reservationId
             gite: reservationData.gite,
             type: type,
-            sujet: document.getElementById('sujetRetourDemande').value,
-            description: document.getElementById('descriptionRetourDemande').value,
+            sujet: sujetEl.value,
+            description: descEl.value,
             urgence: urgenceInput ? urgenceInput.value : 'normale',
             telephone: reservationData.telephone || null, // ✅ FIX: Utiliser reservationData.telephone
             statut: 'nouveau',

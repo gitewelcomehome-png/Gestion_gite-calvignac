@@ -129,6 +129,10 @@ const TAUX_FISCAUX = {
                 minimum: 472,
                 maximum: 13522
             },
+
+            PRELEVEMENTS_SOCIAUX: {
+                patrimoine_bic_meuble: 0.172
+            },
             
             // BARÈME KILOMÉTRIQUE (selon puissance fiscale)
             BAREME_KM: {
@@ -162,8 +166,8 @@ const TAUX_FISCAUX = {
         
         // ⚠️ À mettre à jour chaque année en février : PASS, BAREME_IR, SMIC
         2025: {
-            // PASS 2025 (identique 2024)
-            PASS: 46368,
+            // PASS 2025
+            PASS: 47100,
             SMIC_HORAIRE: 11.88,
             
             // COTISATIONS URSSAF 2025 (identiques 2024 - vérifier février 2025)
@@ -255,6 +259,11 @@ const TAUX_FISCAUX = {
                 minimum: 472,
                 maximum: 13522
             },
+
+            PRELEVEMENTS_SOCIAUX: {
+                // LFSS 2026: applicable aux revenus du patrimoine imposés au titre de 2025
+                patrimoine_bic_meuble: 0.186
+            },
             
 
         },
@@ -271,7 +280,39 @@ const TAUX_FISCAUX = {
                 { max: 84577, taux: 0.30 },
                 { max: 181917, taux: 0.41 },
                 { max: Infinity, taux: 0.45 }
-            ]
+            ],
+
+            ABATTEMENT_SALAIRE: {
+                taux: 0.10,
+                minimum: 509,
+                maximum: 14556
+            },
+
+            ABATTEMENT_PENSION: {
+                taux: 0.10,
+                minimum: 454,
+                maximum: 4439
+            },
+
+            QUOTIENT_FAMILIAL: {
+                plafond_demi_part: 1807
+            },
+
+            DECOTE: {
+                celibataire: {
+                    montant: 897,
+                    seuil: 1982
+                },
+                couple: {
+                    montant: 1483,
+                    seuil: 3277
+                },
+                taux_reduction: 0.4525
+            },
+
+            PRELEVEMENTS_SOCIAUX: {
+                patrimoine_bic_meuble: 0.186
+            }
         }
     },
     
@@ -309,6 +350,22 @@ const TAUX_FISCAUX = {
             ABATTEMENT_SALAIRE: {
                 ...(baseConfig.ABATTEMENT_SALAIRE || {}),
                 ...(overrideConfig.ABATTEMENT_SALAIRE || {})
+            },
+            ABATTEMENT_PENSION: {
+                ...(baseConfig.ABATTEMENT_PENSION || {}),
+                ...(overrideConfig.ABATTEMENT_PENSION || {})
+            },
+            QUOTIENT_FAMILIAL: {
+                ...(baseConfig.QUOTIENT_FAMILIAL || {}),
+                ...(overrideConfig.QUOTIENT_FAMILIAL || {})
+            },
+            DECOTE: {
+                ...(baseConfig.DECOTE || {}),
+                ...(overrideConfig.DECOTE || {})
+            },
+            PRELEVEMENTS_SOCIAUX: {
+                ...(baseConfig.PRELEVEMENTS_SOCIAUX || {}),
+                ...(overrideConfig.PRELEVEMENTS_SOCIAUX || {})
             },
             BAREME_IR: overrideConfig.BAREME_IR || baseConfig.BAREME_IR,
             // Le barème KM 2025 est identique à 2024 (décret BOFiP du 3 avril 2025).
@@ -431,7 +488,47 @@ const TAUX_FISCAUX = {
             if (quotient <= tranche.max) break;
         }
         
-        return impotQuotient * nbParts;
+        let impot = impotQuotient * nbParts;
+
+        // Plafonnement quotient familial (base couple = 2 parts dans ce simulateur)
+        const plafondParDemiPart = Number(config?.QUOTIENT_FAMILIAL?.plafond_demi_part);
+        const demiPartsSupplementaires = Math.max(0, (nbParts - 2) * 2);
+        if (Number.isFinite(plafondParDemiPart) && demiPartsSupplementaires > 0) {
+            const quotientBase = revenuImposable / 2;
+            let impotBaseParPart = 0;
+            let trancheBase = 0;
+
+            for (const tranche of bareme) {
+                if (quotientBase <= trancheBase) break;
+
+                const baseImposable = Math.min(quotientBase, tranche.max) - trancheBase;
+                impotBaseParPart += baseImposable * tranche.taux;
+
+                trancheBase = tranche.max;
+                if (quotientBase <= tranche.max) break;
+            }
+
+            const impotBase = impotBaseParPart * 2;
+            const avantage = Math.max(0, impotBase - impot);
+            const plafondGlobal = demiPartsSupplementaires * plafondParDemiPart;
+            if (avantage > plafondGlobal) {
+                impot = Math.max(0, impotBase - plafondGlobal);
+            }
+        }
+
+        // Décote
+        const decote = config?.DECOTE || {};
+        const estCouple = nbParts >= 2;
+        const decoteMontant = Number(estCouple ? decote?.couple?.montant : decote?.celibataire?.montant);
+        const decoteSeuil = Number(estCouple ? decote?.couple?.seuil : decote?.celibataire?.seuil);
+        const decoteTaux = Number(decote?.taux_reduction);
+
+        if (Number.isFinite(decoteMontant) && Number.isFinite(decoteSeuil) && Number.isFinite(decoteTaux) && impot <= decoteSeuil) {
+            const montantDecote = Math.max(0, decoteMontant - (decoteTaux * impot));
+            impot = Math.max(0, impot - montantDecote);
+        }
+
+        return impot;
     },
     
     /**

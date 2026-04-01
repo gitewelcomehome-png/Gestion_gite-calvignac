@@ -271,6 +271,56 @@
     }
 
     // ================================================
+    // 9. VALIDATION — Formulaires
+    // ================================================
+
+    /**
+     * Valide le format d'une adresse email.
+     *
+     * @param {string} email
+     * @returns {boolean}
+     */
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+    }
+
+    /**
+     * Affiche un message d'erreur inline sous un champ de formulaire.
+     * Ajoute un `<small class="field-error">` juste après l'élément.
+     * Met en évidence le champ via la classe CSS `input--error`.
+     *
+     * @param {HTMLElement} input — Le champ en erreur
+     * @param {string} message   — Texte à afficher
+     */
+    function showFieldError(input, message) {
+        if (!input) return;
+        // Retirer l'éventuelle erreur précédente sur ce champ
+        const existing = input.parentNode && input.parentNode.querySelector('.field-error[data-for="' + input.id + '"]');
+        if (existing) existing.remove();
+
+        input.classList.add('input--error');
+
+        const small = document.createElement('small');
+        small.className = 'field-error';
+        small.setAttribute('data-for', input.id || '');
+        small.textContent = message;
+        small.style.cssText = 'display:block;color:#ef4444;font-size:0.78rem;margin-top:4px;';
+
+        input.insertAdjacentElement('afterend', small);
+    }
+
+    /**
+     * Supprime toutes les erreurs inline d'un formulaire (ou de document).
+     *
+     * @param {HTMLElement|Document} [container=document]
+     */
+    function clearFieldErrors(container) {
+        const root = container || document;
+        root.querySelectorAll('.field-error').forEach(el => el.remove());
+        root.querySelectorAll('.input--error').forEach(el => el.classList.remove('input--error'));
+    }
+
+    // ================================================
     // EXPORT
     // ================================================
 
@@ -285,7 +335,10 @@
         truncateText,
         showToast,
         showSkeleton,
-        hideSkeleton
+        hideSkeleton,
+        validateEmail,
+        showFieldError,
+        clearFieldErrors
     };
 
     // Namespace principal

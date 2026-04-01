@@ -1,8 +1,0 @@
-[21/12/2025 12:31:22] 🏠 CONFIGURATION DES GÎTES
-[21/12/2025 12:31:22] ======================================================================
-[21/12/2025 12:31:22] 🔗 Connexion Supabase...
-[21/12/2025 12:31:22] ❌ Erreur Supabase: getaddrinfo ENOTFOUND aorjoghgsyaaqkodxrpo.supabase.co
-[21/12/2025 12:31:22] 
-❌ Impossible de récupérer les coordonnées.
-[21/12/2025 12:31:22] 💡 Conseil: Vérifiez votre connexion internet
-[21/12/2025 12:31:22] 📝 Vous pouvez configurer manuellement en éditant search_pois.js
