@@ -354,9 +354,7 @@
         copyToClipboard,
         safeJSONParse,
         isNullOrEmpty,
-<<<<<<< HEAD
         truncateText
-=======
         truncateText,
         showToast,
         showSkeleton,
@@ -365,7 +363,6 @@
         validateEmail,
         showFieldError,
         clearFieldErrors
->>>>>>> main
     };
 
     // Namespace principal
@@ -379,11 +376,8 @@
     if (typeof global.debounce === 'undefined') {
         global.debounce = debounce;
     }
-<<<<<<< HEAD
-=======
     if (typeof global.showToast === 'undefined') {
         global.showToast = showToast;
     }
->>>>>>> main
 
 }(window));
