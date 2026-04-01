@@ -6379,3 +6379,39 @@ select option:disabled {
         grid-template-columns: 1fr;
     }
 }
+
+/* ================================================
+   LOADING SKELETONS
+   Affichés pendant le chargement fetch() des onglets
+   ================================================ */
+.skeleton-loader {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 20px;
+}
+
+.skeleton-line {
+    height: 18px;
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        var(--bg-secondary, #f0f0f0) 25%,
+        var(--bg-tertiary, #e0e0e0) 50%,
+        var(--bg-secondary, #f0f0f0) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
+}
+
+.skeleton-line--short  { width: 40%; }
+.skeleton-line--medium { width: 65%; }
+.skeleton-line--long   { width: 90%; }
+.skeleton-line--full   { width: 100%; }
+.skeleton-line--tall   { height: 80px; }
+.skeleton-line--card   { height: 120px; border-radius: 10px; }
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

@@ -2107,7 +2107,12 @@
             if (saveEmailBtn) {
                 saveEmailBtn.addEventListener('click', () => {
                     const addr = document.getElementById('optionsNotifEmailAddress');
-                    const val = addr ? addr.value : '';
+                    const val = addr ? addr.value.trim() : '';
+                    Utils.clearFieldErrors(addr ? addr.parentNode : document);
+                    if (val && !Utils.validateEmail(val)) {
+                        Utils.showFieldError(addr, 'Format d\'email invalide');
+                        return;
+                    }
                     saveNotificationPreferenceInOptions('email_address', val);
                 });
             }
@@ -2116,7 +2121,12 @@
             if (saveMenageEmailBtn) {
                 saveMenageEmailBtn.addEventListener('click', () => {
                     const addr = document.getElementById('optionsNotifMenageCompanyEmail');
-                    const val = addr ? addr.value : '';
+                    const val = addr ? addr.value.trim() : '';
+                    Utils.clearFieldErrors(addr ? addr.parentNode : document);
+                    if (val && !Utils.validateEmail(val)) {
+                        Utils.showFieldError(addr, 'Format d\'email invalide');
+                        return;
+                    }
                     saveNotificationPreferenceInOptions('menage_company_email', val);
                 });
             }
@@ -3806,17 +3816,33 @@
             
             try {
                 profileError.style.display = 'none';
-                
-                // Validation des champs obligatoires
-                const prenom = document.getElementById('profilePrenom').value.trim();
-                const nom = document.getElementById('profileNom').value.trim();
-                const telephone = document.getElementById('profileTelephone').value.trim();
-                const adresse = document.getElementById('profileAdresse').value.trim();
-                const codePostal = document.getElementById('profileCodePostal').value.trim();
-                const ville = document.getElementById('profileVille').value.trim();
-                const pays = document.getElementById('profilePays').value;
-                
-                if (!prenom || !nom || !telephone || !adresse || !codePostal || !ville) {
+                Utils.clearFieldErrors(document.getElementById('profileForm') || document);
+
+                // Validation des champs obligatoires avec erreurs inline
+                const prenomEl    = document.getElementById('profilePrenom');
+                const nomEl       = document.getElementById('profileNom');
+                const telEl       = document.getElementById('profileTelephone');
+                const adresseEl   = document.getElementById('profileAdresse');
+                const cpEl        = document.getElementById('profileCodePostal');
+                const villeEl     = document.getElementById('profileVille');
+                const pays        = document.getElementById('profilePays').value;
+
+                const prenom    = prenomEl  ? prenomEl.value.trim()  : '';
+                const nom       = nomEl     ? nomEl.value.trim()     : '';
+                const telephone = telEl     ? telEl.value.trim()     : '';
+                const adresse   = adresseEl ? adresseEl.value.trim() : '';
+                const codePostal = cpEl     ? cpEl.value.trim()      : '';
+                const ville     = villeEl   ? villeEl.value.trim()   : '';
+
+                let hasError = false;
+                if (!prenom)    { Utils.showFieldError(prenomEl,  'Ce champ est requis'); hasError = true; }
+                if (!nom)       { Utils.showFieldError(nomEl,     'Ce champ est requis'); hasError = true; }
+                if (!telephone) { Utils.showFieldError(telEl,     'Ce champ est requis'); hasError = true; }
+                if (!adresse)   { Utils.showFieldError(adresseEl, 'Ce champ est requis'); hasError = true; }
+                if (!codePostal){ Utils.showFieldError(cpEl,      'Ce champ est requis'); hasError = true; }
+                if (!ville)     { Utils.showFieldError(villeEl,   'Ce champ est requis'); hasError = true; }
+
+                if (hasError) {
                     throw new Error('Veuillez remplir tous les champs obligatoires (marqués avec *)');
                 }
                 

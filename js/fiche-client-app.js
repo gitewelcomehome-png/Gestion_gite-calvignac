@@ -860,6 +860,7 @@ function initializeUI() {
     
     // Onglet Pendant
     initOngletPendant();
+    loadWeatherData(); // widget météo dans l'onglet Pendant (appel async non-bloquant)
     
     // Onglet Sortie
     initOngletSortie();
@@ -1323,15 +1324,15 @@ async function initTimelineSection() {
         timelineAvant.classList.remove('active');
         timelinePendant.classList.add('active');
         timelineApres.classList.remove('active');
-        
-        // Charger météo
-        await loadWeatherData();
     } else {
         // Après départ (dans les 7 jours)
         timelineAvant.classList.remove('active');
         timelinePendant.classList.remove('active');
         timelineApres.classList.add('active');
     }
+
+    // Météo affichée dans toutes les phases
+    await loadWeatherData();
     
     // Afficher les dates
     const formatDate = (date) => {
@@ -1355,11 +1356,11 @@ async function initTimelineSection() {
 // ✨ Chargement météo WeatherAPI.com (gratuit 1M appels/mois, usage commercial autorisé)
 async function loadWeatherData() {
     const weatherWidget = document.getElementById('weatherWidget');
-    if (!weatherWidget || !giteInfo.gps_lat || !giteInfo.gps_lon) return;
+    const lat = giteInfo.latitude || giteInfo.gps_lat;
+    const lon = giteInfo.longitude || giteInfo.gps_lon;
+    if (!weatherWidget || !lat || !lon) return;
     
     try {
-        const lat = giteInfo.gps_lat;
-        const lon = giteInfo.gps_lon;
         const lang = currentLanguage === 'fr' ? 'fr' : 'en';
         
         // WeatherAPI.com : 5M appels/mois (trial Pro Plus → Free plan auto après 16/02/2026)
@@ -2834,16 +2835,7 @@ function copyToClipboard(inputId) {
     showToast(t('copie_success'), 'success');
 }
 
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
+// showToast — défini dans js/utils.js (chargé avant ce fichier)
 
 function showError(message) {
     document.getElementById('loadingScreen').innerHTML = `
@@ -3782,6 +3774,26 @@ async function submitRetourDemande(event) {
     event.preventDefault();
     
     // ✅ Feature réactivée - Table problemes_signales restaurée - 28/01/2026
+
+    // Validation inline des champs requis
+    if (window.Utils && Utils.clearFieldErrors) {
+        Utils.clearFieldErrors(document.getElementById('formRetoursDemande'));
+    }
+    const sujetEl = document.getElementById('sujetRetourDemande');
+    const descEl  = document.getElementById('descriptionRetourDemande');
+    let formValid = true;
+    if (sujetEl && !sujetEl.value.trim()) {
+        if (window.Utils) Utils.showFieldError(sujetEl, 'Ce champ est requis');
+        formValid = false;
+    }
+    if (descEl && !descEl.value.trim()) {
+        if (window.Utils) Utils.showFieldError(descEl, 'Ce champ est requis');
+        formValid = false;
+    }
+    if (!formValid) {
+        showToast('Veuillez remplir tous les champs requis', 'error');
+        return;
+    }
     
     try {
         const type = document.getElementById('typeRetourDemande').value;
@@ -3791,8 +3803,8 @@ async function submitRetourDemande(event) {
             reservation_id: reservationData.id, // ✅ FIX: Utiliser reservationData.id au lieu de giteInfo.reservationId
             gite: reservationData.gite,
             type: type,
-            sujet: document.getElementById('sujetRetourDemande').value,
-            description: document.getElementById('descriptionRetourDemande').value,
+            sujet: sujetEl.value,
+            description: descEl.value,
             urgence: urgenceInput ? urgenceInput.value : 'normale',
             telephone: reservationData.telephone || null, // ✅ FIX: Utiliser reservationData.telephone
             statut: 'nouveau',

@@ -69,9 +69,13 @@
 ### Fichiers d'Architecture
 - **ARCHITECTURE.md** : Documentation centrale de l'existant (structure, tables, fonctionnalités)
 - **ERREURS_CRITIQUES.md** : Historique des bugs critiques et leurs solutions
+- **DOCUMENTATION_PAGES_1_PUBLIC_AUTH.md** : Documentation pages publiques + auth
+- **DOCUMENTATION_PAGES_2_APP_ONGLETS.md** : Documentation app shell + tous les onglets propriétaire
+- **DOCUMENTATION_PAGES_3_ADMIN_CLIENT.md** : Documentation pages admin + pages client/métier
 - **TOUJOURS consulter ces fichiers** avant toute modification
 - **Mettre à jour ces fichiers** après chaque changement important
 - S'y référer systématiquement en cas de bug pour éviter les erreurs connues
+- ⚠️ **Toute modification de page HTML** (ajout bouton, formulaire, section, nouvelle page) = mise à jour du fichier DOCUMENTATION_PAGES correspondant **obligatoire**
 
 ## 🧹 Gestion des Fichiers
 
@@ -105,4 +109,13 @@
 - ✅ Validation avant initiative
 - ✅ Solutions sûres et pérennes
 - ✅ Code propre et sans erreur
+
+## 🤝 Coopération avec Claude Cowork
+
+Après toute correction de bug ou ajout de fonctionnalité, générer un fichier de tests pour Claude Cowork :
+- Écrire `tmp/cowork-pending-tests.json` selon le format défini dans `.github/skills/cowork-tests/SKILL.md`
+- Inclure au moins 1 test `critical` sur le comportement corrigé + 1 test `smoke` de non-régression
+- Après retour des résultats (`tmp/cowork-results.json`), corriger immédiatement les FAIL `critical`
+- Nettoyer `tmp/` après validation complète
+- **Charger le skill** `.github/skills/cowork-tests/SKILL.md` avant de générer les tests
 

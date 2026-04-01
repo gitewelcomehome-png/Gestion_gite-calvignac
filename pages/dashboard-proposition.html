@@ -813,7 +813,29 @@ async function loadAllData() {
         const soldes = soldesRes.data || [];
         const latestSolde = [...soldes].reverse().map(s => Number.parseFloat(s.solde)).find(v => Number.isFinite(v));
 
-        setText('kpi-tresorerie', Number.isFinite(latestSolde) ? formatCurrency(latestSolde) : '-');
+        // Niveau 2.1 — Calcul trésorerie réel (fallback quand suivi_soldes_bancaires est vide)
+        const startOfYear = new Date(year, 0, 1);
+        const revenusYtd = reservations
+            .filter(r => {
+                const inDate = safeDate(findField(r, ['check_in', 'date_arrivee', 'dateDebut']));
+                const statut = String(r.statut || '').toLowerCase();
+                return inDate && inDate >= startOfYear && inDate <= now
+                    && !r.cancelled
+                    && ['confirmee', 'terminee', 'confirmed'].includes(statut);
+            })
+            .reduce((s, r) => s + Number.parseFloat(findField(r, ['montant_total', 'total_price', 'montant', 'prix_total'], 0) || 0), 0);
+
+        const tresorerieValue = Number.isFinite(latestSolde) ? latestSolde : revenusYtd;
+        const tresorerieEl = document.getElementById('kpi-tresorerie');
+        if (tresorerieEl) {
+            tresorerieEl.textContent = formatCurrency(tresorerieValue);
+            tresorerieEl.style.color = tresorerieValue >= 0 ? '#22c55e' : '#ef4444';
+            const labelEl = tresorerieEl.parentElement?.querySelector('.kpi-label');
+            if (labelEl && !Number.isFinite(latestSolde)) {
+                labelEl.textContent = 'Revenus YTD (estimé)';
+            }
+        }
+
         setText('kpi-ca-mois', formatCurrency(caMois));
         setText('kpi-benefice', formatCurrency(beneficeYtd));
         setText('kpi-marge', (Number.isFinite(marge) ? marge.toFixed(1) : '0.0') + '%');

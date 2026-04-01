@@ -1,0 +1,338 @@
+{
+  "meta": {
+    "name": "Fiscalite Full E2E AI Plan",
+    "version": "1.0.0",
+    "date": "2026-03-27",
+    "targetPage": "Fiscalite",
+    "baseUrlProd": "https://liveownerunit.fr",
+    "fiscaliteUrlProd": "https://liveownerunit.fr/app.html?tab=charges",
+    "fiscaliteUrlFallback": "https://gestion-gite-calvignac.vercel.app/app.html?tab=charges",
+    "language": "fr",
+    "notes": [
+      "Plan optimise pour agent IA de test UI.",
+      "URL cible prioritaire: https://liveownerunit.fr/app.html?tab=charges",
+      "Fallback si besoin: https://gestion-gite-calvignac.vercel.app/app.html?tab=charges",
+      "Utiliser les IDs comme selecteurs CSS (#id).",
+      "Quand un montant contient le symbole euro, parser en nombre avant comparaison.",
+      "Tolerance numerique recommandee: 0.5 euro pour les assertions exactes."
+    ]
+  },
+  "execution": {
+    "mode": "sequential",
+    "stopOnFailure": false,
+    "defaultTimeoutMs": 10000,
+    "waitAfterInputMs": 120,
+    "waitAfterClickMs": 180
+  },
+  "helpers": {
+    "moneyParseRule": "remove all chars except digits, comma, dot, minus; replace comma by dot; parseFloat",
+    "assertionToleranceEuro": 0.5
+  },
+  "preconditions": [
+    "Utilisateur connecte.",
+    "Ouvrir directement la page fiscalite via https://liveownerunit.fr/app.html?tab=charges (ou fallback Vercel).",
+    "Au moins un gite actif.",
+    "annee_selector visible et selectionnable."
+  ],
+  "seedData": {
+    "main": {
+      "statut_fiscal": "lmnp",
+      "ca": 20000,
+      "classement_meuble": "non_classe",
+      "option_micro_entrepreneur_confirmee": false,
+      "option_versement_liberatoire": false
+    },
+    "residence": {
+      "surface_bureau": 15,
+      "surface_totale": 100,
+      "interets_residence": 450,
+      "assurance_residence": 45,
+      "electricite_residence": 95,
+      "internet_residence": 39,
+      "eau_residence": 28,
+      "assurance_hab_residence": 22,
+      "taxe_fonciere_residence": 1200
+    },
+    "fraisPro": {
+      "comptable": 1200,
+      "frais_bancaires": 240,
+      "telephone": 35,
+      "materiel_info": 900,
+      "rc_pro": 250,
+      "formation": 300,
+      "fournitures": 40
+    },
+    "ir": {
+      "salaire_madame": 24000,
+      "salaire_monsieur": 16000,
+      "nombre_enfants": 2
+    },
+    "rav": {
+      "frais_perso_internet": 35,
+      "frais_perso_electricite": 95,
+      "frais_perso_eau": 30,
+      "frais_perso_assurance": 65,
+      "frais_perso_taxe": 900,
+      "frais_perso_autres": 250
+    },
+    "ch": {
+      "ch_statut_fiscal": "micro",
+      "ch_ca_annuel": 18000,
+      "ch_rfr_n2": 25000,
+      "ch_surface_totale": 140,
+      "ch_surface_utilisee": 45,
+      "ch_charge_electricite_maison": 1800,
+      "ch_charge_eau_maison": 500,
+      "ch_charge_gaz_maison": 700,
+      "ch_charge_internet_maison": 420,
+      "ch_charge_assurance_pno": 480,
+      "ch_charge_taxe_fonciere": 1500,
+      "ch_charge_linge": 650,
+      "ch_charge_menage": 2200,
+      "ch_charge_commissions": 900,
+      "ch_charge_comptable": 700,
+      "ch_charge_frais_bancaires": 160,
+      "ch_charge_interets_emprunt": 2800,
+      "ch_charge_assurance_emprunteur": 450,
+      "ch_charge_frais_dossier": 120,
+      "ch_frais_notaire": 6000,
+      "ch_frais_notaire_mode": "immediat"
+    }
+  },
+  "tests": [
+    {
+      "id": "JT-01",
+      "title": "Sanity global fiscalite",
+      "priority": "P0",
+      "steps": [
+        { "action": "assertVisible", "target": "#annee_selector" },
+        { "action": "assertVisible", "target": "#ca" },
+        { "action": "fill", "target": "#ca", "value": "20000" },
+        { "action": "select", "target": "#statut_fiscal", "value": "lmnp" },
+        { "action": "select", "target": "#classement_meuble", "value": "non_classe" },
+        { "action": "fill", "target": "#salaire_madame", "value": "24000" },
+        { "action": "fill", "target": "#salaire_monsieur", "value": "16000" },
+        { "action": "select", "target": "#nombre_enfants", "value": "2" }
+      ],
+      "assertions": [
+        { "type": "textNotEquals", "target": "#preview-benefice", "value": "0 €" },
+        { "type": "textNotEquals", "target": "#preview-reste", "value": "0 €" },
+        { "type": "textNotEquals", "target": "#ir-montant", "value": "0 €" },
+        { "type": "visible", "target": "#option-lmnp-reel" }
+      ]
+    },
+    {
+      "id": "JT-02",
+      "title": "VL verrouille sans confirmation micro-entrepreneur",
+      "priority": "P0",
+      "steps": [
+        { "action": "select", "target": "#statut_fiscal", "value": "micro" },
+        { "action": "fill", "target": "#ca", "value": "15000" },
+        { "action": "select", "target": "#classement_meuble", "value": "non_classe" },
+        { "action": "uncheck", "target": "#option_micro_entrepreneur_confirmee" },
+        { "action": "assertEnabled", "target": "#option_micro_entrepreneur_confirmee" }
+      ],
+      "assertions": [
+        { "type": "disabled", "target": "#option_versement_liberatoire" },
+        { "type": "textContains", "target": "#vl-eligibilite-message", "value": "VL desactive" }
+      ]
+    },
+    {
+      "id": "JT-03",
+      "title": "VL activable apres confirmation micro-entrepreneur",
+      "priority": "P0",
+      "steps": [
+        { "action": "select", "target": "#statut_fiscal", "value": "micro" },
+        { "action": "fill", "target": "#ca", "value": "15000" },
+        { "action": "select", "target": "#classement_meuble", "value": "non_classe" },
+        { "action": "check", "target": "#option_micro_entrepreneur_confirmee" },
+        { "action": "check", "target": "#option_versement_liberatoire" }
+      ],
+      "assertions": [
+        { "type": "enabled", "target": "#option_versement_liberatoire" },
+        { "type": "textContains", "target": "#label-ir-micro-non-classe", "value": "VL" }
+      ]
+    },
+    {
+      "id": "JT-04",
+      "title": "Options ineligibles purgees en N/A",
+      "priority": "P0",
+      "steps": [
+        { "action": "select", "target": "#statut_fiscal", "value": "lmnp" },
+        { "action": "fill", "target": "#ca", "value": "30000" },
+        { "action": "select", "target": "#classement_meuble", "value": "non_classe" }
+      ],
+      "assertions": [
+        { "type": "textEquals", "target": "#total-micro-non-classe", "value": "N/A" },
+        { "type": "textEquals", "target": "#cotis-micro-non-classe", "value": "N/A" },
+        { "type": "textEquals", "target": "#ir-micro-non-classe", "value": "N/A" }
+      ]
+    },
+    {
+      "id": "JT-05",
+      "title": "LMNP sous 23k: URSSAF nul et cout non nul",
+      "priority": "P0",
+      "steps": [
+        { "action": "select", "target": "#statut_fiscal", "value": "lmnp" },
+        { "action": "fill", "target": "#ca", "value": "20000" },
+        { "action": "fill", "target": "#salaire_madame", "value": "24000" },
+        { "action": "fill", "target": "#salaire_monsieur", "value": "16000" },
+        { "action": "select", "target": "#nombre_enfants", "value": "2" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "#urssaf-lmnp-reel", "value": "0" },
+        { "type": "moneyGreaterThan", "target": "#total-lmnp-reel", "value": 0 }
+      ]
+    },
+    {
+      "id": "JT-06",
+      "title": "LMP deficit: impact IR peut etre negatif",
+      "priority": "P0",
+      "steps": [
+        { "action": "select", "target": "#statut_fiscal", "value": "lmp" },
+        { "action": "fill", "target": "#ca", "value": "30000" },
+        { "action": "fill", "target": "#salaire_madame", "value": "50000" },
+        { "action": "fill", "target": "#salaire_monsieur", "value": "0" },
+        { "action": "fill", "target": "#comptable", "value": "4000" },
+        { "action": "fill", "target": "#materiel_info", "value": "5000" },
+        { "action": "fill", "target": "#formation", "value": "2500" }
+      ],
+      "assertions": [
+        { "type": "moneyGreaterThanOrEqual", "target": "#ssi-lmp-reel", "value": 1200 },
+        { "type": "textContainsAny", "target": "#ir-lmp-reel", "values": ["-", "+", "0"] },
+        { "type": "visible", "target": "#option-lmp-reel" }
+      ]
+    },
+    {
+      "id": "JT-07",
+      "title": "IR foyer: recalcul avec salaires et enfants",
+      "priority": "P1",
+      "steps": [
+        { "action": "fill", "target": "#salaire_madame", "value": "24000" },
+        { "action": "fill", "target": "#salaire_monsieur", "value": "16000" },
+        { "action": "select", "target": "#nombre_enfants", "value": "2" }
+      ],
+      "assertions": [
+        { "type": "moneyGreaterThan", "target": "#ir-montant", "value": 0 },
+        { "type": "textContains", "target": "#ir-parts", "value": "3" }
+      ]
+    },
+    {
+      "id": "JT-08",
+      "title": "RAV: depenses augmentent avec IR mensuel",
+      "priority": "P0",
+      "steps": [
+        { "action": "fill", "target": "#frais_perso_internet", "value": "35" },
+        { "action": "fill", "target": "#frais_perso_electricite", "value": "95" },
+        { "action": "fill", "target": "#frais_perso_eau", "value": "30" },
+        { "action": "fill", "target": "#frais_perso_assurance", "value": "65" },
+        { "action": "fill", "target": "#frais_perso_taxe", "value": "900" },
+        { "action": "fill", "target": "#frais_perso_autres", "value": "250" },
+        { "action": "rememberMoney", "name": "dep_before", "target": "#rav-total-depenses" },
+        { "action": "fill", "target": "#salaire_madame", "value": "70000" },
+        { "action": "fill", "target": "#salaire_monsieur", "value": "50000" }
+      ],
+      "assertions": [
+        { "type": "moneyGreaterThanRemembered", "target": "#rav-total-depenses", "remember": "dep_before" },
+        { "type": "moneyLessThan", "target": "#rav-final", "value": 99999999 }
+      ]
+    },
+    {
+      "id": "JT-09",
+      "title": "Comparatif reel vs micro visible en LMNP",
+      "priority": "P1",
+      "steps": [
+        { "action": "select", "target": "#statut_fiscal", "value": "lmnp" },
+        { "action": "fill", "target": "#ca", "value": "12000" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "#comparaison-reel-micro" },
+        { "type": "moneyGreaterThanOrEqual", "target": "#comp-reel-total", "value": 0 },
+        { "type": "moneyGreaterThanOrEqual", "target": "#comp-micro-total", "value": 0 }
+      ]
+    },
+    {
+      "id": "JT-10",
+      "title": "Module CH micro/reel/vl",
+      "priority": "P1",
+      "steps": [
+        { "action": "select", "target": "#ch-statut-fiscal", "value": "micro" },
+        { "action": "fill", "target": "#ch-ca-annuel", "value": "18000" },
+        { "action": "fill", "target": "#ch-rfr-n2", "value": "25000" },
+        { "action": "check", "target": "#ch-option-vl" },
+        { "action": "fill", "target": "#ch-surface-totale", "value": "140" },
+        { "action": "fill", "target": "#ch-surface-utilisee", "value": "45" },
+        { "action": "fill", "target": "#ch-charge-electricite-maison", "value": "1800" },
+        { "action": "fill", "target": "#ch-charge-eau-maison", "value": "500" },
+        { "action": "fill", "target": "#ch-charge-gaz-maison", "value": "700" },
+        { "action": "fill", "target": "#ch-charge-internet-maison", "value": "420" },
+        { "action": "fill", "target": "#ch-charge-assurance-pno", "value": "480" },
+        { "action": "fill", "target": "#ch-charge-taxe-fonciere", "value": "1500" },
+        { "action": "fill", "target": "#ch-charge-linge", "value": "650" },
+        { "action": "fill", "target": "#ch-charge-menage", "value": "2200" },
+        { "action": "fill", "target": "#ch-charge-commissions", "value": "900" },
+        { "action": "fill", "target": "#ch-charge-comptable", "value": "700" },
+        { "action": "fill", "target": "#ch-charge-frais-bancaires", "value": "160" },
+        { "action": "fill", "target": "#ch-charge-interets-emprunt", "value": "2800" },
+        { "action": "fill", "target": "#ch-charge-assurance-emprunteur", "value": "450" },
+        { "action": "fill", "target": "#ch-charge-frais-dossier", "value": "120" },
+        { "action": "fill", "target": "#ch-frais-notaire", "value": "6000" },
+        { "action": "select", "target": "#ch-frais-notaire-mode", "value": "immediat" }
+      ],
+      "assertions": [
+        { "type": "moneyGreaterThanOrEqual", "target": "#ch-total-micro-standard", "value": 0 },
+        { "type": "visible", "target": "#ch-option-vl-card" },
+        { "type": "visible", "target": "#ch-option-reel" }
+      ]
+    },
+    {
+      "id": "JT-11",
+      "title": "Alerte seuil statut",
+      "priority": "P1",
+      "steps": [
+        { "action": "fill", "target": "#ca", "value": "25000" },
+        { "action": "fill", "target": "#salaire_madame", "value": "10000" },
+        { "action": "fill", "target": "#salaire_monsieur", "value": "5000" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "#alerte-seuil-statut" },
+        { "type": "textNotEquals", "target": "#alerte-seuil-message", "value": "" }
+      ]
+    },
+    {
+      "id": "JT-12",
+      "title": "Persistence save/load annee",
+      "priority": "P0",
+      "steps": [
+        { "action": "clickByText", "value": "Sauvegarder" },
+        { "action": "rememberValue", "name": "saved_statut", "target": "#statut_fiscal" },
+        { "action": "rememberChecked", "name": "saved_me_confirm", "target": "#option_micro_entrepreneur_confirmee" },
+        { "action": "rememberChecked", "name": "saved_vl", "target": "#option_versement_liberatoire" },
+        { "action": "rememberValue", "name": "saved_ca", "target": "#ca" },
+        { "action": "click", "target": "button[onclick='creerNouvelleAnnee()']" },
+        { "action": "waitMs", "value": 1000 },
+        { "action": "selectPreviousOption", "target": "#annee_selector" },
+        { "action": "waitMs", "value": 1000 }
+      ],
+      "assertions": [
+        { "type": "valueEqualsRemembered", "target": "#statut_fiscal", "remember": "saved_statut" },
+        { "type": "checkedEqualsRemembered", "target": "#option_micro_entrepreneur_confirmee", "remember": "saved_me_confirm" },
+        { "type": "checkedEqualsRemembered", "target": "#option_versement_liberatoire", "remember": "saved_vl" },
+        { "type": "valueEqualsRemembered", "target": "#ca", "remember": "saved_ca" }
+      ]
+    }
+  ],
+  "postRun": {
+    "reportTemplate": {
+      "fields": [
+        "testId",
+        "status",
+        "errorMessage",
+        "expected",
+        "actual",
+        "screenshotPath",
+        "reproStepIndex"
+      ]
+    }
+  }
+}

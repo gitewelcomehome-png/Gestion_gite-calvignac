@@ -638,28 +638,4 @@ function formatCurrency(value) {
     }).format(value);
 }
 
-function showToast(message, type = 'info') {
-    // Implémentation simple toast
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
-        color: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+// showToast — défini dans js/utils.js (chargé avant ce fichier)

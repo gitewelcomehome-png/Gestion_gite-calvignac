@@ -1,1 +1,0 @@
-V6.2_06FEB2026_SIMPLIFICATION_FISCALITE - Simplification code fiscalité + correction bugs config hardcodés + helpers utilitaires

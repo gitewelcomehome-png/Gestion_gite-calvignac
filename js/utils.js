@@ -185,6 +185,167 @@
     }
 
     // ================================================
+<<<<<<< HEAD
+=======
+    // 7. NOTIFICATIONS — Toast
+    // ================================================
+
+    /**
+     * Affiche un toast de notification flottant (coin supérieur droit).
+     * Utilisé par les pages autonomes (admin, support, femme-menage, etc.)
+     * qui n'ont pas accès à shared-utils.js.
+     *
+     * Dans app.html, shared-utils.js redéfinit showToast pour le mode inline-onglet.
+     * Ce fallback ne s'applique que si aucune version plus spécifique n'est déjà définie.
+     *
+     * @param {string} message
+     * @param {'success'|'error'|'info'|'warning'} [type='success']
+     * @param {number} [duration=3500]
+     */
+    function showToast(message, type, duration) {
+        const kind = type || 'success';
+        const delay = duration || 3500;
+        const bg = kind === 'error' ? '#ef4444'
+                 : kind === 'warning' ? '#f59e0b'
+                 : kind === 'info' ? '#3b82f6'
+                 : '#10b981';
+
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = [
+            'position:fixed',
+            'top:20px',
+            'right:20px',
+            'padding:12px 20px',
+            'border-radius:8px',
+            'box-shadow:0 4px 12px rgba(0,0,0,0.2)',
+            'z-index:100000',
+            'color:#fff',
+            'font-weight:600',
+            'font-size:14px',
+            'max-width:360px',
+            'word-break:break-word',
+            'transition:opacity 0.3s ease',
+            'background:' + bg
+        ].join(';');
+
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, delay);
+    }
+
+    // ================================================
+    // 8. SKELETONS — Chargement
+    // ================================================
+
+    /**
+     * Injecte un skeleton de chargement dans un élément.
+     * Remplace le contenu existant. Appeler hideSkeleton() pour restaurer.
+     *
+     * @param {HTMLElement|string} target — Élément ou son ID
+     * @param {number} [lines=5] — Nombre de lignes skeleton
+     */
+    function showSkeleton(target, lines) {
+        const el = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!el) return;
+        const count = lines || 5;
+        const patterns = ['short', 'full', 'long', 'medium', 'full'];
+        let html = '<div class="skeleton-loader" aria-hidden="true">';
+        for (let i = 0; i < count; i++) {
+            html += `<div class="skeleton-line skeleton-line--${patterns[i % patterns.length]}"></div>`;
+        }
+        html += '</div>';
+        el.innerHTML = html;
+    }
+
+    /**
+     * Vide le skeleton d'un élément (le contenu réel sera ensuite injecté).
+     *
+     * @param {HTMLElement|string} target
+     */
+    function hideSkeleton(target) {
+        const el = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!el) return;
+        const skeleton = el.querySelector('.skeleton-loader');
+        if (skeleton) skeleton.remove();
+    }
+
+    // ================================================
+    // 9. DÉTECTION HORS-LIGNE
+    // ================================================
+
+    /**
+     * Initialise la détection hors-ligne.
+     * Affiche / cache la bannière #offline-banner selon la connectivité.
+     * Appeler une seule fois au démarrage de la page.
+     */
+    function detectOffline() {
+        const banner = document.getElementById('offline-banner');
+        if (!banner) return;
+
+        function setOffline(isOffline) {
+            banner.style.display = isOffline ? 'flex' : 'none';
+        }
+
+        window.addEventListener('offline', () => setOffline(true));
+        window.addEventListener('online',  () => setOffline(false));
+        setOffline(!navigator.onLine);
+    }
+
+    // ================================================
+    // 10. VALIDATION — Formulaires
+    // ================================================
+
+    /**
+     * Valide le format d'une adresse email.
+     *
+     * @param {string} email
+     * @returns {boolean}
+     */
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+    }
+
+    /**
+     * Affiche un message d'erreur inline sous un champ de formulaire.
+     * Ajoute un `<small class="field-error">` juste après l'élément.
+     * Met en évidence le champ via la classe CSS `input--error`.
+     *
+     * @param {HTMLElement} input — Le champ en erreur
+     * @param {string} message   — Texte à afficher
+     */
+    function showFieldError(input, message) {
+        if (!input) return;
+        // Retirer l'éventuelle erreur précédente sur ce champ
+        const existing = input.parentNode && input.parentNode.querySelector('.field-error[data-for="' + input.id + '"]');
+        if (existing) existing.remove();
+
+        input.classList.add('input--error');
+
+        const small = document.createElement('small');
+        small.className = 'field-error';
+        small.setAttribute('data-for', input.id || '');
+        small.textContent = message;
+        small.style.cssText = 'display:block;color:#ef4444;font-size:0.78rem;margin-top:4px;';
+
+        input.insertAdjacentElement('afterend', small);
+    }
+
+    /**
+     * Supprime toutes les erreurs inline d'un formulaire (ou de document).
+     *
+     * @param {HTMLElement|Document} [container=document]
+     */
+    function clearFieldErrors(container) {
+        const root = container || document;
+        root.querySelectorAll('.field-error').forEach(el => el.remove());
+        root.querySelectorAll('.input--error').forEach(el => el.classList.remove('input--error'));
+    }
+
+    // ================================================
+>>>>>>> main
     // EXPORT
     // ================================================
 
@@ -196,7 +357,18 @@
         copyToClipboard,
         safeJSONParse,
         isNullOrEmpty,
+<<<<<<< HEAD
         truncateText
+=======
+        truncateText,
+        showToast,
+        showSkeleton,
+        hideSkeleton,
+        detectOffline,
+        validateEmail,
+        showFieldError,
+        clearFieldErrors
+>>>>>>> main
     };
 
     // Namespace principal
@@ -210,5 +382,11 @@
     if (typeof global.debounce === 'undefined') {
         global.debounce = debounce;
     }
+<<<<<<< HEAD
+=======
+    if (typeof global.showToast === 'undefined') {
+        global.showToast = showToast;
+    }
+>>>>>>> main
 
 }(window));

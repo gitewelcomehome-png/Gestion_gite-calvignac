@@ -905,55 +905,50 @@
 
         function validateCurrentStep() {
             hideError();
+            Utils.clearFieldErrors();
+            let valid = true;
+
+            function requireField(id, msg) {
+                const el = document.getElementById(id);
+                if (!el || !el.value.trim()) {
+                    Utils.showFieldError(el, msg || 'Ce champ est requis');
+                    valid = false;
+                }
+                return el;
+            }
             
             if (currentStep === 0) {
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const passwordConfirm = document.getElementById('passwordConfirm').value;
-                
-                if (!email || !password || !passwordConfirm) {
-                    showError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
-                
-                if (password.length < 6) {
-                    showError('Le mot de passe doit contenir au moins 6 caractères');
-                    return false;
-                }
-                
-                if (password !== passwordConfirm) {
-                    showError('Les mots de passe ne correspondent pas');
-                    return false;
-                }
-                
-                // Valider format email
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    showError('Format d\'email invalide');
-                    return false;
-                }
+                const emailEl = document.getElementById('email');
+                const email = emailEl ? emailEl.value.trim() : '';
+                const passwordEl = document.getElementById('password');
+                const password = passwordEl ? passwordEl.value : '';
+                const passwordConfirmEl = document.getElementById('passwordConfirm');
+                const passwordConfirm = passwordConfirmEl ? passwordConfirmEl.value : '';
+
+                if (!email) { Utils.showFieldError(emailEl, 'Ce champ est requis'); valid = false; }
+                else if (!Utils.validateEmail(email)) { Utils.showFieldError(emailEl, 'Format d\'email invalide'); valid = false; }
+
+                if (!password) { Utils.showFieldError(passwordEl, 'Ce champ est requis'); valid = false; }
+                else if (password.length < 6) { Utils.showFieldError(passwordEl, 'Minimum 6 caractères'); valid = false; }
+
+                if (!passwordConfirm) { Utils.showFieldError(passwordConfirmEl, 'Ce champ est requis'); valid = false; }
+                else if (password && password !== passwordConfirm) { Utils.showFieldError(passwordConfirmEl, 'Les mots de passe ne correspondent pas'); valid = false; }
+
+                if (!valid) { showError('Veuillez corriger les erreurs'); return false; }
             }
             
             if (currentStep === 1) {
-                const prenom = document.getElementById('prenom').value.trim();
-                const nom = document.getElementById('nom').value.trim();
-                const telephone = document.getElementById('telephone').value.trim();
-                
-                if (!prenom || !nom || !telephone) {
-                    showError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
+                requireField('prenom', 'Ce champ est requis');
+                requireField('nom', 'Ce champ est requis');
+                requireField('telephone', 'Ce champ est requis');
+                if (!valid) { showError('Veuillez remplir tous les champs obligatoires'); return false; }
             }
             
             if (currentStep === 2) {
-                const adresse = document.getElementById('adresse').value.trim();
-                const codePostal = document.getElementById('codePostal').value.trim();
-                const ville = document.getElementById('ville').value.trim();
-                
-                if (!adresse || !codePostal || !ville) {
-                    showError('Veuillez remplir tous les champs obligatoires');
-                    return false;
-                }
+                requireField('adresse', 'Ce champ est requis');
+                requireField('codePostal', 'Ce champ est requis');
+                requireField('ville', 'Ce champ est requis');
+                if (!valid) { showError('Veuillez remplir tous les champs obligatoires'); return false; }
             }
             
             return true;

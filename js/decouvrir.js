@@ -736,19 +736,7 @@ function escapeForOnclick(text) {
                 .replace(/>/g, '&gt;');
 }
 
-function showToast(message, type = 'info') {
-    const toast = document.getElementById('toast');
-    if (toast) {
-        toast.textContent = message;
-        toast.className = `toast ${type}`;
-        toast.style.display = 'block';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 3000);
-    } else {
-        // console.log(`[${type.toUpperCase()}] ${message}`);
-    }
-}
+// showToast — défini dans js/shared-utils.js (chargé avant ce fichier)
 
 // ==================== AUTO-INIT ====================
 // NE PAS FAIRE D'AUTO-INIT car le HTML est chargé dynamiquement
