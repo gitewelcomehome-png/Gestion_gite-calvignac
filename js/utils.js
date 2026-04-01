@@ -271,7 +271,29 @@
     }
 
     // ================================================
-    // 9. VALIDATION — Formulaires
+    // 9. DÉTECTION HORS-LIGNE
+    // ================================================
+
+    /**
+     * Initialise la détection hors-ligne.
+     * Affiche / cache la bannière #offline-banner selon la connectivité.
+     * Appeler une seule fois au démarrage de la page.
+     */
+    function detectOffline() {
+        const banner = document.getElementById('offline-banner');
+        if (!banner) return;
+
+        function setOffline(isOffline) {
+            banner.style.display = isOffline ? 'flex' : 'none';
+        }
+
+        window.addEventListener('offline', () => setOffline(true));
+        window.addEventListener('online',  () => setOffline(false));
+        setOffline(!navigator.onLine);
+    }
+
+    // ================================================
+    // 10. VALIDATION — Formulaires
     // ================================================
 
     /**
@@ -336,6 +358,7 @@
         showToast,
         showSkeleton,
         hideSkeleton,
+        detectOffline,
         validateEmail,
         showFieldError,
         clearFieldErrors

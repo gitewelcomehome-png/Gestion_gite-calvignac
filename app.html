@@ -711,6 +711,11 @@
     </script>
     -->
     
+    <!-- 🔌 BANNIÈRE HORS-LIGNE -->
+    <div id="offline-banner" role="alert" style="display:none;align-items:center;justify-content:center;gap:8px;background:#ef4444;color:#fff;padding:10px 16px;text-align:center;font-size:0.92rem;font-weight:600;z-index:99999;position:sticky;top:0;">
+        ⚠️ Vous êtes hors ligne. Les modifications seront synchronisées une fois la connexion rétablie.
+    </div>
+
     <!-- 🎨 CONTRÔLES ADMIN -->
     <div class="theme-controls">
         <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
@@ -954,7 +959,10 @@
         }
         */
         
-        // 📱 GESTION MENU MOBILE
+        // � DÉTECTION HORS-LIGNE
+        document.addEventListener('DOMContentLoaded', () => { if (window.Utils) Utils.detectOffline(); });
+
+        // �📱 GESTION MENU MOBILE
         document.addEventListener('DOMContentLoaded', () => {
             const menuToggle = document.getElementById('mobile-menu-toggle');
             const mobileNav = document.querySelector('.icalou-modern-nav');
