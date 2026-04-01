@@ -23,41 +23,7 @@ const ACTIVE_SUPPORT_STATUSES = ['ouvert', 'en_cours', 'en_attente_client', 'en_
 let supportSolutionsReadAllowed = true;
 let supportSolutionsWriteAllowed = true;
 let supportDelegationInitialized = false;
-const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
-
-function normalizeEmail(email) {
-    return String(email || '').trim().toLowerCase();
-}
-
-async function isCurrentUserAdmin(user) {
-    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
-        ? window.APP_CONFIG.ADMIN_EMAILS
-        : [];
-    const adminEmails = new Set(
-        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
-            .map(normalizeEmail)
-            .filter(Boolean)
-    );
-
-    if (adminEmails.has(normalizeEmail(user?.email))) {
-        return true;
-    }
-
-    try {
-        const { data: rolesData, error: rolesError } = await window.supabaseClient
-            .from('user_roles')
-            .select('role, is_active')
-            .eq('user_id', user.id)
-            .eq('is_active', true)
-            .in('role', ['admin', 'super_admin'])
-            .limit(1);
-
-        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
-    } catch (rolesCheckError) {
-        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
-        return false;
-    }
-}
+// isCurrentUserAdmin → window.isCurrentUserAdmin (shared-config.js)
 
 function isSupportSolutionsAccessDenied(error) {
     const status = Number(error?.status || 0);

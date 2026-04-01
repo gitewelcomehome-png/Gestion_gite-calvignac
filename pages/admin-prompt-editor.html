@@ -321,35 +321,8 @@
 
             currentUser = session.user;
 
-            const fallbackAdminEmails = ['stephanecalvignac@hotmail.fr'];
-            const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
-                ? window.APP_CONFIG.ADMIN_EMAILS
-                : [];
-            const adminEmails = new Set(
-                [...fallbackAdminEmails, ...configuredAdminEmails]
-                    .map((email) => String(email || '').trim().toLowerCase())
-                    .filter(Boolean)
-            );
-
-            let isAdmin = adminEmails.has(String(currentUser.email || '').trim().toLowerCase());
-
-            if (!isAdmin) {
-                try {
-                    const { data: rolesData, error: rolesError } = await supabase
-                        .from('user_roles')
-                        .select('role, is_active')
-                        .eq('user_id', currentUser.id)
-                        .eq('is_active', true)
-                        .in('role', ['admin', 'super_admin'])
-                        .limit(1);
-
-                    if (!rolesError && Array.isArray(rolesData) && rolesData.length > 0) {
-                        isAdmin = true;
-                    }
-                } catch (rolesCheckError) {
-                    console.warn('Vérification rôle indisponible:', rolesCheckError?.message || rolesCheckError);
-                }
-            }
+            // Vérifier si c'est l'admin via user_roles (shared-config.js)
+            const isAdmin = await window.isCurrentUserAdmin(currentUser);
 
             if (!isAdmin) {
                 alert('Accès refusé : réservé aux administrateurs.');
@@ -400,7 +373,8 @@
                         action: 'save-prompt',
                         prompt: newPrompt,
                         version: '1.1',
-                        notes: 'Modification depuis interface admin'
+                        notes: 'Modification depuis interface admin',
+                        validateur: currentUser?.email || null
                     })
                 });
 

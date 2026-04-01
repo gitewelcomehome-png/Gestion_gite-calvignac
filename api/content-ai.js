@@ -113,7 +113,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'save-prompt') {
-      const { prompt, version, notes } = req.body;
+      const { prompt, version, notes, validateur } = req.body;
       
       try {
         // Sauvegarder dans fichier
@@ -131,7 +131,7 @@ export default async function handler(req, res) {
           prompt_system: prompt,
           prompt_user_template: prompt,
           notes,
-          valide_par: 'stephanecalvignac@hotmail.fr',
+          valide_par: validateur || null,
           statut: 'actif',
           date_activation: new Date().toISOString()
         });

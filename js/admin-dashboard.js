@@ -106,38 +106,9 @@ async function checkAuth() {
         }
         
         currentUser = session.user;
-        // console.log('✅ Utilisateur connecté:', currentUser.email);
 
-        // Vérifier si c'est l'admin (email allowlist + rôle actif si disponible)
-        const fallbackAdminEmails = ['stephanecalvignac@hotmail.fr'];
-        const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
-            ? window.APP_CONFIG.ADMIN_EMAILS
-            : [];
-        const adminEmails = new Set(
-            [...fallbackAdminEmails, ...configuredAdminEmails]
-                .map((email) => String(email || '').trim().toLowerCase())
-                .filter(Boolean)
-        );
-
-        let isAdmin = adminEmails.has(String(currentUser.email || '').trim().toLowerCase());
-
-        if (!isAdmin) {
-            try {
-                const { data: rolesData, error: rolesError } = await window.supabaseClient
-                    .from('user_roles')
-                    .select('role, is_active')
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true)
-                    .in('role', ['admin', 'super_admin'])
-                    .limit(1);
-
-                if (!rolesError && Array.isArray(rolesData) && rolesData.length > 0) {
-                    isAdmin = true;
-                }
-            } catch (rolesCheckError) {
-                console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
-            }
-        }
+        // Vérifier si c'est l'admin via user_roles (shared-config.js)
+        const isAdmin = await window.isCurrentUserAdmin(currentUser);
 
         if (!isAdmin) {
             alert('Accès refusé : Réservé aux administrateurs');

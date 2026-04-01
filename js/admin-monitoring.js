@@ -4,7 +4,7 @@
 
 let currentUser = null;
 let unresolvedGroupedErrors = [];
-const ADMIN_FALLBACK_EMAILS = ['stephanecalvignac@hotmail.fr'];
+// isCurrentUserAdmin → window.isCurrentUserAdmin (shared-config.js)
 let aiHealthApiUnavailable = false;
 let cmErrorLogsAccessUnavailable = false;
 
@@ -12,40 +12,6 @@ function isAccessDeniedError(error) {
     const code = String(error?.code || error?.status || '');
     const message = String(error?.message || '').toLowerCase();
     return code === '401' || code === '403' || message.includes('permission denied') || message.includes('row-level security');
-}
-
-function normalizeEmail(email) {
-    return String(email || '').trim().toLowerCase();
-}
-
-async function isCurrentUserAdmin(user) {
-    const configuredAdminEmails = Array.isArray(window.APP_CONFIG?.ADMIN_EMAILS)
-        ? window.APP_CONFIG.ADMIN_EMAILS
-        : [];
-    const adminEmails = new Set(
-        [...ADMIN_FALLBACK_EMAILS, ...configuredAdminEmails]
-            .map(normalizeEmail)
-            .filter(Boolean)
-    );
-
-    if (adminEmails.has(normalizeEmail(user?.email))) {
-        return true;
-    }
-
-    try {
-        const { data: rolesData, error: rolesError } = await window.supabaseClient
-            .from('user_roles')
-            .select('role, is_active')
-            .eq('user_id', user.id)
-            .eq('is_active', true)
-            .in('role', ['admin', 'super_admin'])
-            .limit(1);
-
-        return !rolesError && Array.isArray(rolesData) && rolesData.length > 0;
-    } catch (rolesCheckError) {
-        console.warn('⚠️ Vérification rôle admin indisponible:', rolesCheckError?.message || rolesCheckError);
-        return false;
-    }
 }
 
 function getValidatedCorrectionIds() {
@@ -667,15 +633,15 @@ User Agent: ${error.user_agent || 'N/A'}
 window.markErrorResolved = async function(errorType, source, message) {
     try {
         const { error } = await window.supabaseClient
-            .from('cm_error_logs')
+            .from('error_logs')
             .update({
                 resolved: true,
                 resolved_at: new Date().toISOString(),
-                resolved_by: currentUser.email
+                resolved_by: currentUser?.email || null
             })
             .eq('error_type', errorType)
             .eq('source', source)
-            .eq('message', message)
+            .eq('error_message', message)
             .eq('resolved', false);
         
         if (error) throw error;
@@ -890,7 +856,7 @@ window.deleteAllErrors = async function() {
 
     try {
         const { error } = await window.supabaseClient
-            .from('cm_error_logs')
+            .from('error_logs')
             .delete()
             .eq('resolved', false);
 
@@ -1581,11 +1547,10 @@ window.validateTestCorrection = async function(correctionId, filePath) {
             const fileName = (filePath.split('/').pop() || filePath).trim();
 
             const { data: updatedBySource, error: updateBySourceError } = await window.supabaseClient
-                .from('cm_error_logs')
+                .from('error_logs')
                 .update({
                     resolved: true,
-                    resolved_at: new Date().toISOString(),
-                    resolved_by: currentUser?.email || 'admin'
+                    resolved_at: new Date().toISOString()
                 })
                 .eq('resolved', false)
                 .ilike('source', `%${fileName}%`)
@@ -1595,14 +1560,13 @@ window.validateTestCorrection = async function(correctionId, filePath) {
 
             if (!updatedBySource || updatedBySource.length === 0) {
                 const { error: updateFallbackError } = await window.supabaseClient
-                    .from('cm_error_logs')
+                    .from('error_logs')
                     .update({
                         resolved: true,
-                        resolved_at: new Date().toISOString(),
-                        resolved_by: currentUser?.email || 'admin'
+                        resolved_at: new Date().toISOString()
                     })
                     .eq('resolved', false)
-                    .ilike('message', '%escapeHTML%');
+                    .ilike('error_message', '%escapeHTML%');
 
                 if (updateFallbackError) throw updateFallbackError;
             }
@@ -1704,12 +1668,11 @@ window.validateCorrection = async function(correctionId, errorId) {
     try {
         // Mettre à jour le statut de l'erreur
         const { error: updateError } = await window.supabaseClient
-            .from('cm_error_logs')
+            .from('error_logs')
             .update({
                 resolved: true,
                 resolved_at: new Date().toISOString(),
-                resolved_by: currentUser?.email || 'admin',
-                resolution_note: `Correction validée le ${new Date().toLocaleString('fr-FR')}`
+                resolved_by: currentUser?.email || null
             })
             .eq('id', errorId);
         

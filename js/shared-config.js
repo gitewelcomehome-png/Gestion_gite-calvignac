@@ -201,6 +201,40 @@ function initDB() {
     return Promise.resolve();
 }
 
+// ================================================
+// VÉRIFICATION ADMIN — Source unique de vérité
+// ================================================
+// Ne jamais dupliquer cette fonction dans les autres fichiers.
+// Utiliser window.isCurrentUserAdmin(user) partout.
+
+/**
+ * Vérifie si l'utilisateur courant est admin.
+ * Utilise exclusivement la table user_roles (rôles en BDD).
+ * Aucun email hardcodé — le bon compte admin est celui qui a
+ * un enregistrement actif dans user_roles avec role = 'admin' ou 'super_admin'.
+ *
+ * @param {object} user — Objet user Supabase (doit avoir .id)
+ * @returns {Promise<boolean>}
+ */
+async function isCurrentUserAdmin(user) {
+    if (!user?.id) return false;
+    try {
+        const sb = window.supabaseClient;
+        if (!sb) return false;
+        const { data, error } = await sb
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .in('role', ['admin', 'super_admin'])
+            .limit(1);
+        return !error && Array.isArray(data) && data.length > 0;
+    } catch (err) {
+        console.warn('[shared-config] Vérification rôle admin indisponible:', err?.message || err);
+        return false;
+    }
+}
+
 // Export vers window pour accessibilité globale
 window.TIMEZONE = TIMEZONE;
 window.SUPABASE_URL = SUPABASE_URL;
@@ -214,6 +248,7 @@ window.setDistributionAccessMode = setDistributionAccessMode;
 window.getChannelCapabilities = getChannelCapabilities;
 window.hasChannelCapability = hasChannelCapability;
 window.createParisDate = createParisDate;
+window.isCurrentUserAdmin = isCurrentUserAdmin;
 window.initDB = initDB;
 
 function hardenExternalLinks() {

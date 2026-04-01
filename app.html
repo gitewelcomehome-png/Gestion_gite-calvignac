@@ -4957,25 +4957,9 @@
         async function showAdminMenu() {
             const dropdown = document.getElementById('adminDropdown');
             
-            // Vérifier si l'utilisateur est admin
+            // Vérifier si l'utilisateur est admin via user_roles (shared-config.js)
             const user = window.authManager?.currentUser;
-            let isAdmin = false;
-            
-            if (user) {
-                // Vérifier d'abord par email (fallback sûr)
-                const userEmail = user.email.toLowerCase();
-                isAdmin = userEmail === 'stephanecalvignac@hotmail.fr';
-                
-                // Si pas admin par email, vérifier dans la BDD
-                if (!isAdmin && window.supabaseClient) {
-                    const { data: roles } = await window.supabaseClient
-                        .from('user_roles')
-                        .select('role')
-                        .eq('user_id', user.id);
-                    
-                    isAdmin = roles && roles.some(r => r.role === 'admin' || r.role === 'owner');
-                }
-            }
+            const isAdmin = user ? await window.isCurrentUserAdmin(user) : false;
             
             // Cacher/Afficher le bouton Channel Manager selon les droits
             const channelManagerBtn = dropdown.querySelector('.dropdown-item-header');
