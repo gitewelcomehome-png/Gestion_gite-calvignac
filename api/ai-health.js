@@ -483,9 +483,22 @@ export default async function handler(req, res) {
                 .limit(3000);
 
             if (error) {
-                return res.status(500).json({
-                    error: 'Impossible de charger les métriques IA',
-                    code: 'SUPPORT_AI_METRICS_QUERY_ERROR'
+                // Table absente ou inaccessible : retour dégradé sans bloquer le dashboard
+                const supportAiReady = isSupportAiEnabled() && Boolean(process.env.OPENAI_API_KEY);
+                return res.status(200).json({
+                    ok: true,
+                    supportAiReady,
+                    metrics: summarizeSupportMetrics([]),
+                    thresholds: {
+                        errorRate1hPct: DEFAULT_ALERT_ERROR_RATE_1H_PCT,
+                        cost24hEur: DEFAULT_ALERT_COST_24H_EUR,
+                        latency1hMs: DEFAULT_ALERT_LATENCY_1H_MS,
+                        consecutiveErrors1h: DEFAULT_ALERT_CONSECUTIVE_ERRORS_1H
+                    },
+                    alerts: [],
+                    autoTicket: { enabled: false, processed: 0, created: 0, linked: 0, skipped: 0, reason: 'metrics-unavailable' },
+                    updatedAt: new Date().toISOString(),
+                    _degraded: true
                 });
             }
 
