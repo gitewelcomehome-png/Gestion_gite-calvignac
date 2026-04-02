@@ -1596,7 +1596,7 @@ function initOngletEntree() {
     // // console.log('🕒 Heure arrivée formatée:', heureArriveeFormatted);
     let heureArriveeText = heureArriveeFormatted;
     if (arriveeFlexible) {
-        heureArriveeText += ` <span style="background: var(--primary-light, #e8f5e9); color: var(--primary, #68a84f); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-left: 0.5rem;">✓ Flexible</span>`;
+        heureArriveeText += ` <span style="background: var(--primary); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-left: 0.5rem; font-weight: 600;">✓ Flexible</span>`;
     }
     document.getElementById('heureArrivee').innerHTML = heureArriveeText;
     
@@ -1695,7 +1695,7 @@ function initOngletEntree() {
         codeEntreeElement.style.fontWeight = '800';
         codeEntreeElement.style.fontSize = '1.35rem';
         codeEntreeElement.style.letterSpacing = '0.03em';
-        codeEntreeElement.style.color = codeAccesPrioritaire ? 'var(--primary)' : 'var(--gray-500)';
+        codeEntreeElement.style.color = codeAccesPrioritaire ? 'white' : 'rgba(255,255,255,0.6)';
     }
     
     // Instructions d'accès (affichage direct, pas d'accordion)
@@ -2106,7 +2106,7 @@ function initOngletSortie() {
     if (heureDepartElement) {
         let heureDepartText = heureDepartFormatted;
         if (departFlexible) {
-            heureDepartText += ` <span style="background: var(--primary-light, #e8f5e9); color: var(--primary, #68a84f); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-left: 0.5rem;">✓ Flexible</span>`;
+            heureDepartText += ` <span style="background: var(--primary); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; margin-left: 0.5rem; font-weight: 600;">✓ Flexible</span>`;
         }
         heureDepartElement.innerHTML = heureDepartText;
     }
