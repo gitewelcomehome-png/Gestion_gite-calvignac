@@ -345,6 +345,9 @@ const translations = {
         feels_like: 'Ressenti',
         updated: 'Mis à jour',
         weather_unavailable: 'Météo non disponible',
+        forecast_today: "Aujourd'hui",
+        forecast_tomorrow: 'Demain',
+        forecast_rain: 'Pluie',
         disponibilite: 'Disponibilité',
         places: 'Places',
         type_chauffage: 'Type de chauffage',
@@ -520,6 +523,9 @@ const translations = {
         feels_like: 'Feels like',
         updated: 'Updated',
         weather_unavailable: 'Weather unavailable',
+        forecast_today: 'Today',
+        forecast_tomorrow: 'Tomorrow',
+        forecast_rain: 'Rain',
         disponibilite: 'Availability',
         places: 'Spaces',
         type_chauffage: 'Heating type',
@@ -1362,20 +1368,40 @@ async function loadWeatherData() {
     
     try {
         const lang = currentLanguage === 'fr' ? 'fr' : 'en';
-        
-        // WeatherAPI.com : 5M appels/mois (trial Pro Plus → Free plan auto après 16/02/2026)
         const apiKey = '7efc12e29575437a864135709260202';
         
         const response = await fetch(
-            `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&lang=${lang}&aqi=no`
+            `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${lat},${lon}&days=3&lang=${lang}&aqi=no`
         );
         
         if (!response.ok) throw new Error('Météo indisponible');
         
         const data = await response.json();
         const current = data.current;
+        const forecastDays = data.forecast.forecastday;
         
-        const weatherHTML = `
+        // Labels des 3 jours
+        const locale = currentLanguage === 'fr' ? 'fr-FR' : 'en-GB';
+        const dayLabels = forecastDays.map((fd, i) => {
+            if (i === 0) return t('forecast_today');
+            if (i === 1) return t('forecast_tomorrow');
+            return new Date(fd.date + 'T12:00:00').toLocaleDateString(locale, { weekday: 'long' });
+        });
+        
+        // Cartes prévisions 3 jours
+        const forecastHTML = forecastDays.map((fd, i) => `
+            <div class="weather-forecast-card">
+                <div class="weather-forecast-day">${dayLabels[i]}</div>
+                <div class="weather-forecast-emoji">${getWeatherEmoji(fd.day.condition.code, 1)}</div>
+                <div class="weather-forecast-temps">
+                    <span class="weather-forecast-max">${Math.round(fd.day.maxtemp_c)}°</span>
+                    <span class="weather-forecast-min">${Math.round(fd.day.mintemp_c)}°</span>
+                </div>
+                <div class="weather-forecast-rain">💧 ${fd.day.daily_chance_of_rain}%</div>
+            </div>
+        `).join('');
+        
+        weatherWidget.innerHTML = `
             <div class="weather-header">
                 <div>
                     <div class="weather-temp">${Math.round(current.temp_c)}°C</div>
@@ -1394,14 +1420,16 @@ async function loadWeatherData() {
                 </div>
                 <div class="weather-detail-item">
                     <div class="weather-detail-label" data-i18n="updated">Mis à jour</div>
-                    <div class="weather-detail-value">${new Date(current.last_updated).toLocaleTimeString(currentLanguage === 'fr' ? 'fr-FR' : 'en-GB', {hour: '2-digit', minute: '2-digit'})}</div>
+                    <div class="weather-detail-value">${new Date(current.last_updated).toLocaleTimeString(locale, {hour: '2-digit', minute: '2-digit'})}</div>
                 </div>
             </div>
+            <div class="weather-forecast">
+                ${forecastHTML}
+            </div>
         `;
-        
-        weatherWidget.innerHTML = weatherHTML;
+        updateTranslations();
     } catch (error) {
-        console.warn('⚠️ Erreur chargement météo:', error);
+        console.warn('[Météo] Erreur chargement:', error.message);
         weatherWidget.innerHTML = `
             <div style="text-align: center; color: rgba(255,255,255,0.8); padding: 1rem;">
                 <i data-lucide="cloud-off"></i>

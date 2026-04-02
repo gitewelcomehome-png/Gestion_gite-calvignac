@@ -1830,6 +1830,63 @@
             font-size: 0.95rem;
         }
         
+        /* Prévisions 3 jours */
+        .weather-forecast {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            padding-top: 0.75rem;
+        }
+        
+        .weather-forecast-card {
+            text-align: center;
+            padding: 0.5rem 0.25rem;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 0.5rem;
+        }
+        
+        .weather-forecast-day {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .weather-forecast-emoji {
+            font-size: 1.5rem;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .weather-forecast-temps {
+            display: flex;
+            justify-content: center;
+            gap: 0.375rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .weather-forecast-max {
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        
+        .weather-forecast-min {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.85rem;
+        }
+        
+        .weather-forecast-rain {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.7rem;
+        }
+        
         /* Responsive mobile */
         @media (max-width: 480px) {
             .hero-section {
@@ -1873,6 +1930,14 @@
             .weather-details {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
+            }
+            
+            .weather-forecast-day {
+                font-size: 0.65rem;
+            }
+            
+            .weather-forecast-emoji {
+                font-size: 1.25rem;
             }
         }
         
