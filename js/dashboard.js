@@ -2015,73 +2015,11 @@ async function updateFinancialIndicators() {
         console.error('❌ Exception récupération simulation:', error);
     }
     
-    let totalChargesAnnee = 0;
+    // Bénéfice = CA - Charges, depuis la simulation fiscale (base annuelle cohérente).
+        : null;
     
-    if (simFiscale && typeof window.calculerChargesParGiteSansAmortissement === 'function') {
-        // ✅ UTILISER LA NOUVELLE FONCTION GLOBALE (calcul dynamique multi-gîtes)
-        try {
-            // Récupérer les gîtes
-            const gites = await window.gitesManager.getVisibleGites();
-            const charges = await window.calculerChargesParGiteSansAmortissement(simFiscale, gites);
-            totalChargesAnnee = charges.total;
-        } catch (error) {
-            console.error('❌ Erreur calcul charges:', error);
-        }
-    } else if (!simFiscale) {
-        // Pas de simulation fiscale pour l'année en cours - utiliser 0
-        totalChargesAnnee = 0;
-    } else {
-        // Fonction manquante - charger fiscalite-v2.js d'abord
-        console.error('❌ La fonction calculerChargesParGiteSansAmortissement n\'est pas disponible');
-        totalChargesAnnee = 0;
-    }
-    
-    // console.log('💰 CA Année:', caAnnee.toFixed(2), '€');
-    // console.log('💰 Charges Année:', totalChargesAnnee.toFixed(2), '€');
-    
-    // Bénéfice = CA - Total Charges (depuis fiscalité)
-    const beneficeAnnee = caAnnee - totalChargesAnnee;
-    
-    // console.log('💰 BÉNÉFICE Année (CA - Charges):', beneficeAnnee.toFixed(2), '€');
-    
-    // 2. Calculer l'URSSAF pour l'année en cours selon le statut fiscal réel
-    //    Même logique que calculerURSSAF() dans fiscalite-v2.js
-    const config = window.TAUX_FISCAUX.getConfig(anneeActuelle);
-    const statutFiscal = simFiscale?.donnees_detaillees?.statut_fiscal || 'lmp';
-    const SEUIL_EXONERATION_LMNP = 23000;
-
-    let urssafTotal = 0;
-
-    if (statutFiscal === 'lmnp' && caAnnee < SEUIL_EXONERATION_LMNP) {
-        // LMNP sous 23 000 € de CA → pas de cotisations SSI
-        urssafTotal = 0;
-    } else {
-        // LMP (ou LMNP au-dessus du seuil) → cotisations sociales complètes
-        const urssafConfig = config.URSSAF;
-        const indemnites = beneficeAnnee * urssafConfig.indemnites_journalieres.taux;
-        const revenuPlafonne = Math.min(beneficeAnnee, urssafConfig.retraite_base.plafond || beneficeAnnee);
-        const retraiteBase = revenuPlafonne * urssafConfig.retraite_base.taux;
-        const retraiteCompl = beneficeAnnee * urssafConfig.retraite_complementaire.taux;
-        const invalidite = beneficeAnnee * urssafConfig.invalidite_deces.taux;
-        const csgCrds = beneficeAnnee * urssafConfig.csg_crds.taux;
-        const PASS = config.PASS || 46368;
-        const formationPro = PASS * urssafConfig.formation_pro.taux;
-
-        const af = urssafConfig.allocations_familiales;
-        let allocations = 0;
-        if (beneficeAnnee > af.seuil_debut) {
-            const baseAlloc = Math.min(beneficeAnnee - af.seuil_debut, af.seuil_fin - af.seuil_debut);
-            const tauxAlloc = (baseAlloc / (af.seuil_fin - af.seuil_debut)) * af.taux_max;
-            allocations = beneficeAnnee * tauxAlloc;
-        }
-
-        urssafTotal = indemnites + retraiteBase + retraiteCompl + invalidite + csgCrds + formationPro + allocations;
-
-        // ⚠️ Appliquer le minimum LMP uniquement (pas pour LMNP > seuil)
-        if (statutFiscal === 'lmp' && urssafTotal < config.COTISATIONS_MINIMALES.montant) {
-            urssafTotal = config.COTISATIONS_MINIMALES.montant;
-        }
-    }
+    // 2. URSSAF de l'année en cours — lire depuis la simulation (même source que l'indicateur URSSAF affiché)
+    const urssafTotal = parseFloat(simFiscale?.donnees_detaillees?.cotisations_urssaf || 0);
     
     
     // 3. Calculer l'IR de l'ANNÉE PRÉCÉDENTE (depuis la base)
@@ -2109,73 +2047,8 @@ async function updateFinancialIndicators() {
         urssafPrecedent = parseFloat(details.cotisations_urssaf || 0);
     }
     
-    // 4. Calculer l'IR de l'ANNÉE EN COURS (temps réel)
-    const { data: simulationCourante } = await window.supabaseClient
-        .from('fiscal_history')
-        .select('*')
-        .eq('year', anneeActuelle)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-    
-    let impotRevenuCourant = 0;
-    
-    if (simulationCourante) {
-        const details = simulationCourante.donnees_detaillees || {};
-        const salaireMadame = parseFloat(details.salaire_madame || 0);
-        const salaireMonsieur = parseFloat(details.salaire_monsieur || 0);
-        const nbEnfants = parseInt(details.nombre_enfants || 0);
-        
-        // Revenu imposable = bénéfice - URSSAF + salaires
-        const resteApresURSSAF = beneficeAnnee - urssafTotal;
-        const revenuFiscal = resteApresURSSAF + salaireMadame + salaireMonsieur;
-        
-        // Calcul du nombre de parts
-        let nbParts = 2; // Couple par défaut
-        if (nbEnfants === 1) nbParts = 2.5;
-        else if (nbEnfants === 2) nbParts = 3;
-        else if (nbEnfants >= 3) nbParts = 3 + (nbEnfants - 2);
-        
-        // Quotient familial
-        const quotient = revenuFiscal / nbParts;
-        
-        // Barème 2024 (inchangé pour 2025/2026)
-        let impotParPart = 0;
-        if (quotient > 177106) {
-            impotParPart = (quotient - 177106) * 0.45 + 44797;
-        } else if (quotient > 78570) {
-            impotParPart = (quotient - 78570) * 0.41 + 14372;
-        } else if (quotient > 27478) {
-            impotParPart = (quotient - 27478) * 0.30 + 5686;
-        } else if (quotient > 11294) {
-            impotParPart = (quotient - 11294) * 0.11 + 906;
-        } else if (quotient > 11109) {
-            impotParPart = (quotient - 11109) * 0.11;
-        }
-        
-        impotRevenuCourant = Math.max(0, impotParPart * nbParts);
-        
-    } else {
-        // console.warn(`⚠️ Pas de simulation pour ${anneeActuelle}, calcul simplifié`);
-        // Calcul simplifié sans salaires
-        const resteApresURSSAF = beneficeAnnee - urssafTotal;
-        const quotient = resteApresURSSAF / 2; // Couple sans enfant
-        
-        let impotParPart = 0;
-        if (quotient > 177106) {
-            impotParPart = (quotient - 177106) * 0.45 + 44797;
-        } else if (quotient > 78570) {
-            impotParPart = (quotient - 78570) * 0.41 + 14372;
-        } else if (quotient > 27478) {
-            impotParPart = (quotient - 27478) * 0.30 + 5686;
-        } else if (quotient > 11294) {
-            impotParPart = (quotient - 11294) * 0.11 + 906;
-        } else if (quotient > 11109) {
-            impotParPart = (quotient - 11109) * 0.11;
-        }
-        
-        impotRevenuCourant = Math.max(0, impotParPart * 2);
-    }
+    // 4. IR de l'année en cours — lire depuis la simulation (déjà calculé par fiscalite-v2.js)
+    let impotRevenuCourant = parseFloat(simFiscale?.donnees_detaillees?.impot_revenu || 0);
     
     // 5. Mettre à jour l'affichage
     const urssaf2025El = document.getElementById('dashboard-urssaf-2025');
@@ -2189,9 +2062,7 @@ async function updateFinancialIndicators() {
         urssaf2025El.textContent = simulationPrecedente ? formatCurrency(urssafPrecedent) : '-';
     }
     if (urssaf2026El) {
-        // Priorité : valeur sauvegardée en BDD depuis la simulation fiscale
-        const urssafSimule = parseFloat(simFiscale?.donnees_detaillees?.cotisations_urssaf || 0);
-        urssaf2026El.textContent = urssafSimule > 0 ? formatCurrency(urssafSimule) : formatCurrency(urssafTotal);
+        urssaf2026El.textContent = urssafTotal > 0 ? formatCurrency(urssafTotal) : (simFiscale ? formatCurrency(0) : '-');
     }
     
     // Afficher IR des 2 années (seulement si option personnelle activée)
@@ -2207,17 +2078,13 @@ async function updateFinancialIndicators() {
             ir2025El.textContent = simulationPrecedente ? formatCurrency(impotRevenuPrecedent) : '-';
         }
         if (ir2026El) {
-            // Priorité : valeur sauvegardée en BDD depuis la simulation fiscale
-            const irSimule = parseFloat(simFiscale?.donnees_detaillees?.impot_revenu || 0);
-            ir2026El.textContent = irSimule > 0 ? formatCurrency(irSimule) : formatCurrency(impotRevenuCourant);
+            ir2026El.textContent = impotRevenuCourant > 0 ? formatCurrency(impotRevenuCourant) : (simFiscale ? formatCurrency(0) : '-');
         }
     }
     
-    // Afficher bénéfice APRÈS URSSAF — priorité à l'URSSAF sauvegardé en BDD (même source que l'indicateur URSSAF)
-    const urssafSimulePourBenefice = parseFloat(simFiscale?.donnees_detaillees?.cotisations_urssaf || 0);
-    const urssafPourBenefice = urssafSimulePourBenefice > 0 ? urssafSimulePourBenefice : urssafTotal;
-    const beneficeFinal = beneficeAnnee - urssafPourBenefice;
-    if (beneficeEl) beneficeEl.textContent = formatCurrency(beneficeFinal);
+    // Afficher le bénéfice après URSSAF directement depuis la simulation (déjà nets de charges et URSSAF).
+    // Si pas de simulation : afficher '-'.
+    if (beneficeEl) beneficeEl.textContent = beneficeAnnee !== null ? formatCurrency(beneficeAnnee) : '-';
     
     // console.log('💰 URSSAF Total:', urssafTotal.toFixed(2), '€');
     // console.log('💰 BÉNÉFICE FINAL (après URSSAF):', beneficeFinal.toFixed(2), '€');
@@ -2238,8 +2105,9 @@ async function updateFinancialIndicators() {
         tresorerieEl.textContent = '-';
     }
     
-    // 7. Afficher les graphiques (avec bénéfice final après URSSAF uniquement)
-    const benefices = await calculerBeneficesMensuels(totalChargesAnnee, urssafTotal / 12);
+    // 7. Afficher les graphiques (avec URSSAF mensuel depuis simulation)
+    const chargesAnnuellesSim = parseFloat(simFiscale?.donnees_detaillees?.charges_total || 0);
+    const benefices = await calculerBeneficesMensuels(chargesAnnuellesSim, urssafTotal / 12);
     await afficherGraphiqueBenefices(benefices);
     await afficherGraphiqueTresorerieDashboard();
 }

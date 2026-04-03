@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "generated_at": "2026-04-02T00:00:00Z",
+    "correction_summary": "feat: prévisions météo 3 jours dans fiche-client. Remplacement de /v1/current.json par /v1/forecast.json?days=3 (WeatherAPI.com). Ajout d'un bloc HTML .weather-forecast avec 3 cartes (emoji, min/max, chance pluie). Labels i18n FR/EN (Aujourd'hui, Demain, nom du jour).",
+    "files_modified": ["js/fiche-client-app.js", "pages/fiche-client.html"],
+    "copilot_version": "Copilot Claude Sonnet 4.6"
+  },
+  "auth": {
+    "url": "https://liveownerunitv4-git-preprod-stephane1984s-projects.vercel.app/index.html",
+    "email_env": "TEST_ADMIN_EMAIL",
+    "password_env": "TEST_ADMIN_PASSWORD",
+    "wait_for": "#app-container"
+  },
+  "scenarios": [
+    {
+      "id": "test-001",
+      "name": "Fiche client — bloc prévisions 3 jours visible",
+      "page": "/pages/fiche-client.html",
+      "priority": "critical",
+      "steps": [
+        {
+          "action": "navigate",
+          "url": "https://liveownerunitv4-git-preprod-stephane1984s-projects.vercel.app/pages/fiche-client.html?token=TEST_CLIENT_TOKEN"
+        },
+        {
+          "action": "wait",
+          "selector": "#weatherWidget",
+          "timeout": 8000
+        },
+        {
+          "action": "wait_ms",
+          "ms": 3000
+        },
+        {
+          "action": "assert_visible",
+          "selector": ".weather-forecast",
+          "description": "Le bloc prévisions 3 jours est affiché"
+        },
+        {
+          "action": "assert_count",
+          "selector": ".weather-forecast-card",
+          "min": 3,
+          "max": 3,
+          "description": "Exactement 3 cartes de prévisions"
+        }
+      ],
+      "expected_result": "Le widget météo contient un bloc .weather-forecast avec 3 cartes"
+    },
+    {
+      "id": "test-002",
+      "name": "Fiche client — cartes contiennent emoji, températures et pluie",
+      "page": "/pages/fiche-client.html",
+      "priority": "critical",
+      "steps": [
+        {
+          "action": "navigate",
+          "url": "https://liveownerunitv4-git-preprod-stephane1984s-projects.vercel.app/pages/fiche-client.html?token=TEST_CLIENT_TOKEN"
+        },
+        {
+          "action": "wait",
+          "selector": ".weather-forecast-card",
+          "timeout": 8000
+        },
+        {
+          "action": "assert_visible",
+          "selector": ".weather-forecast-max",
+          "description": "La température max est affichée"
+        },
+        {
+          "action": "assert_visible",
+          "selector": ".weather-forecast-min",
+          "description": "La température min est affichée"
+        },
+        {
+          "action": "assert_visible",
+          "selector": ".weather-forecast-rain",
+          "description": "L'indicateur de pluie est affiché"
+        },
+        {
+          "action": "assert_visible",
+          "selector": ".weather-forecast-emoji",
+          "description": "L'emoji météo est affiché"
+        }
+      ],
+      "expected_result": "Chaque carte de prévision affiche emoji + max/min + % pluie"
+    },
+    {
+      "id": "test-003",
+      "name": "Fiche client — label jour 0 = Aujourd'hui ou Today",
+      "page": "/pages/fiche-client.html",
+      "priority": "high",
+      "steps": [
+        {
+          "action": "navigate",
+          "url": "https://liveownerunitv4-git-preprod-stephane1984s-projects.vercel.app/pages/fiche-client.html?token=TEST_CLIENT_TOKEN"
+        },
+        {
+          "action": "wait",
+          "selector": ".weather-forecast-day",
+          "timeout": 8000
+        },
+        {
+          "action": "screenshot",
+          "name": "weather-forecast-labels"
+        },
+        {
+          "action": "assert_text",
+          "selector": ".weather-forecast-card:first-child .weather-forecast-day",
+          "expected": "Aujourd",
+          "description": "La première carte affiche Aujourd'hui (ou Today en EN)"
+        }
+      ],
+      "expected_result": "Le premier jour est libellé 'Aujourd'hui' (FR) ou 'Today' (EN)"
+    },
+    {
+      "id": "test-004",
+      "name": "Smoke — fiche client sans erreur console",
+      "page": "/pages/fiche-client.html",
+      "priority": "smoke",
+      "steps": [
+        {
+          "action": "navigate",
+          "url": "https://liveownerunitv4-git-preprod-stephane1984s-projects.vercel.app/pages/fiche-client.html?token=TEST_CLIENT_TOKEN"
+        },
+        {
+          "action": "wait",
+          "selector": "#weatherWidget",
+          "timeout": 8000
+        },
+        {
+          "action": "assert_no_console_error",
+          "description": "Aucune erreur console lors du chargement météo"
+        }
+      ],
+      "expected_result": "La fiche client charge sans erreur console"
+    }
+  ]
+}
