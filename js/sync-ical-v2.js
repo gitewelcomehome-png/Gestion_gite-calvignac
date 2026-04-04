@@ -371,17 +371,29 @@ async function syncCalendar(giteId, platform, url) {
     const isHomelidays = /(^|\.)homelidays\.com$/i.test(new URL(normalizedUrl).hostname);
 
     // Essayer plusieurs proxies CORS
-    // 1. Notre proxy Vercel serverless (toujours en premier, échoue silencieusement si absent)
+    // 1. Notre proxy Vercel serverless (uniquement si disponible : prod ou vercel dev)
     // 2. Proxies publics (fallback)
     // Homelidays bloque les proxies externes → on tente uniquement notre proxy interne.
+    // En environnement Live Server (localhost, *.app.github.dev sans vercel dev), le proxy interne
+    // retourne 404 → on le saute pour éviter des erreurs console inutiles.
+    const { hostname } = window.location;
+    const isVercelDevOrProd = !(
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname.endsWith('.app.github.dev')
+    );
     const proxies = [
-        { url: `/api/cors-proxy?url=${encodeURIComponent(normalizedUrl)}`, type: 'raw' },
+        ...(isVercelDevOrProd ? [{ url: `/api/cors-proxy?url=${encodeURIComponent(normalizedUrl)}`, type: 'raw' }] : []),
         ...(isHomelidays ? [] : [
             { url: `https://corsproxy.io/?${encodeURIComponent(normalizedUrl)}`, type: 'raw' },
             { url: `https://api.allorigins.win/get?url=${encodeURIComponent(normalizedUrl)}`, type: 'allorigins' },
             { url: `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(normalizedUrl)}`, type: 'raw' }
         ])
     ];
+
+    if (proxies.length === 0) {
+        throw new Error(`Aucun proxy disponible pour ce flux iCal en environnement de développement local.`);
+    }
 
     let text;
     let lastError;

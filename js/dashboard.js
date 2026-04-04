@@ -2213,7 +2213,8 @@ async function updateFinancialIndicators() {
         }
     }
     
-    // Afficher bénéfice APRÈS URSSAF — priorité à l'URSSAF sauvegardé en BDD (même source que l'indicateur URSSAF)
+    // Afficher bénéfice APRÈS URSSAF (CA - Charges - URSSAF)
+    // Priorité : URSSAF sauvegardé en BDD (simulation fiscale), fallback sur calcul dynamique
     const urssafSimulePourBenefice = parseFloat(simFiscale?.donnees_detaillees?.cotisations_urssaf || 0);
     const urssafPourBenefice = urssafSimulePourBenefice > 0 ? urssafSimulePourBenefice : urssafTotal;
     const beneficeFinal = beneficeAnnee - urssafPourBenefice;
