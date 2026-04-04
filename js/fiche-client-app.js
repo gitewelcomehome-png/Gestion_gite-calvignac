@@ -2679,8 +2679,8 @@ async function submitDemandeHoraire(type) {
             });
 
         if (error) {
-            if (error.code === 'PGRST202') {
-                // RPC pas encore créée, fallback direct
+            // PGRST202 = RPC introuvable ; 42804 / 400 = type mismatch (p_heure text → time) → fallback insert direct
+            if (error.code === 'PGRST202' || error.status === 400 || error.code === '400' || error.code === '42804') {
                 const ownerUserId = reservationData.owner_user_id;
                 if (!ownerUserId) { showToast('❌ Erreur : données de réservation manquantes'); return; }
                 const { error: insertError } = await supabase.from('demandes_horaires').insert({
