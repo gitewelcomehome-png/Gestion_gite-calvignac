@@ -52,8 +52,11 @@ if (!window.ficheClientAppLoaded) {
         // Lire la clé dynamiquement (peut avoir été injectée après fetch /api/public-config)
         const key = window.APP_CONFIG?.SUPABASE_KEY || window.SUPABASE_KEY || '';
         const headers = clientToken ? { 'x-client-token': clientToken } : {};
+        // storageKey dédié pour éviter l'avertissement "Multiple GoTrueClient instances"
+        const storageKey = clientToken ? `sb-fiche-${clientToken.slice(0, 8)}` : 'sb-fiche-client';
         return createClient(SUPABASE_URL, key, {
-            global: { headers }
+            global: { headers },
+            auth: { storageKey }
         });
     };
 
@@ -2679,8 +2682,8 @@ async function submitDemandeHoraire(type) {
             });
 
         if (error) {
-            if (error.code === 'PGRST202') {
-                // RPC pas encore créée, fallback direct
+            // PGRST202 = RPC introuvable, 400 = paramètres invalides/RPC non disponible → fallback insert direct
+            if (error.code === 'PGRST202' || error.status === 400 || error.code === '400') {
                 const ownerUserId = reservationData.owner_user_id;
                 if (!ownerUserId) { showToast('❌ Erreur : données de réservation manquantes'); return; }
                 const { error: insertError } = await supabase.from('demandes_horaires').insert({
