@@ -143,7 +143,6 @@ async function handlePhotoUploadInfosGites(event, category) {
         // Sauvegarder automatiquement en BDD
         try {
             await savePhotosToDatabase(selectedGite);
-            console.log('💾 Photos sauvegardées automatiquement en BDD');
         } catch (saveErr) {
             console.error('Erreur sauvegarde auto:', saveErr);
             showToast('Photo uploadée mais erreur sauvegarde BDD', 'warning');
@@ -167,15 +166,6 @@ function displayPhotoPreviews(category) {
     const previewContainer = document.getElementById(`preview${capitalizedCategory}`);
     const gridContainer = document.getElementById(`grid${capitalizedCategory}`);
 
-    console.log(`📸 displayPhotoPreviews(${category}):`, {
-        capitalizedCategory,
-        previewId: `preview${capitalizedCategory}`,
-        gridId: `grid${capitalizedCategory}`,
-        previewExists: !!previewContainer,
-        gridExists: !!gridContainer,
-        data: tempPhotosData[category]
-    });
-
     if (!previewContainer) {
         console.warn(`⚠️ Preview container not found for ${category}`);
         return;
@@ -187,7 +177,6 @@ function displayPhotoPreviews(category) {
             if (img) {
                 img.src = tempPhotosData.couverture.url;
                 previewContainer.style.display = 'block';
-                console.log(`✅ Couverture affichée:`, tempPhotosData.couverture.url);
             } else {
                 console.error('❌ Element imgCouverture not found');
             }
@@ -252,7 +241,6 @@ async function removePhotoInfosGites(category) {
         // Sauvegarder automatiquement en BDD
         try {
             await savePhotosToDatabase(selectedGite);
-            console.log('💾 Suppression sauvegardée automatiquement en BDD');
         } catch (saveErr) {
             console.error('Erreur sauvegarde auto:', saveErr);
             showToast('Photo supprimée mais erreur sauvegarde BDD', 'warning');
@@ -292,7 +280,6 @@ async function removePhotoFromGridInfosGites(category, index) {
         // Sauvegarder automatiquement en BDD
         try {
             await savePhotosToDatabase(selectedGite);
-            console.log('💾 Suppression sauvegardée automatiquement en BDD');
         } catch (saveErr) {
             console.error('Erreur sauvegarde auto:', saveErr);
             showToast('Photo supprimée mais erreur sauvegarde BDD', 'warning');
@@ -328,8 +315,6 @@ async function deletePhotoFromStorage(path) {
  * @param {string} giteName - Nom du gîte
  */
 async function loadExistingPhotos(giteName) {
-    console.log(`🔄 loadExistingPhotos(${giteName})`);
-    
     try {
         const { data, error } = await supabaseClient
             .from('infos_gites')
@@ -337,16 +322,12 @@ async function loadExistingPhotos(giteName) {
             .eq('gite', giteName.toLowerCase())
             .maybeSingle();
 
-        console.log(`📥 Résultat chargement photos:`, { data, error });
-
         if (error) {
             console.error('Erreur chargement photos:', error);
             return;
         }
 
         if (data && data.photos) {
-            console.log(`✅ Photos trouvées:`, data.photos);
-            
             // Charger dans la structure temporaire
             tempPhotosData = {
                 couverture: data.photos.couverture || null,
@@ -356,8 +337,6 @@ async function loadExistingPhotos(giteName) {
                 entree: data.photos.entree || []
             };
 
-            console.log(`📦 tempPhotosData après chargement:`, tempPhotosData);
-
             // Afficher les prévisualisations
             displayPhotoPreviews('couverture');
             displayPhotoPreviews('galerie');
@@ -365,7 +344,6 @@ async function loadExistingPhotos(giteName) {
             displayPhotoPreviews('parking');
             displayPhotoPreviews('entree');
         } else {
-            console.log(`ℹ️ Pas de photos pour ${giteName}, réinitialisation`);
             // Réinitialiser si pas de photos
             resetTempPhotos();
         }
@@ -389,8 +367,6 @@ async function savePhotosToDatabase(giteName) {
             entree: tempPhotosData.entree
         };
 
-        console.log(`💾 Sauvegarde photos pour ${giteName}:`, photosJSON);
-
         // Utiliser UPDATE au lieu de UPSERT pour éviter les problèmes RLS
         const { data, error } = await supabaseClient
             .from('infos_gites')
@@ -413,7 +389,6 @@ async function savePhotosToDatabase(giteName) {
             return photosJSON;
         }
 
-        console.log(`✅ Photos sauvegardées avec succès pour ${giteName}`);
         return photosJSON;
     } catch (err) {
         console.error('Erreur savePhotosToDatabase:', err);
@@ -461,19 +436,4 @@ window.loadExistingPhotos = loadExistingPhotos;
 window.savePhotosToDatabase = savePhotosToDatabase;
 window.resetTempPhotos = resetTempPhotos;
 
-// Fonction de debug
-window.debugPhotos = function() {
-    console.log('====== DEBUG PHOTOS ======');
-    console.log('tempPhotosData:', tempPhotosData);
-    console.log('Preview elements:');
-    ['Couverture', 'Galerie', 'BoiteCles', 'Parking', 'Entree'].forEach(cat => {
-        const preview = document.getElementById(`preview${cat}`);
-        const grid = document.getElementById(`grid${cat}`);
-        console.log(`  ${cat}:`, { 
-            previewExists: !!preview, 
-            previewVisible: preview?.style.display !== 'none',
-            gridExists: !!grid 
-        });
-    });
-    console.log('==========================');
-};
+

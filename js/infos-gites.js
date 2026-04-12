@@ -2371,6 +2371,9 @@ function attachAutoTranslation() {
         // Exclure GPS, coordonnées et champs photo
         if (!idFR || idFR.includes('gps') || idFR.includes('Lat') || idFR.includes('Lon') || idFR.startsWith('upload') || idFR.includes('Photo')) return;
         
+        // Exclure les contrôles UI non traduisibles (génération code, longueur)
+        if (idFR.includes('codeGenerationMode') || idFR.includes('codeLength')) return;
+
         const idEN = idFR + '_en';
         const champEN = document.getElementById(idEN);
         
