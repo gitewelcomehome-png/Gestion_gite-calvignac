@@ -830,7 +830,7 @@ Ouvert / En cours / En attente client / Résolu / Fermé
 - `../js/utils.js`
 - `../js/shared-config.js`
 - `../js/fiche-activites-map.js?v=2.5.5`
-- `../js/fiche-client-app.js?v=2.10.2`
+- `../js/fiche-client-app.js?v=2.10.3`
 - `../js/fiche-client-prestations.js?v=1.0.2`
 
 **Bibliothèques externes :**

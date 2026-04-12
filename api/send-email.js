@@ -5,7 +5,7 @@
 // Utilisé par le système de ticketing et notifications
 // ================================================================
 
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 function getOriginFromRequest(req) {
     const origin = req.headers.origin || req.headers.referer || '';
@@ -203,7 +203,7 @@ const emailTemplates = {
     })
 };
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     const allowedOrigins = getAllowedOrigins();
     const requestOrigin = getOriginFromRequest(req);
     const isAllowed = requestOrigin ? allowedOrigins.has(requestOrigin) : false;
@@ -302,4 +302,4 @@ module.exports = async (req, res) => {
         // Retourner 200 pour ne pas créer de boucles d'erreurs côté client
         return res.status(200).json({ success: false, skipped: true, reason: error.message || 'unexpected error' });
     }
-};
+}

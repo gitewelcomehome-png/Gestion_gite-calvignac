@@ -3842,47 +3842,22 @@ async function submitRetourDemande(event) {
             created_at: new Date().toISOString()
         };
         
-        // Si c'est un problème, utiliser la table problemes_signales
-        if (type === 'probleme') {
-            const { data, error } = await window.ficheClientSupabase
-                .from('problemes_signales')
-                .insert([{
-                    reservation_id: formData.reservation_id,
-                    gite: formData.gite,
-                    owner_user_id: reservationData.owner_user_id || null,
-                    client_name: reservationData.client_name || null,
-                    type: 'probleme',
-                    sujet: formData.sujet,
-                    urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
-                    description: formData.description,
-                    telephone: formData.telephone,
-                    statut: 'nouveau',
-                    created_at: formData.created_at
-                }])
-                .select();
-            
-            if (error) throw error;
-        } else {
-            // Pour demande, retour, amelioration : aussi dans problemes_signales
-            const { data, error } = await window.ficheClientSupabase
-                .from('problemes_signales')
-                .insert([{
-                    reservation_id: formData.reservation_id,
-                    gite: formData.gite,
-                    owner_user_id: reservationData.owner_user_id || null,
-                    client_name: reservationData.client_name || null,
-                    type: type, // demande, retour, amelioration
-                    sujet: formData.sujet,
-                    urgence: formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne'),
-                    description: formData.description,
-                    telephone: formData.telephone,
-                    statut: 'nouveau',
-                    created_at: formData.created_at
-                }])
-                .select();
-            
-            if (error) throw error;
-        }
+        // Tous les types (probleme, demande, retour, amelioration) via RPC SECURITY DEFINER
+        // pour contourner les politiques RLS RESTRICTIVE sur l'insert anon direct
+        const urgenceNormalized = formData.urgence === 'haute' ? 'haute' : (formData.urgence === 'basse' ? 'faible' : 'moyenne');
+        const { error } = await window.ficheClientSupabase
+            .rpc('insert_probleme_signale_by_token', {
+                p_token:       token,
+                p_type:        type,
+                p_sujet:       formData.sujet,
+                p_description: formData.description,
+                p_urgence:     urgenceNormalized,
+                p_gite:        formData.gite || null,
+                p_client_name: reservationData.client_name || null,
+                p_telephone:   formData.telephone || null
+            });
+
+        if (error) throw error;
         
         // Masquer le formulaire et afficher la confirmation
         document.getElementById('formRetoursDemande').style.display = 'none';

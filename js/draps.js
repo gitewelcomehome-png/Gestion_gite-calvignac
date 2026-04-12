@@ -814,7 +814,7 @@ async function decrementerStockReservationsTerminees() {
                             item_key: key,
                             quantity: nouvelleQuantite
                         }, {
-                            onConflict: 'owner_user_id,gite_id,item_key'
+                            onConflict: 'gite_id,item_key'
                         });
                     
                     if (upsertError) {
