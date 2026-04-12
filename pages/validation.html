@@ -864,7 +864,10 @@
                 gites.forEach(g => {
                     giteMap[g.id] = g.name;
                 });
-                
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
                 // Récupérer les réservations du bon propriétaire uniquement
                 const { data: reservations, error: resError } = await supabaseClient
                     .from('reservations')
@@ -902,9 +905,6 @@
                 })).filter(c => c.scheduledDate);
 
                 // Organiser par semaine
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
                 const weeks = {};
                 
                 reservations.forEach(res => {
@@ -920,7 +920,6 @@
                         console.warn('⚠️ Réservation ignorée (dateFin invalide):', res.id, res.check_out);
                         return;
                     }
-                    const today = new Date();
                     
                     if (dateFin < today) return; // Ignorer le passé
 
