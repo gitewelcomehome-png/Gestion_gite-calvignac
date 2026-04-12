@@ -2650,12 +2650,12 @@ async function proposerPrixIATarifs() {
     const joursLibres = [];
     
     for (let d = 1; d <= lastDay; d++) {
-        const dto = new Date(currentYearTarifs, currentMonthTarifs, d);
-        const dateStr = toLocalDateString(dto);
+        const dateStr = toLocalDateString(new Date(currentYearTarifs, currentMonthTarifs, d));
+        // Comparaison string ISO : évite le bug UTC (new Date("YYYY-MM-DD") = UTC midnight ≠ minuit local)
         const isResa = reservationsCache.some(r => {
-            const ci = new Date(r.date_arrivee || r.check_in);
-            const co = new Date(r.date_depart || r.check_out);
-            return dto >= ci && dto < co;
+            const ci = toDateOnlyString(r.date_arrivee || r.check_in);
+            const co = toDateOnlyString(r.date_depart || r.check_out);
+            return dateStr >= ci && dateStr < co;
         });
         if (!isResa) {
             aiDemandeCacheTarifs[dateStr] = getDemandePourDateTarifs(dateStr);
