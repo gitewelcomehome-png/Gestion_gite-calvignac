@@ -10,7 +10,6 @@ let prestationsList = [];
 // INITIALISATION
 // ==========================================
 async function loadGites() {
-    console.log('🔍 [PRESTATIONS] Début loadGites');
     
     const select = document.getElementById('giteSelect');
     
@@ -23,7 +22,6 @@ async function loadGites() {
             return;
         }
         
-        console.log('✓ [PRESTATIONS] Supabase OK');
         
         // Récupérer l'utilisateur connecté
         const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
@@ -40,7 +38,6 @@ async function loadGites() {
             return;
         }
         
-        console.log('✓ [PRESTATIONS] User ID:', user.id);
         
         // Charger les gîtes
         const { data: gites, error } = await window.supabaseClient
@@ -54,7 +51,6 @@ async function loadGites() {
             throw error;
         }
         
-        console.log('✓ [PRESTATIONS] Gîtes trouvés:', gites?.length || 0);
         
         if (!gites || gites.length === 0) {
             select.innerHTML = '<option value="">Aucun gîte trouvé</option>';
@@ -64,17 +60,14 @@ async function loadGites() {
         }
         
         // Vérifier les doublons
-        console.log('📋 [PRESTATIONS] Liste des gîtes:', gites.map(g => `${g.name} (${g.id})`));
         
         select.innerHTML = gites.map(g => 
             `<option value="${g.id}">${g.name}</option>`
         ).join('');
         
-        console.log('✅ [PRESTATIONS] Options ajoutées au select, total:', select.options.length);
         
         // Charger le premier gîte
         giteIdCourant = gites[0].id;
-        console.log('✓ [PRESTATIONS] Gîte sélectionné:', giteIdCourant);
         loadAllData();
         
     } catch (error) {
@@ -89,12 +82,10 @@ async function loadGites() {
 // CHARGEMENT DONNÉES
 // ==========================================
 async function loadAllData() {
-    console.log('🔄 [PRESTATIONS] loadAllData()');
     
     const select = document.getElementById('giteSelect');
     giteIdCourant = select.value;
     
-    console.log('📍 [PRESTATIONS] Gîte ID:', giteIdCourant);
     
     if (!giteIdCourant) {
         console.warn('⚠️ [PRESTATIONS] Pas de gîte sélectionné');
@@ -107,7 +98,6 @@ async function loadAllData() {
             loadPrestations(),
             loadRevenusMensuels()
         ]);
-        console.log('✅ [PRESTATIONS] Toutes les données chargées');
     } catch (error) {
         console.error('❌ [PRESTATIONS] Erreur loadAllData:', error);
     }
@@ -117,7 +107,6 @@ async function loadAllData() {
 // STATS ANNUELLES
 // ==========================================
 async function loadStatsAnnuelles() {
-    console.log('📊 [STATS] Chargement stats annuelles...');
     
     try {
         const anneeActuelle = new Date().getFullYear();
@@ -132,7 +121,6 @@ async function loadStatsAnnuelles() {
         
         if (error) throw error;
         
-        console.log('✓ [STATS] Commandes trouvées:', commandes?.length || 0);
         
         const caBrut = commandes?.reduce((sum, c) => sum + (c.montant_prestations || 0), 0) || 0;
         const caNet = commandes?.reduce((sum, c) => sum + (c.montant_net_owner || 0), 0) || 0;
@@ -144,7 +132,6 @@ async function loadStatsAnnuelles() {
         document.getElementById('stat-nb-commandes').textContent = nbCommandes;
         document.getElementById('stat-panier-moyen').textContent = formatEuro(panierMoyen);
         
-        console.log('✅ [STATS] Stats affichées');
         
     } catch (error) {
         console.error('❌ [STATS] Erreur:', error);
@@ -155,7 +142,6 @@ async function loadStatsAnnuelles() {
 // PRESTATIONS CATALOGUE
 // ==========================================
 async function loadPrestations() {
-    console.log('📦 [PRESTA] Chargement prestations...');
     
     try {
         const { data, error } = await window.supabaseClient
@@ -169,7 +155,6 @@ async function loadPrestations() {
             throw error;
         }
         
-        console.log('✓ [PRESTA] Prestations trouvées:', data?.length || 0);
         
         prestationsList = data || [];
         renderPrestations();
@@ -186,12 +171,10 @@ async function loadPrestations() {
 }
 
 function renderPrestations() {
-    console.log('🖼️ [PRESTA] Rendu prestations, count:', prestationsList.length);
     
     const grid = document.getElementById('prestationsGrid');
     
     if (prestationsList.length === 0) {
-        console.log('ℹ️ [PRESTA] Aucune prestation, affichage empty state');
         grid.innerHTML = `
             <div class="empty-state">
                 <i data-lucide="package" style="width: 48px; height: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
@@ -281,7 +264,6 @@ async function savePrestation(event) {
     
     const prestationId = document.getElementById('prestationId').value;
     
-    console.log('💾 Sauvegarde prestation...', { giteIdCourant, prestationId });
     
     const data = {
         gite_id: giteIdCourant,
@@ -295,7 +277,6 @@ async function savePrestation(event) {
         is_active: true
     };
     
-    console.log('💾 Données à sauvegarder:', data);
     
     try {
         if (prestationId) {
@@ -306,7 +287,6 @@ async function savePrestation(event) {
                 .eq('id', prestationId);
             
             if (error) throw error;
-            console.log('✓ Prestation modifiée');
         } else {
             // Créer
             const { error } = await window.supabaseClient
@@ -314,7 +294,6 @@ async function savePrestation(event) {
                 .insert(data);
             
             if (error) throw error;
-            console.log('✓ Prestation créée');
         }
         
         closePrestationModal();
@@ -366,7 +345,6 @@ function previewPhoto(event) {
 // REVENUS MENSUELS
 // ==========================================
 async function loadRevenusMensuels() {
-    console.log('📅 [REVENUS] Chargement revenus...');
     
     try {
         const anneeActuelle = new Date().getFullYear();
@@ -385,7 +363,6 @@ async function loadRevenusMensuels() {
             throw error;
         }
         
-        console.log('✓ [REVENUS] Commandes trouvées:', commandes?.length || 0);
         
         // Grouper par mois
         const groupes = {};
@@ -551,17 +528,14 @@ function formatMois(moisKey) {
 
 // Attacher les event listeners après chargement du HTML
 function initEventListeners() {
-    console.log('🔗 Initialisation des event listeners...');
     
     // Event delegation sur document pour capturer tous les clics
     document.addEventListener('click', handlePrestationsClick);
-    console.log('✓ Event delegation activée');
 }
 
 function handlePrestationsClick(e) {
     // Bouton créer une prestation
     if (e.target.closest('#btn-create-prestation')) {
-        console.log('🔵 Clic sur Créer une prestation');
         openPrestationModal();
         return;
     }
@@ -569,21 +543,18 @@ function handlePrestationsClick(e) {
     // Bouton submit du formulaire prestation
     if (e.target.closest('#btn-save-prestation')) {
         e.preventDefault();
-        console.log('💾 Clic sur Enregistrer - appel savePrestation');
         savePrestation(e);
         return;
     }
     
     // Bouton fermer modal
     if (e.target.closest('.modal-close') && e.target.closest('#modalPrestation')) {
-        console.log('🔵 Clic sur fermer modal');
         closePrestationModal();
         return;
     }
     
     // Bouton annuler
     if (e.target.closest('#btn-cancel-prestation')) {
-        console.log('🔵 Clic sur annuler');
         closePrestationModal();
         return;
     }

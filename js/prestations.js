@@ -17,7 +17,6 @@ let isLoadingGites = false; // Flag pour éviter les appels multiples
  */
 async function loadGitesSelector() {
     if (isLoadingGites) {
-        console.log('⏳ loadGitesSelector déjà en cours, skip...');
         return;
     }
     
@@ -375,7 +374,6 @@ async function afficherGestionCatalogue() {
         return;
     }
     
-    console.log('🎨 [GESTION] Affichage interface gestion pour gîte:', giteSelectionne.name, giteSelectionne.id);
     
     // Masquer les stats, afficher l'interface de gestion
     document.getElementById('prestations-stats-view').style.display = 'none';
@@ -407,7 +405,6 @@ async function afficherGestionCatalogue() {
         
         // Injecter les styles extraits
         if (styles.length > 0) {
-            console.log(`🎨 [GESTION] Injection de ${styles.length} bloc(s) de styles`);
             styles.forEach((styleContent, index) => {
                 if (styleContent.trim()) {
                     const style = document.createElement('style');
@@ -418,41 +415,32 @@ async function afficherGestionCatalogue() {
             });
         }
         
-        console.log('✅ [GESTION] HTML chargé dans le container');
         
         // Charger le script JS
         if (!window.desktopOwnerPrestationsLoaded) {
-            console.log('📜 [GESTION] Chargement du script desktop-owner-prestations.js...');
             const script = document.createElement('script');
             script.src = 'js/desktop-owner-prestations.js';
             script.onload = () => {
-                console.log('✅ [GESTION] Script prestations chargé');
                 window.desktopOwnerPrestationsLoaded = true;
                 
                 // Initialiser avec le gîte sélectionné
                 if (typeof window.initEventListeners === 'function') {
-                    console.log('🎯 [GESTION] Initialisation des event listeners...');
                     window.initEventListeners();
                 }
                 
                 // Charger les données pour ce gîte
                 if (typeof window.loadGites === 'function') {
                     setTimeout(() => {
-                        console.log('🔄 [GESTION] Appel loadGites()...');
                         window.loadGites().then(() => {
                             // Après le chargement des gîtes, forcer la sélection du bon gîte
                             setTimeout(() => {
                                 const select = document.getElementById('giteSelect');
-                                console.log('🎯 [GESTION] Select trouvé:', select);
-                                console.log('🎯 [GESTION] Gîte à sélectionner:', giteSelectionne.id);
                                 
                                 if (select) {
                                     select.value = giteSelectionne.id;
-                                    console.log('✅ [GESTION] Gîte sélectionné dans le select:', select.value);
                                     
                                     // Charger les données pour ce gîte
                                     if (typeof window.loadAllData === 'function') {
-                                        console.log('🔄 [GESTION] Appel loadAllData()...');
                                         window.loadAllData();
                                     } else {
                                         console.error('❌ [GESTION] loadAllData non disponible');
@@ -471,14 +459,12 @@ async function afficherGestionCatalogue() {
             document.body.appendChild(script);
         } else {
             // Script déjà chargé, juste réinitialiser
-            console.log('♻️ [GESTION] Script déjà chargé, réutilisation...');
             if (typeof window.loadGites === 'function') {
                 setTimeout(() => {
                     window.loadGites().then(() => {
                         const select = document.getElementById('giteSelect');
                         if (select) {
                             select.value = giteSelectionne.id;
-                            console.log('✅ [GESTION] Gîte resélectionné:', select.value);
                             
                             if (typeof window.loadAllData === 'function') {
                                 window.loadAllData();
@@ -504,7 +490,6 @@ async function afficherGestionCatalogue() {
  * Retour aux statistiques depuis l'interface de gestion
  */
 function retourAuxStatistiques() {
-    console.log('🔙 [RETOUR] Retour aux statistiques');
     
     const managementView = document.getElementById('prestations-management-view');
     const statsView = document.getElementById('prestations-stats-view');
@@ -517,7 +502,6 @@ function retourAuxStatistiques() {
     managementView.style.display = 'none';
     statsView.style.display = 'block';
     
-    console.log('✅ [RETOUR] Vue basculée vers statistiques');
     
     // Réinitialiser les icônes Lucide
     if (typeof lucide !== 'undefined') {
