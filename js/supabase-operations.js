@@ -498,6 +498,7 @@ async function addReservation(reservation) {
         if (result.error) throw result.error;
 
         await autoResolveCleaningConflictForReservation(result.data.id);
+        await syncCleaningScheduleForReservation(result.data.id, 'add');
         
         // 🚗 Automatisation des trajets kilométriques
         if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
@@ -717,6 +718,12 @@ async function updateReservation(id, updates) {
 
         if (datesChanged) {
             await autoResolveCleaningConflictForReservation(id);
+            await syncCleaningScheduleForReservation(id, 'update');
+        }
+        
+        // Si réservation annulée → notifier la société de ménage
+        if (updates.status === 'cancelled' || updates.status === 'annulée') {
+            await syncCleaningScheduleForReservation(id, 'delete');
         }
         
         if (datesChanged && typeof window.KmManager?.supprimerTrajetsAutoReservation === 'function' &&
@@ -762,6 +769,9 @@ async function deleteReservation(id) {
             }
         }
         
+        // Nullifier cleaning_schedule avant la suppression (évite CASCADE, garde la trace visible)
+        await syncCleaningScheduleForReservation(id, 'delete');
+
         const result = await window.supabaseClient
             .from('reservations')
             .delete()
@@ -776,6 +786,108 @@ async function deleteReservation(id) {
         throw error;
     }
 }
+
+// ==========================================
+// SYNC CLEANING SCHEDULE ← RÉSERVATIONS
+// ==========================================
+
+/**
+ * Synchronise cleaning_schedule à chaque ajout / modification / suppression de réservation.
+ * @param {string} reservationId
+ * @param {'add'|'update'|'delete'} action
+ */
+async function syncCleaningScheduleForReservation(reservationId, action) {
+    try {
+        if (!reservationId) return;
+        const todayFR = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        if (action === 'delete') {
+            // Nullifier la FK AVANT la suppression de la réservation pour éviter le CASCADE
+            // → l'entrée reste visible par la société de ménage comme "annulée"
+            await window.supabaseClient
+                .from('cleaning_schedule')
+                .update({
+                    reservation_id: null,
+                    status: 'cancelled',
+                    notes: `❌ Réservation supprimée le ${todayFR}`
+                })
+                .eq('reservation_id', reservationId);
+            return;
+        }
+
+        const { data: resa, error } = await window.supabaseClient
+            .from('reservations')
+            .select('id, owner_user_id, gite_id, check_in, check_out')
+            .eq('id', reservationId)
+            .single();
+
+        if (error || !resa?.check_out) return;
+
+        const scheduledDate = resa.check_out.slice(0, 10);
+
+        if (action === 'add') {
+            await window.supabaseClient
+                .from('cleaning_schedule')
+                .upsert({
+                    owner_user_id: resa.owner_user_id,
+                    reservation_id: resa.id,
+                    gite_id: resa.gite_id,
+                    scheduled_date: scheduledDate,
+                    date: scheduledDate,
+                    time_of_day: 'afternoon',
+                    status: 'pending',
+                    validated_by_company: false,
+                    reservation_end: scheduledDate
+                }, { onConflict: 'reservation_id' });
+        } else if (action === 'update') {
+            const { data: existing } = await window.supabaseClient
+                .from('cleaning_schedule')
+                .select('id, status, validated_by_company')
+                .eq('reservation_id', reservationId)
+                .maybeSingle();
+
+            if (!existing) {
+                // Pas encore d'entrée → créer
+                await window.supabaseClient
+                    .from('cleaning_schedule')
+                    .insert({
+                        owner_user_id: resa.owner_user_id,
+                        reservation_id: resa.id,
+                        gite_id: resa.gite_id,
+                        scheduled_date: scheduledDate,
+                        date: scheduledDate,
+                        time_of_day: 'afternoon',
+                        status: 'pending',
+                        validated_by_company: false,
+                        reservation_end: scheduledDate,
+                        notes: `🔄 Dates modifiées le ${todayFR}`
+                    });
+            } else if (existing.status !== 'validated') {
+                // Mettre à jour la date et marquer comme modifié
+                await window.supabaseClient
+                    .from('cleaning_schedule')
+                    .update({
+                        scheduled_date: scheduledDate,
+                        date: scheduledDate,
+                        reservation_end: scheduledDate,
+                        status: 'pending',
+                        validated_by_company: false,
+                        notes: `🔄 Dates modifiées le ${todayFR}`
+                    })
+                    .eq('reservation_id', reservationId);
+            } else {
+                // Déjà validé : signaler le changement sans reset la validation
+                await window.supabaseClient
+                    .from('cleaning_schedule')
+                    .update({ notes: `⚠️ Dates modifiées le ${todayFR} — re-validation requise` })
+                    .eq('reservation_id', reservationId);
+            }
+        }
+    } catch (err) {
+        console.error('⚠️ syncCleaningScheduleForReservation:', err);
+    }
+}
+window.syncCleaningScheduleForReservation = syncCleaningScheduleForReservation;
 
 // ==========================================
 // CHARGES

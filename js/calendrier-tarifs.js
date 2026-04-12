@@ -1571,6 +1571,11 @@ async function deleteReservation(id) {
     if (!confirm('Supprimer cette réservation ?')) return;
     
     try {
+        // Notifier la société de ménage AVANT la suppression (évite CASCADE silencieux)
+        if (typeof window.syncCleaningScheduleForReservation === 'function') {
+            await window.syncCleaningScheduleForReservation(id, 'delete');
+        }
+
         const { error } = await window.supabaseClient
             .from('reservations')
             .delete()

@@ -182,6 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await peuplerSelectsGites();
     
     await chargerInterventions();
+    await chargerChangementsRecents(); // Alertes ajout/modif/suppression réservations
     await chargerStocksDraps(); // Activer le chargement des stocks
     await chargerRetoursMenuge(); // Charger les retours ménage envoyés
     
@@ -216,11 +217,12 @@ async function chargerInterventions() {
         const troisSemaines = new Date(today);
         troisSemaines.setDate(today.getDate() + 21);
         
-        // Charger les ménages des 3 prochaines semaines
+        // Charger les ménages des 3 prochaines semaines (hors annulés)
         const { data: menages, error } = await window.supabaseClient
             .from('cleaning_schedule')
             .select('*')
             .eq('owner_user_id', window.cleanerOwnerId)
+            .neq('status', 'cancelled')
             .gte('scheduled_date', today.toISOString().split('T')[0])
             .lte('scheduled_date', troisSemaines.toISOString().split('T')[0])
             .order('scheduled_date', { ascending: true });
@@ -300,7 +302,7 @@ async function chargerInterventions() {
 
             giteIds.forEach((giteId) => {
                 const menagesGite = semaine.gites[giteId];
-                const gite = window.gitesManager?.getById(giteId);
+                const gite = visibleGites.find(g => g.id === giteId);
                 const giteName = gite?.name || 'Gîte inconnu';
                 const giteSlug = giteName.toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -314,6 +316,7 @@ async function chargerInterventions() {
 
                     const validated = menage.validated_by_company;
                     const heureLabel = menage.time_of_day === 'morning' ? 'Matin (7h–12h)' : 'Après-midi (12h–17h)';
+                    const hasChange = menage.notes && (menage.notes.startsWith('🔄') || menage.notes.startsWith('⚠️'));
 
                     html += `
                         <div class="intervention-neo-card ${validated ? 'validated' : ''}" data-gite-color="${giteSlug}">
@@ -328,7 +331,8 @@ async function chargerInterventions() {
                                     </div>
                                 </div>
                                 <div class="intervention-neo-time">⏰ ${heureLabel}</div>
-                                ${menage.notes ? `<div class="intervention-neo-notes">📝 ${menage.notes}</div>` : ''}
+                                ${hasChange ? `<div style="margin-top:8px;padding:6px 10px;background:#fff3cd;border-radius:6px;font-size:0.8rem;font-weight:600;color:#856404;border-left:3px solid #ffc107;">${menage.notes}</div>` : ''}
+                                ${menage.notes && !hasChange ? `<div class="intervention-neo-notes">📝 ${menage.notes}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -858,4 +862,116 @@ async function supprimerRetourMenage(retourId) {
         showToast('❌ Erreur lors de la suppression', 'error');
     }
 }
+
+// ================================================================
+// ALERTES CHANGEMENTS RÉSERVATIONS
+// ================================================================
+
+async function chargerChangementsRecents() {
+    const container = document.getElementById('alertes-changements-list');
+    if (!container) return;
+
+    try {
+        const limitDate = new Date();
+        limitDate.setDate(limitDate.getDate() - 21);
+        const limitStr = limitDate.toISOString().split('T')[0];
+
+        // Deux requêtes pour éviter les problèmes d'ilike avec emojis
+        const [{ data: annules }, { data: modifies }] = await Promise.all([
+            // 1. Entrées annulées (scheduled_date recent ou futur)
+            window.supabaseClient
+                .from('cleaning_schedule')
+                .select('id, gite_id, scheduled_date, status, notes, gites:gite_id(name)')
+                .eq('owner_user_id', window.cleanerOwnerId)
+                .eq('status', 'cancelled')
+                .gte('scheduled_date', limitStr)
+                .order('scheduled_date', { ascending: false })
+                .limit(10),
+            // 2. Entrées avec notes (🔄 modif, ⚠️ re-validation) – filtrées en JS
+            window.supabaseClient
+                .from('cleaning_schedule')
+                .select('id, gite_id, scheduled_date, status, notes, gites:gite_id(name)')
+                .eq('owner_user_id', window.cleanerOwnerId)
+                .not('notes', 'is', null)
+                .gte('scheduled_date', limitStr)
+                .order('scheduled_date', { ascending: false })
+                .limit(20)
+        ]);
+
+        // Fusionner + dédupliquer + filtrer les notes de changement
+        const seen = new Set();
+        const alertes = [];
+        for (const a of (annules || [])) {
+            if (!seen.has(a.id)) { seen.add(a.id); alertes.push(a); }
+        }
+        for (const a of (modifies || [])) {
+            const notes = a.notes || '';
+            if (!seen.has(a.id) && (notes.startsWith('🔄') || notes.startsWith('⚠️'))) {
+                seen.add(a.id); alertes.push(a);
+            }
+        }
+        // Trier par date desc
+        alertes.sort((a, b) => (b.scheduled_date || '').localeCompare(a.scheduled_date || ''));
+
+        const sectionCard = document.getElementById('alertes-changements-card');
+
+        if (alertes.length === 0) {
+            if (sectionCard) sectionCard.style.display = 'none';
+            return;
+        }
+
+        if (sectionCard) sectionCard.style.display = 'block';
+
+        let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+        alertes.forEach(a => {
+            const giteName = a.gites?.name || 'Gîte inconnu';
+            const dateFormatee = a.scheduled_date
+                ? new Date(a.scheduled_date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+                : '—';
+            const isCancelled = a.status === 'cancelled';
+            const bgColor = isCancelled ? '#ffe3e3' : '#fff3cd';
+            const borderColor = isCancelled ? '#ff7675' : '#ffc107';
+            const textColor = isCancelled ? '#c0392b' : '#856404';
+            const icon = isCancelled ? '❌' : '🔄';
+
+            html += `
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:${bgColor};border:2px solid ${borderColor};border-radius:10px;box-shadow:2px 2px 0 ${borderColor};">
+                    <span style="font-size:1.3rem;flex-shrink:0;">${icon}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:${textColor};">${giteName} — ${dateFormatee}</div>
+                        <div style="font-size:0.85rem;color:${textColor};margin-top:2px;">${a.notes || (isCancelled ? 'Réservation annulée' : 'Modifiée')}</div>
+                    </div>
+                    <button onclick="marquerAlertesVues('${a.id}', ${isCancelled})"
+                        style="flex-shrink:0;padding:6px 12px;border:2px solid ${borderColor};background:white;color:${textColor};border-radius:8px;cursor:pointer;font-weight:600;font-size:0.8rem;box-shadow:2px 2px 0 ${borderColor};">
+                        ✓ Vu
+                    </button>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        if (window.SecurityUtils) window.SecurityUtils.setInnerHTML(container, html, { trusted: true });
+        else container.innerHTML = html;
+
+    } catch (err) {
+        console.error('⚠️ chargerChangementsRecents:', err);
+    }
+}
+
+async function marquerAlertesVues(alerteId, isCancel) {
+    try {
+        if (isCancel) {
+            // Supprimer l'entrée annulée (plus utile)
+            await window.supabaseClient.from('cleaning_schedule').delete().eq('id', alerteId);
+        } else {
+            // Effacer le flag de modification
+            await window.supabaseClient.from('cleaning_schedule').update({ notes: null }).eq('id', alerteId);
+        }
+        await chargerChangementsRecents();
+    } catch (err) {
+        console.error('⚠️ marquerAlertesVues:', err);
+    }
+}
+
+window.marquerAlertesVues = marquerAlertesVues;
 window.supprimerRetourMenage = supprimerRetourMenage;
