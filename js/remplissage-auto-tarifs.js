@@ -729,12 +729,15 @@
         modalState.tarif = stateTemplate.tarif;
         modalState.currentGiteId = giteId;
         
-        // Charger les réservations pour ce gîte
+        // Charger les réservations pour ce gîte (hors annulées)
         try {
+            const todayStrRemplissage = new Date().toISOString().split('T')[0];
             const { data, error } = await window.supabaseClient
                 .from('reservations')
                 .select('*')
-                .eq('gite_id', giteId);
+                .eq('gite_id', giteId)
+                .not('status', 'in', '("cancelled","annul\u00e9e","annulee")')
+                .gte('check_out', todayStrRemplissage);
             
             if (error) throw error;
             reservationsForGite = data || [];

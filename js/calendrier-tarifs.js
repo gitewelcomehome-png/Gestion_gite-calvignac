@@ -1207,6 +1207,7 @@ async function loadReservations() {
             .from('reservations')
             .select('*')
             .eq('gite_id', currentGiteId)
+            .not('status', 'in', '("cancelled","annul\u00e9e","annulee")')
             .gte('check_out', todayStr)
             .order('check_in', { ascending: true });
         
