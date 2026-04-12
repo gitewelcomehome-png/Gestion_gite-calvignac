@@ -199,10 +199,10 @@ function renderPrestations() {
             <div class="prestation-prix">${formatEuro(p.prix)}</div>
             ${p.charges_fiscales > 0 ? `<div class="prestation-charges">Charges: ${formatEuro(p.charges_fiscales)}</div>` : ''}
             <div class="prestation-actions">
-                <button onclick="editPrestation(${p.id})" class="btn btn-sm btn-secondary">
+                <button onclick="editPrestation('${p.id}')" class="btn btn-sm btn-secondary">
                     <i data-lucide="edit"></i> Modifier
                 </button>
-                <button onclick="deletePrestation(${p.id})" class="btn btn-sm btn-danger">
+                <button onclick="deletePrestation('${p.id}')" class="btn btn-sm btn-danger">
                     <i data-lucide="trash-2"></i>
                 </button>
             </div>
