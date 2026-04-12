@@ -524,14 +524,14 @@ async function afficherPlanningParSemaine() {
             };
         }
         
-        // Stocker la vérité calculée pour la réconciliation finale
-        wantedMap[r.id] = { scheduled_date: scheduledDateStr, time_of_day: calculatedTimeOfDay };
-
         // Mettre à jour cleaning_schedule si la date calculée diffère de la date stockée
         // (hors statuts finaux validated/confirmed)
         const isFinalStatus = validation?.status === 'validated' || validation?.status === 'confirmed';
         const scheduledDateStr = `${dateMenage.getFullYear()}-${String(dateMenage.getMonth() + 1).padStart(2, '0')}-${String(dateMenage.getDate()).padStart(2, '0')}`;
         const reservationEndStr = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
+
+        // Stocker la vérité calculée pour la réconciliation finale
+        wantedMap[r.id] = { scheduled_date: scheduledDateStr, time_of_day: calculatedTimeOfDay };
         const dateHasChanged = validation && !isFinalStatus && validation.scheduled_date !== scheduledDateStr;
 
         if (validation && !isFinalStatus && (validation.status === 'pending' || dateHasChanged)) {
