@@ -507,7 +507,11 @@
         
         const current = new Date(debut);
         while (current <= fin) {
-            const dateStr = current.toISOString().split('T')[0];
+            // Composantes locales pour éviter le décalage UTC (toISOString donne J-1 en France)
+            const y = current.getFullYear();
+            const m = String(current.getMonth() + 1).padStart(2, '0');
+            const d = String(current.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
             const jourSemaine = getJourSemaine(dateStr);
             if (modalState.joursSelectionnes[jourSemaine]) {
                 const estReservee = isDateReservee(dateStr);
