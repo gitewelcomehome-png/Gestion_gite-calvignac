@@ -495,6 +495,8 @@ async function afficherPlanningParSemaine() {
     // Organiser par semaine
     const weeks = {};
     const weekStarts = new Set();
+    // Map de vérité : reservation_id → { scheduled_date, time_of_day } calculés
+    const wantedMap = {};
     
     // Transformer en for..of pour utiliser await
     for (const r of relevant) {
@@ -522,6 +524,9 @@ async function afficherPlanningParSemaine() {
             };
         }
         
+        // Stocker la vérité calculée pour la réconciliation finale
+        wantedMap[r.id] = { scheduled_date: scheduledDateStr, time_of_day: calculatedTimeOfDay };
+
         // Mettre à jour cleaning_schedule si la date calculée diffère de la date stockée
         // (hors statuts finaux validated/confirmed)
         const isFinalStatus = validation?.status === 'validated' || validation?.status === 'confirmed';
@@ -707,6 +712,78 @@ async function afficherPlanningParSemaine() {
         // }, 100);
     } else {
         console.error('❌ ERREUR: Conteneur #menagePlanningWeeks non trouvé !');
+    }
+
+    // ─── RÉCONCILIATION ASYNC (sans bloquer l'affichage) ───────────────────
+    // Lance en arrière-plan : corrige cleaning_schedule pour que la société
+    // voit exactement les mêmes dates que l'owner, et cancelle les orphelines.
+    const allReservationIds = new Set(reservations.map(r => r.id));
+    reconcileCleaningWithOwner(wantedMap, allReservationIds, user.id).catch(() => {/* silencieux */});
+}
+
+/**
+ * Réconcilie cleaning_schedule avec la réalité calculée par l'owner.
+ * - Corrige les dates incohérentes (hors statuts finaux)
+ * - Annule les entrées dont la réservation n'existe plus
+ * @param {Object} wantedMap   - { [reservation_id]: { scheduled_date, time_of_day } }
+ * @param {Set}    allResIds   - Tous les IDs de réservations actives en base
+ * @param {string} ownerUserId
+ */
+async function reconcileCleaningWithOwner(wantedMap, allResIds, ownerUserId) {
+    const todayFR = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const FINAL = new Set(['validated', 'confirmed', 'cancelled']);
+
+    // Lire toutes les entries non-cancelled de cet owner
+    const { data: entries, error } = await window.supabaseClient
+        .from('cleaning_schedule')
+        .select('id, reservation_id, scheduled_date, time_of_day, status')
+        .eq('owner_user_id', ownerUserId)
+        .neq('status', 'cancelled');
+
+    if (error || !entries) return;
+
+    const toCancel = [];
+    const toUpdate = [];
+
+    for (const entry of entries) {
+        const rid = entry.reservation_id;
+
+        if (!rid) continue; // orpheline sans FK → laisser
+
+        if (!allResIds.has(rid)) {
+            // Réservation n'existe plus → canceller
+            toCancel.push(entry.id);
+            continue;
+        }
+
+        const wanted = wantedMap[rid];
+        if (!wanted) continue; // Réservation passée / hors plage → ne pas toucher
+
+        if (FINAL.has(entry.status)) continue; // Jamais toucher aux validés
+
+        const dateOk = entry.scheduled_date === wanted.scheduled_date;
+        const timeOk = entry.time_of_day === wanted.time_of_day;
+        if (!dateOk || !timeOk) {
+            toUpdate.push({ id: entry.id, rid, ...wanted });
+        }
+    }
+
+    // Batch UPDATE des dates incohérentes
+    await Promise.all(toUpdate.map(u =>
+        window.supabaseClient
+            .from('cleaning_schedule')
+            .update({ scheduled_date: u.scheduled_date, date: u.scheduled_date, time_of_day: u.time_of_day })
+            .eq('id', u.id)
+            .catch(() => {})
+    ));
+
+    // Batch CANCEL des orphelines
+    if (toCancel.length > 0) {
+        await window.supabaseClient
+            .from('cleaning_schedule')
+            .update({ status: 'cancelled', notes: `❌ Réservation supprimée le ${todayFR}` })
+            .in('id', toCancel)
+            .catch(() => {});
     }
 }
 
