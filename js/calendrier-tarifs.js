@@ -476,23 +476,23 @@ function _renderCalendrierTarifsImmediate() {
         
         // Calculer le prix avec promotions si un tarif existe
         let prixDisplay = '';
-        if (tarif && !isReserved) {
-            const prixBase = parseFloat(tarif.prix_nuit);
-            const { prixFinal, promoAppliquee } = calculatePrixWithPromos(dateStr, prixBase);
-            
-            if (promoAppliquee) {
-                // Afficher prix barré + nouveau prix
-                prixDisplay = `
-                    <div style="font-size: 11px; color: var(--text-secondary); text-decoration: line-through; margin-top: 2px;">${prixBase.toFixed(0)}€</div>
-                    <div style="font-size: 13px; font-weight: 700; color: #e74c3c; margin-top: 2px;">${prixFinal.toFixed(0)}€</div>
-                    <div style="font-size: 9px; color: #e74c3c; font-weight: 600; margin-top: 2px;">🎉 ${promoAppliquee.split(' ')[0]}</div>
-                `;
+        if (!isReserved) {
+            const prixBase = parseFloat(tarif?.prix_nuit) || getPrixNuitEffectif(dateStr);
+            if (prixBase > 0) {
+                const { prixFinal, promoAppliquee } = calculatePrixWithPromos(dateStr, prixBase);
+                const isDefault = !tarif?.prix_nuit; // prix venant du tarif_nuit_base
+                if (promoAppliquee) {
+                    prixDisplay = `
+                        <div style="font-size: 11px; color: var(--text-secondary); text-decoration: line-through; margin-top: 2px;">${prixBase.toFixed(0)}€</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #e74c3c; margin-top: 2px;">${prixFinal.toFixed(0)}€</div>
+                        <div style="font-size: 9px; color: #e74c3c; font-weight: 600; margin-top: 2px;">🎉 ${promoAppliquee.split(' ')[0]}</div>
+                    `;
+                } else {
+                    prixDisplay = `<div class="day-price" style="font-size: 13px; font-weight: 600; color: ${isDefault ? 'var(--text-secondary)' : 'var(--text)'}; margin-top: 4px; ${isDefault ? 'opacity:0.6;' : ''}">${prixFinal.toFixed(0)}€</div>`;
+                }
             } else {
-                // Prix normal
-                prixDisplay = `<div class="day-price" style="font-size: 13px; font-weight: 600; color: var(--text); margin-top: 4px;">${prixBase.toFixed(0)}€</div>`;
+                prixDisplay = '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">—</div>';
             }
-        } else if (!isReserved) {
-            prixDisplay = '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">—</div>';
         }
         
         const dayCard = document.createElement('div');
@@ -1436,7 +1436,7 @@ function calculateTarifForDuration(dateDebut, dateFin, nbNuits) {
         date.setDate(date.getDate() + i);
         const dateStr = toLocalDateString(date);
         
-        const tarifBase = parseFloat(tarifsCache.find(t => t.date === dateStr)?.prix_nuit) || 0;
+        const tarifBase = getPrixNuitEffectif(dateStr);
         
         // Appliquer la grille de durée
         let multiplicateur = 1;
@@ -1498,7 +1498,7 @@ function calculateTarifSansPromo(dateDebut, dateFin, nbNuits) {
         date.setDate(date.getDate() + i);
         const dateStr = toLocalDateString(date);
         
-        const tarifBase = parseFloat(tarifsCache.find(t => t.date === dateStr)?.prix_nuit) || 0;
+        const tarifBase = getPrixNuitEffectif(dateStr);
         
         // Appliquer la grille de durée
         let multiplicateur = 1;
@@ -1649,14 +1649,21 @@ function toDateOnlyString(value) {
     return toLocalDateString(date);
 }
 
+// Retourne le prix d'une nuit : tarif calendrier s'il existe, sinon tarif_nuit_base
+function getPrixNuitEffectif(dateStr) {
+    const prix = parseFloat(tarifsCache.find(t => t.date === dateStr)?.prix_nuit);
+    if (prix > 0) return prix;
+    const base = parseFloat(reglesCache?.configuration_gite?.tarif_nuit_base);
+    return base > 0 ? base : 0;
+}
+
 // Vérifie que toutes les nuits d'un séjour ont un prix défini (non nul)
 function hasAllPricesDefined(dateDebutStr, nbNuits) {
     for (let i = 0; i < nbNuits; i++) {
         const d = parseDateOnly(dateDebutStr);
         d.setDate(d.getDate() + i);
         const ds = toLocalDateString(d);
-        const prix = parseFloat(tarifsCache.find(t => t.date === ds)?.prix_nuit);
-        if (!prix || prix <= 0) return false;
+        if (getPrixNuitEffectif(ds) <= 0) return false;
     }
     return true;
 }
