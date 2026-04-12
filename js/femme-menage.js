@@ -181,6 +181,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Peupler les selects de gîtes dynamiquement
     await peuplerSelectsGites();
     
+    // Réconciliation BDD avant affichage : supprime orphelines + doublons
+    await reconcilierAvecReservations();
     await chargerInterventions();
     await chargerChangementsRecents(); // Alertes ajout/modif/suppression réservations
     await chargerStocksDraps(); // Activer le chargement des stocks
@@ -975,3 +977,98 @@ async function marquerAlertesVues(alerteId, isCancel) {
 
 window.marquerAlertesVues = marquerAlertesVues;
 window.supprimerRetourMenage = supprimerRetourMenage;
+
+// ================================================================
+// RÉCONCILIATION BDD : cleaning_schedule ↔ reservations
+// Exécutée au chargement de la page société pour garantir la cohérence
+// ================================================================
+async function reconcilierAvecReservations() {
+    const todayFR = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const todayStr = new Date().toISOString().split('T')[0];
+    const oneYearLater = new Date();
+    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+    const oneYearStr = oneYearLater.toISOString().split('T')[0];
+
+    try {
+        // 1. Charger toutes les entrées cleaning_schedule non-annulées futures
+        const { data: schedules } = await window.supabaseClient
+            .from('cleaning_schedule')
+            .select('id, reservation_id, gite_id, scheduled_date, status')
+            .eq('owner_user_id', window.cleanerOwnerId)
+            .neq('status', 'cancelled')
+            .gte('scheduled_date', todayStr)
+            .lte('scheduled_date', oneYearStr);
+
+        if (!schedules || schedules.length === 0) return;
+
+        // 2. Charger toutes les réservations actives de l'owner
+        const { data: reservations } = await window.supabaseClient
+            .from('reservations')
+            .select('id, status')
+            .eq('owner_user_id', window.cleanerOwnerId);
+
+        const validResaIds = new Set(
+            (reservations || [])
+                .filter(r => r.status !== 'cancelled' && r.status !== 'annulée')
+                .map(r => r.id)
+        );
+
+        // 3. Détecter les orphelines et doublons
+        const toCancel = [];   // IDs cleaning_schedule à marquer cancelled
+        const toDelete = [];   // IDs cleaning_schedule à supprimer (doublons)
+        const FINAL = new Set(['validated', 'confirmed']);
+
+        // Détecter doublons : même (gite_id + semaine ISO)
+        const seen = new Map(); // clé → { id, status, isFinal }
+        for (const s of schedules) {
+            // Orpheline sans réservation
+            if (!s.reservation_id) {
+                toCancel.push(s);
+                continue;
+            }
+            // Réservation supprimée ou annulée
+            if (!validResaIds.has(s.reservation_id)) {
+                toCancel.push(s);
+                continue;
+            }
+            // Doublon : même gite + même semaine
+            const d = new Date(s.scheduled_date + 'T12:00:00');
+            const monday = new Date(d);
+            monday.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1));
+            const weekKey = `${s.gite_id}_${monday.toISOString().split('T')[0]}`;
+            if (seen.has(weekKey)) {
+                const prev = seen.get(weekKey);
+                // Garder le validé/confirmé, supprimer l'autre
+                if (FINAL.has(s.status)) {
+                    toDelete.push(prev.id);
+                    seen.set(weekKey, s);
+                } else {
+                    toDelete.push(s.id);
+                }
+            } else {
+                seen.set(weekKey, s);
+            }
+        }
+
+        // 4. Annuler les orphelines (garder trace visible dans alertes)
+        await Promise.all(toCancel.map(s =>
+            window.supabaseClient
+                .from('cleaning_schedule')
+                .update({ status: 'cancelled', notes: `❌ Réservation supprimée le ${todayFR}` })
+                .eq('id', s.id)
+                .catch(() => {})
+        ));
+
+        // 5. Supprimer les doublons
+        if (toDelete.length > 0) {
+            await window.supabaseClient
+                .from('cleaning_schedule')
+                .delete()
+                .in('id', toDelete)
+                .catch(() => {});
+        }
+
+    } catch (err) {
+        // Silencieux : ne pas bloquer l'affichage
+    }
+}
