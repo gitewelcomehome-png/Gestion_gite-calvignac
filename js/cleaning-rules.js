@@ -51,23 +51,23 @@ function displayCleaningRules(rules) {
     let html = '';
     rules.forEach(rule => {
         const statusBadge = rule.is_enabled 
-            ? '<span style="background: #55efc4; color: var(--text); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; border: 2px solid #2D3436;">✓ Activée</span>'
+            ? '<span style="background: #55efc4; color: #2D3436; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; border: 2px solid #2D3436;">✓ Activée</span>'
             : '<span style="background: #dfe6e9; color: #636e72; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; border: 2px solid #636e72;">○ Désactivée</span>';
 
         html += `
-            <div style="background: var(--card); border: 2px solid #2D3436; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 4px 4px 0 #2D3436;">
+            <div style="background: var(--bg-secondary); border: 2px solid #2D3436; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 4px 4px 0 #2D3436;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                            <span style="background: #ffeaa7; color: var(--text); padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid #2D3436;">Priorité ${rule.priority}</span>
+                            <span style="background: #ffeaa7; color: #2D3436; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid #2D3436;">Priorité ${rule.priority}</span>
                             ${statusBadge}
                         </div>
-                        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: var(--text); font-weight: 700;">${rule.rule_name}</h3>
-                        <p style="margin: 0; font-size: 0.9rem; color: #636e72; line-height: 1.5;">${rule.description}</p>
+                        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: var(--text-primary); font-weight: 700;">${rule.rule_name}</h3>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">${rule.description}</p>
                     </div>
                     <div style="display: flex; gap: 8px; margin-left: 15px;">
                         <button class="toggle-rule-btn" data-rule-id="${rule.id}" data-enabled="${rule.is_enabled}"
-                                style="background: ${rule.is_enabled ? '#fab1a0' : '#55efc4'}; color: var(--text); border: 2px solid #2D3436; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 2px 2px 0 #2D3436; transition: all 0.2s;"
+                                style="background: ${rule.is_enabled ? '#fab1a0' : '#55efc4'}; color: #2D3436; border: 2px solid #2D3436; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 0.85rem; box-shadow: 2px 2px 0 #2D3436; transition: all 0.2s;"
                                 onmouseover="this.style.transform='translate(-1px, -1px)'; this.style.boxShadow='3px 3px 0 #2D3436'"
                                 onmouseout="this.style.transform=''; this.style.boxShadow='2px 2px 0 #2D3436'">
                             ${rule.is_enabled ? '○ Désactiver' : '✓ Activer'}
@@ -173,46 +173,46 @@ async function openEditRuleModal(ruleId) {
         modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;';
         
         modal.innerHTML = `
-            <div style="background: var(--card); border: 3px solid #2D3436; border-radius: 16px; box-shadow: 8px 8px 0 #2D3436; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 30px;">
+            <div style="background: var(--bg-secondary); border: 3px solid #2D3436; border-radius: 16px; box-shadow: 8px 8px 0 #2D3436; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0; font-size: 1.5rem; color: var(--text); font-weight: 700;">✏️ Modifier la règle</h2>
+                    <h2 style="margin: 0; font-size: 1.5rem; color: var(--text-primary); font-weight: 700;">✏️ Modifier la règle</h2>
                     <button onclick="closeEditRuleModal()" style="background: #ff7675; color: white; border: 2px solid #2D3436; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; box-shadow: 2px 2px 0 #2D3436;">✕</button>
                 </div>
                 
                 <form id="edit-rule-form" onsubmit="saveRule(event, '${rule.id}'); return false;">
                     <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Nom de la règle</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Nom de la règle</label>
                         <input type="text" id="rule-name" value="${rule.rule_name}" required
-                               style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-size: 1rem; box-shadow: 2px 2px 0 #2D3436;">
+                               style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-size: 1rem; box-shadow: 2px 2px 0 #2D3436; background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Description</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Description</label>
                         <textarea id="rule-description" rows="3" required
-                                  style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-size: 1rem; resize: vertical; box-shadow: 2px 2px 0 #2D3436;">${rule.description}</textarea>
+                                  style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-size: 1rem; resize: vertical; box-shadow: 2px 2px 0 #2D3436; background: var(--bg-primary); color: var(--text-primary);">${rule.description}</textarea>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Priorité (plus petit = plus prioritaire)</label>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">Priorité (plus petit = plus prioritaire)</label>
                         <input type="number" id="rule-priority" value="${rule.priority}" min="0" required
-                               style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-size: 1rem; box-shadow: 2px 2px 0 #2D3436;">
+                               style="width: 100%; padding: 12px; border: 2px solid #2D3436; border-radius: 8px; font-size: 1rem; box-shadow: 2px 2px 0 #2D3436; background: var(--bg-primary); color: var(--text-primary);">
                     </div>
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                             <input type="checkbox" id="rule-enabled" ${rule.is_enabled ? 'checked' : ''}
                                    style="width: 20px; height: 20px; cursor: pointer;">
-                            <span style="font-weight: 600; color: var(--text);">Règle activée</span>
+                            <span style="font-weight: 600; color: var(--text-primary);">Règle activée</span>
                         </label>
                     </div>
                     
                     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
                         <button type="button" onclick="closeEditRuleModal()"
-                                style="background: #dfe6e9; color: var(--text); border: 2px solid #2D3436; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 3px 3px 0 #2D3436;">
+                                style="background: #dfe6e9; color: #2D3436; border: 2px solid #2D3436; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 3px 3px 0 #2D3436;">
                             Annuler
                         </button>
                         <button type="submit"
-                                style="background: #55efc4; color: var(--text); border: 2px solid #2D3436; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 3px 3px 0 #2D3436;">
+                                style="background: #55efc4; color: #2D3436; border: 2px solid #2D3436; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 3px 3px 0 #2D3436;">
                             💾 Enregistrer
                         </button>
                     </div>
