@@ -519,9 +519,11 @@
             font-size: 0.8rem;
             font-weight: 700;
         }
-        .changes-badge.new    { background: #74b9ff; color: #2D3436; }
-        .changes-badge.modif  { background: #fdcb6e; color: #2D3436; }
-        .changes-badge.refused{ background: #ff6b6b; color: white; }
+        .changes-badge.new      { background: #74b9ff; color: #2D3436; }
+        .changes-badge.modif    { background: #fdcb6e; color: #2D3436; }
+        .changes-badge.changed  { background: #a29bfe; color: white; }
+        .changes-badge.cancelled{ background: #ff6b6b; color: white; }
+        .changes-badge.refused  { background: #e17055; color: white; }
         .changes-banner-body {
             padding: 14px 18px;
             display: flex;
@@ -537,9 +539,11 @@
             border-radius: 6px;
             margin-top: 4px;
         }
-        .changes-section-label.new    { background: #dbeafe; color: #1d4ed8; }
-        .changes-section-label.modif  { background: #fef3c7; color: #92400e; }
-        .changes-section-label.refused{ background: #fee2e2; color: #991b1b; }
+        .changes-section-label.new       { background: #dbeafe; color: #1d4ed8; }
+        .changes-section-label.modif     { background: #fef3c7; color: #92400e; }
+        .changes-section-label.changed   { background: #ede9fe; color: #5b21b6; }
+        .changes-section-label.cancelled { background: #fee2e2; color: #991b1b; }
+        .changes-section-label.refused   { background: #ffedd5; color: #9a3412; }
         .change-item {
             display: flex;
             align-items: flex-start;
@@ -548,9 +552,11 @@
             border-radius: 8px;
             border-left: 4px solid;
         }
-        .change-item.new    { background: #eef5ff; border-color: #74b9ff; }
-        .change-item.modif  { background: #fff9e6; border-color: #fdcb6e; }
-        .change-item.refused{ background: #fff5f5; border-color: #ff6b6b; }
+        .change-item.new       { background: #eef5ff; border-color: #74b9ff; }
+        .change-item.modif     { background: #fff9e6; border-color: #fdcb6e; }
+        .change-item.changed   { background: #f5f3ff; border-color: #a29bfe; }
+        .change-item.cancelled { background: #fff5f5; border-color: #ff6b6b; }
+        .change-item.refused   { background: #fff7ed; border-color: #e17055; }
         .change-item-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
         .change-item-content { flex: 1; }
         .change-item-title   { font-weight: 800; font-size: 0.88rem; color: #2D3436; margin-bottom: 2px; }
@@ -660,7 +666,7 @@
             }, 3000);
         }
 
-        function displayNotifications(menages) {
+        function displayNotifications(menages, annules) {
             const banner = document.getElementById('notificationsBanner');
             
             const today = new Date();
@@ -671,11 +677,15 @@
                 .filter(m => m.scheduledDate >= today)
                 .sort((a, b) => a.scheduledDate - b.scheduledDate);
             
-            const nouveaux    = futurs.filter(m => m.status === 'pending');
-            const modifs      = futurs.filter(m => m.status === 'pending_validation');
-            const refus       = futurs.filter(m => m.status === 'refused');
+            // Dates changées par le propriétaire (pending ou validated avec notes "modifiées")
+            const datesChangees  = futurs.filter(m => m.dateChanged);
+            // Nouvelles réservations = pending sans changement de date
+            const nouveaux       = futurs.filter(m => m.status === 'pending' && !m.dateChanged);
+            const modifs         = futurs.filter(m => m.status === 'pending_validation');
+            const refus          = futurs.filter(m => m.status === 'refused');
+            const annulesFuturs  = (annules || []).sort((a, b) => b.scheduledDate - a.scheduledDate);
             
-            if (nouveaux.length === 0 && modifs.length === 0 && refus.length === 0) {
+            if (nouveaux.length === 0 && modifs.length === 0 && refus.length === 0 && datesChangees.length === 0 && annulesFuturs.length === 0) {
                 banner.style.display = 'none';
                 return;
             }
@@ -683,9 +693,11 @@
             const fmtDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
             
             let badgesHtml = '';
-            if (nouveaux.length > 0) badgesHtml += `<span class="changes-badge new">🆕 ${nouveaux.length} nouvelle${nouveaux.length > 1 ? 's' : ''}</span>`;
-            if (modifs.length > 0)   badgesHtml += `<span class="changes-badge modif">✏️ ${modifs.length} modif${modifs.length > 1 ? 's' : ''}</span>`;
-            if (refus.length > 0)    badgesHtml += `<span class="changes-badge refused">❌ ${refus.length} refus</span>`;
+            if (nouveaux.length > 0)      badgesHtml += `<span class="changes-badge new">🆕 ${nouveaux.length} nouvelle${nouveaux.length > 1 ? 's' : ''}</span>`;
+            if (modifs.length > 0)        badgesHtml += `<span class="changes-badge modif">✏️ ${modifs.length} modif${modifs.length > 1 ? 's' : ''}</span>`;
+            if (datesChangees.length > 0) badgesHtml += `<span class="changes-badge changed">🔄 ${datesChangees.length} date${datesChangees.length > 1 ? 's' : ''} changée${datesChangees.length > 1 ? 's' : ''}</span>`;
+            if (annulesFuturs.length > 0) badgesHtml += `<span class="changes-badge cancelled">❌ ${annulesFuturs.length} supprimée${annulesFuturs.length > 1 ? 's' : ''}</span>`;
+            if (refus.length > 0)         badgesHtml += `<span class="changes-badge refused">⛔ ${refus.length} refus</span>`;
             
             const buildItems = (list, cls, icon, buildDetails) => list.map(m => {
                 const det = buildDetails(m);
@@ -704,9 +716,21 @@
                 bodyHtml += buildItems(modifs, 'modif', '✏️', m =>
                     `<strong>${m.reservation.nom || 'Client'}</strong> · Départ ${fmtDate(m.dateFin)} · Nouvelle date proposée : <strong>${fmtDate(m.scheduledDate)}</strong>`);
             }
+            if (datesChangees.length > 0) {
+                bodyHtml += `<div class="changes-section-label changed">🔄 Dates de réservation modifiées</div>`;
+                bodyHtml += buildItems(datesChangees, 'changed', '🔄', m =>
+                    `<strong>${m.reservation.nom || 'Client'}</strong> · Départ ${fmtDate(m.dateFin)} · Ménage recalculé : <strong>${fmtDate(m.scheduledDate)}</strong>`);
+            }
+            if (annulesFuturs.length > 0) {
+                bodyHtml += `<div class="changes-section-label cancelled">❌ Réservations supprimées</div>`;
+                bodyHtml += annulesFuturs.map(c => {
+                    const reason = c.notes ? `<div class="change-item-reason">💬 ${c.notes}</div>` : '';
+                    return `<div class="change-item cancelled"><span class="change-item-icon">❌</span><div class="change-item-content"><div class="change-item-title">${c.giteName}</div><div class="change-item-details">Ménage annulé du <strong>${fmtDate(c.scheduledDate)}</strong></div>${reason}</div></div>`;
+                }).join('');
+            }
             if (refus.length > 0) {
-                bodyHtml += `<div class="changes-section-label refused">❌ Refus à corriger</div>`;
-                bodyHtml += buildItems(refus, 'refused', '❌', m =>
+                bodyHtml += `<div class="changes-section-label refused">⛔ Refus à corriger</div>`;
+                bodyHtml += buildItems(refus, 'refused', '⛔', m =>
                     `<strong>${m.reservation.nom || 'Client'}</strong> · Départ ${fmtDate(m.dateFin)} · Ménage du ${fmtDate(m.scheduledDate)}`);
             }
             
@@ -860,6 +884,23 @@
 
                 if (cleanError) throw cleanError;
 
+                // Récupérer les ménages annulés des 30 derniers jours (réservations supprimées)
+                const thirtyDaysAgo = new Date(today);
+                thirtyDaysAgo.setDate(today.getDate() - 30);
+                const thirtyDaysAgoStr = `${thirtyDaysAgo.getFullYear()}-${String(thirtyDaysAgo.getMonth()+1).padStart(2,'0')}-${String(thirtyDaysAgo.getDate()).padStart(2,'0')}`;
+                const { data: cancelledRaw } = await supabaseClient
+                    .from('cleaning_schedule')
+                    .select('gite_id, scheduled_date, notes')
+                    .eq('owner_user_id', window.cleanerOwnerId)
+                    .eq('status', 'cancelled')
+                    .gte('scheduled_date', thirtyDaysAgoStr)
+                    .order('scheduled_date', { ascending: false });
+                const cancelledMenages = (cancelledRaw || []).map(c => ({
+                    giteName: giteMap[c.gite_id] || 'Gîte inconnu',
+                    scheduledDate: (() => { const [y,m,d] = (c.scheduled_date || '').split('-'); return c.scheduled_date ? new Date(parseInt(y), parseInt(m)-1, parseInt(d)) : null; })(),
+                    notes: c.notes || ''
+                })).filter(c => c.scheduledDate);
+
                 // Organiser par semaine
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -972,7 +1013,8 @@
                         status: cleaning?.status || 'pending',
                         validated: isValidatedStatus || cleaning?.validated_by_company === true || ownerValidatedModification,
                         giteId: res.gite_id,
-                        giteName: giteMap[res.gite_id] || 'Gîte inconnu'
+                        giteName: giteMap[res.gite_id] || 'Gîte inconnu',
+                        dateChanged: !!(cleaning?.notes?.includes('modifiées'))
                     };
                     
                     // Ajouter au gîte correspondant
@@ -1002,19 +1044,22 @@
                     return menageDate >= today && menageDate <= twoWeeksLater;
                 });
                 
-                // Compter nouveaux ménages (pending) et modifications en attente (pending_validation)
-                // uniquement pour les 2 prochaines semaines
-                const nbNew = menagesDeuxSemaines.filter(m => m.status === 'pending').length;
-                const nbModified = menagesDeuxSemaines.filter(m => m.status === 'pending_validation').length;
+                // Compter pour le titre de l'onglet (tous les futurs, pas seulement 2 semaines)
+                const nbNew      = allMenages.filter(m => m.scheduledDate >= today && m.status === 'pending' && !m.dateChanged).length;
+                const nbModified = allMenages.filter(m => m.scheduledDate >= today && m.status === 'pending_validation').length;
+                const nbChanged  = allMenages.filter(m => m.scheduledDate >= today && m.dateChanged).length;
+                const nbAnnules  = cancelledMenages.length;
                 
                 // Mettre à jour le titre de l'onglet avec compteurs
-                const totalNotifications = nbNew + nbModified;
+                const totalNotifications = nbNew + nbModified + nbChanged + nbAnnules;
                 if (totalNotifications > 0) {
                     let title = '(';
-                    if (nbNew > 0) title += `🆕${nbNew}`;
-                    if (nbNew > 0 && nbModified > 0) title += ' ';
-                    if (nbModified > 0) title += `✏️${nbModified}`;
-                    title += ') Validation Ménage';
+                    const parts = [];
+                    if (nbNew > 0)      parts.push(`🆕${nbNew}`);
+                    if (nbModified > 0) parts.push(`✏️${nbModified}`);
+                    if (nbChanged > 0)  parts.push(`🔄${nbChanged}`);
+                    if (nbAnnules > 0)  parts.push(`❌${nbAnnules}`);
+                    title += parts.join(' ') + ') Validation Ménage';
                     document.title = title;
                 } else {
                     document.title = 'Validation Ménage';
@@ -1023,7 +1068,7 @@
                 const modalRows = await loadAutoConflictRowsForModal(giteMap);
 
                 // Afficher les notifications
-                displayNotifications(allMenages);
+                displayNotifications(allMenages, cancelledMenages);
                 showAutoConflictModal([...allMenages, ...modalRows]);
                 
                 if (sortedWeeks.length === 0) {
