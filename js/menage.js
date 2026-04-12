@@ -522,36 +522,43 @@ async function afficherPlanningParSemaine() {
             };
         }
         
-        // Mettre à jour uniquement les enregistrements existants en pending (évite les POST upsert bloqués par RLS)
-        if (validation && validation.status === 'pending') {
+        // Mettre à jour cleaning_schedule si la date calculée diffère de la date stockée
+        // (hors statuts finaux validated/confirmed)
+        const isFinalStatus = validation?.status === 'validated' || validation?.status === 'confirmed';
+        const scheduledDateStr = `${dateMenage.getFullYear()}-${String(dateMenage.getMonth() + 1).padStart(2, '0')}-${String(dateMenage.getDate()).padStart(2, '0')}`;
+        const reservationEndStr = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
+        const dateHasChanged = validation && !isFinalStatus && validation.scheduled_date !== scheduledDateStr;
+
+        if (validation && !isFinalStatus && (validation.status === 'pending' || dateHasChanged)) {
             const nextRes = reservations
-                .filter(next => next.gite === r.gite && parseLocalDate(next.dateFin) > dateFin)
+                .filter(next => next.gite_id === r.gite_id && parseLocalDate(next.dateDebut) > dateFin)
                 .sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut))[0];
             
             try {
-                // Formater les dates sans décalage UTC
-                const scheduledDateStr = `${dateMenage.getFullYear()}-${String(dateMenage.getMonth() + 1).padStart(2, '0')}-${String(dateMenage.getDate()).padStart(2, '0')}`;
-                const reservationEndStr = `${dateFin.getFullYear()}-${String(dateFin.getMonth() + 1).padStart(2, '0')}-${String(dateFin.getDate()).padStart(2, '0')}`;
                 let nextResDateStr = null;
                 if (nextRes) {
-                    const nextResDate = parseLocalDate(nextRes.dateFin);
+                    const nextResDate = parseLocalDate(nextRes.dateDebut);
                     nextResDateStr = `${nextResDate.getFullYear()}-${String(nextResDate.getMonth() + 1).padStart(2, '0')}-${String(nextResDate.getDate()).padStart(2, '0')}`;
+                }
+                
+                const updatePayload = {
+                    gite_id: r.gite_id,
+                    scheduled_date: scheduledDateStr,
+                    date: scheduledDateStr,
+                    time_of_day: calculatedTimeOfDay,
+                    reservation_end: reservationEndStr,
+                    reservation_start_after: nextResDateStr
+                };
+                // Ne reset le status que si déjà pending (ne pas écraser pending_validation)
+                if (validation.status === 'pending') {
+                    updatePayload.owner_user_id = user.id;
+                    updatePayload.status = 'pending';
+                    updatePayload.validated_by_company = false;
                 }
                 
                 await window.supabaseClient
                     .from('cleaning_schedule')
-                    .update({
-                        owner_user_id: user.id,
-                        gite: r.gite,
-                        gite_id: r.gite_id,
-                        scheduled_date: scheduledDateStr,
-                        date: scheduledDateStr,
-                        time_of_day: calculatedTimeOfDay,
-                        status: 'pending',
-                        validated_by_company: false,
-                        reservation_end: reservationEndStr,
-                        reservation_start_after: nextResDateStr
-                    })
+                    .update(updatePayload)
                     .eq('reservation_id', r.id);
             } catch (err) {
                 // Échec silencieux: ne pas bloquer l'affichage du planning
