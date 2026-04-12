@@ -91,22 +91,14 @@
     }
 
     function isDateReservee(dateStr) {
-        if (!reservationsForGite || reservationsForGite.length === 0) {
-            return false;
-        }
-        
-        const date = new Date(dateStr + 'T12:00:00');
-        
         for (const resa of reservationsForGite) {
-            const checkIn = new Date(resa.date_arrivee || resa.check_in);
-            const checkOut = new Date(resa.date_depart || resa.check_out);
-            
-            // La date est réservée si elle est entre check-in (inclus) et check-out (exclus)
-            if (date >= checkIn && date < checkOut) {
-                return true;
-            }
+            // Comparaison pure en strings ISO YYYY-MM-DD : évite tout décalage UTC
+            const checkInStr  = (resa.date_arrivee || resa.check_in  || '').slice(0, 10);
+            const checkOutStr = (resa.date_depart  || resa.check_out || '').slice(0, 10);
+            if (!checkInStr || !checkOutStr) continue;
+            // check-in <= dateStr < check-out (le jour de check-out est LIBRE)
+            if (dateStr >= checkInStr && dateStr < checkOutStr) return true;
         }
-        
         return false;
     }
 
@@ -147,7 +139,11 @@
         const current = new Date(debut);
         
         while (current <= fin) {
-            const dateStr = current.toISOString().split('T')[0];
+            // Utiliser les composantes locales (pas toISOString qui convertit en UTC)
+            const y = current.getFullYear();
+            const m = String(current.getMonth() + 1).padStart(2, '0');
+            const d = String(current.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${m}-${d}`;
             const jourSemaine = getJourSemaine(dateStr);
             
             if (modalState.joursSelectionnes[jourSemaine]) {

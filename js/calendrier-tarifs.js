@@ -421,11 +421,13 @@ function _renderCalendrierTarifsImmediate() {
     // Identifier toutes les réservations qui touchent ce mois et créer les barres continues
     const reservationBars = [];
     reservationsCache.forEach(resa => {
-        const checkIn = new Date(resa.date_arrivee || resa.check_in);
-        const checkOut = new Date(resa.date_depart || resa.check_out);
+        const checkIn = parseDateOnly(resa.date_arrivee || resa.check_in);
+        const checkOut = parseDateOnly(resa.date_depart || resa.check_out);
         const firstDayOfMonth = new Date(currentYearTarifs, currentMonthTarifs, 1);
         const lastDayOfMonth = new Date(currentYearTarifs, currentMonthTarifs + 1, 0);
         
+        if (!checkIn || !checkOut) return;
+
         // Vérifier si la réservation chevauche ce mois
         if (checkIn <= lastDayOfMonth && checkOut > firstDayOfMonth) {
             // Calculer les jours de début et fin dans le mois
