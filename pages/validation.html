@@ -487,6 +487,76 @@
                 max-width: 100%;
             }
         }
+
+        /* ─── Bannière informations (nouvelles résa, modifs, refus) ─── */
+        .changes-banner {
+            background: white;
+            border: 3px solid #2D3436;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 #2D3436;
+            overflow: hidden;
+        }
+        .changes-banner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: #2D3436;
+            color: white;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .changes-banner-header:hover { background: #3d4a4e; }
+        .badge-group { display: flex; gap: 8px; align-items: center; }
+        .changes-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .changes-badge.new    { background: #74b9ff; color: #2D3436; }
+        .changes-badge.modif  { background: #fdcb6e; color: #2D3436; }
+        .changes-badge.refused{ background: #ff6b6b; color: white; }
+        .changes-banner-body {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .changes-section-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+        .changes-section-label.new    { background: #dbeafe; color: #1d4ed8; }
+        .changes-section-label.modif  { background: #fef3c7; color: #92400e; }
+        .changes-section-label.refused{ background: #fee2e2; color: #991b1b; }
+        .change-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 9px 13px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .change-item.new    { background: #eef5ff; border-color: #74b9ff; }
+        .change-item.modif  { background: #fff9e6; border-color: #fdcb6e; }
+        .change-item.refused{ background: #fff5f5; border-color: #ff6b6b; }
+        .change-item-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .change-item-content { flex: 1; }
+        .change-item-title   { font-weight: 800; font-size: 0.88rem; color: #2D3436; margin-bottom: 2px; }
+        .change-item-details { font-size: 0.88rem; color: #636e72; font-weight: 600; }
+        .change-item-reason  { font-size: 0.83rem; color: #7a2020; margin-top: 3px; font-style: italic; }
+        .changes-toggle-arrow { transition: transform 0.2s; display: inline-block; }
     </style>
 </head>
 <body>
@@ -593,57 +663,61 @@
         function displayNotifications(menages) {
             const banner = document.getElementById('notificationsBanner');
             
-            // Calculer la date limite (dans 2 semaines)
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const twoWeeksLater = new Date(today);
-            twoWeeksLater.setDate(today.getDate() + 14);
             
-            // Filtrer les notifications des 2 prochaines semaines uniquement
-            const menagesDeuxSemaines = menages.filter(m => {
-                const menageDate = m.scheduledDate;
-                return menageDate >= today && menageDate <= twoWeeksLater;
-            });
+            // Tous les ménages futurs, triés par date
+            const futurs = menages
+                .filter(m => m.scheduledDate >= today)
+                .sort((a, b) => a.scheduledDate - b.scheduledDate);
             
-            // Afficher UNIQUEMENT les refusés (à corriger)
-            const notifications = menagesDeuxSemaines.filter(m => m.status === 'refused');
+            const nouveaux    = futurs.filter(m => m.status === 'pending');
+            const modifs      = futurs.filter(m => m.status === 'pending_validation');
+            const refus       = futurs.filter(m => m.status === 'refused');
             
-            if (notifications.length === 0) {
+            if (nouveaux.length === 0 && modifs.length === 0 && refus.length === 0) {
                 banner.style.display = 'none';
                 return;
             }
             
-            let html = '<div class="notifications-banner">';
-            html += '<div class="banner-header">';
-            html += '<span>🔔 Refus à corriger (2 prochaines semaines)</span>';
-            html += `<span class="notification-count">${notifications.length}</span>`;
-            html += '</div>';
+            const fmtDate = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
             
-            notifications.forEach(menageInfo => {
-                const menageDate = menageInfo.scheduledDate;
-                const day = menageDate.getDate();
-                const month = menageDate.getMonth() + 1;
-                const year = menageDate.getFullYear();
-                const dateFormatted = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
-                
-                html += `<div class="notification-item refused">`;
-                html += `<span class="notification-icon">❌</span>`;
-                html += '<div class="notification-content">';
-                html += `<div class="notification-title">Refusé par le propriétaire</div>`;
-                html += `<div class="notification-details">`;
-                html += `<strong>${menageInfo.reservation.gite}</strong> - ${menageInfo.reservation.nom || 'Client'} - `;
-                html += `Ménage du ${dateFormatted}`;
-                html += `</div>`;
-                
-                if (menageInfo.cleaning?.notes) {
-                    html += `<div class="notification-reason">💬 Raison : ${menageInfo.cleaning.notes}</div>`;
-                }
-                
-                html += '</div>';
-                html += '</div>';
-            });
+            let badgesHtml = '';
+            if (nouveaux.length > 0) badgesHtml += `<span class="changes-badge new">🆕 ${nouveaux.length} nouvelle${nouveaux.length > 1 ? 's' : ''}</span>`;
+            if (modifs.length > 0)   badgesHtml += `<span class="changes-badge modif">✏️ ${modifs.length} modif${modifs.length > 1 ? 's' : ''}</span>`;
+            if (refus.length > 0)    badgesHtml += `<span class="changes-badge refused">❌ ${refus.length} refus</span>`;
             
-            html += '</div>';
+            const buildItems = (list, cls, icon, buildDetails) => list.map(m => {
+                const det = buildDetails(m);
+                const reason = m.cleaning?.notes ? `<div class="change-item-reason">💬 ${m.cleaning.notes}</div>` : '';
+                return `<div class="change-item ${cls}"><span class="change-item-icon">${icon}</span><div class="change-item-content"><div class="change-item-title">${m.giteName}</div><div class="change-item-details">${det}</div>${reason}</div></div>`;
+            }).join('');
+            
+            let bodyHtml = '';
+            if (nouveaux.length > 0) {
+                bodyHtml += `<div class="changes-section-label new">🆕 Nouvelles réservations à planifier</div>`;
+                bodyHtml += buildItems(nouveaux, 'new', '🆕', m =>
+                    `<strong>${m.reservation.nom || 'Client'}</strong> · Départ ${fmtDate(m.dateFin)} · Ménage prévu le ${fmtDate(m.scheduledDate)}`);
+            }
+            if (modifs.length > 0) {
+                bodyHtml += `<div class="changes-section-label modif">✏️ Modifications du propriétaire à valider</div>`;
+                bodyHtml += buildItems(modifs, 'modif', '✏️', m =>
+                    `<strong>${m.reservation.nom || 'Client'}</strong> · Départ ${fmtDate(m.dateFin)} · Nouvelle date proposée : <strong>${fmtDate(m.scheduledDate)}</strong>`);
+            }
+            if (refus.length > 0) {
+                bodyHtml += `<div class="changes-section-label refused">❌ Refus à corriger</div>`;
+                bodyHtml += buildItems(refus, 'refused', '❌', m =>
+                    `<strong>${m.reservation.nom || 'Client'}</strong> · Départ ${fmtDate(m.dateFin)} · Ménage du ${fmtDate(m.scheduledDate)}`);
+            }
+            
+            const html = `<div class="changes-banner">
+                <div class="changes-banner-header" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'flex':'none';this.querySelector('.changes-toggle-arrow').style.transform=b.style.display==='none'?'rotate(180deg)':''">
+                    <span>📋 Informations à traiter</span>
+                    <div class="badge-group">${badgesHtml}<span class="changes-toggle-arrow" style="margin-left:8px">▲</span></div>
+                </div>
+                <div class="changes-banner-body">${bodyHtml}</div>
+            </div>`;
+            
             setSafeHtml(banner, html);
             banner.style.display = 'block';
         }
