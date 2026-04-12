@@ -91,13 +91,13 @@ export default async function handler(req, res) {
   try {
     const { action, type, subject, tone, keyPoints, cta, length, model } = req.body;
 
-    // DEBUG: Log des variables d'environnement
+    // DEBUG: Log des variables d'environnement (désactivé)
     // console.log('🔍 DEBUG ENV:', {
-      hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
-      hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
-      action: action
-    });
+    //   hasSupabaseUrl: !!process.env.SUPABASE_URL,
+    //   hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
+    //   hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+    //   action: action
+    // });
 
     // ================================================================
     // GESTION PROMPT (GET/SAVE)
@@ -160,10 +160,10 @@ export default async function handler(req, res) {
 
       // console.log('✅ Anthropic API key présente');
       // console.log('🔑 API Key format:', {
-        length: ANTHROPIC_API_KEY.length,
-        starts: ANTHROPIC_API_KEY.substring(0, 7),
-        valid_format: ANTHROPIC_API_KEY.startsWith('sk-ant-')
-      });
+      //   length: ANTHROPIC_API_KEY.length,
+      //   starts: ANTHROPIC_API_KEY.substring(0, 7),
+      //   valid_format: ANTHROPIC_API_KEY.startsWith('sk-ant-')
+      // });
 
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_ANON_KEY;
