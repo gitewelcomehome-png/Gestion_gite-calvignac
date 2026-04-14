@@ -719,6 +719,9 @@ async function addReservationFromIcal(reservation) {
     if (typeof window.autoResolveCleaningConflictForReservation === 'function') {
         await window.autoResolveCleaningConflictForReservation(result.data.id);
     }
+    if (typeof window.syncCleaningScheduleForReservation === 'function') {
+        await window.syncCleaningScheduleForReservation(result.data.id, 'add');
+    }
     
     // 🚗 Automatisation des trajets kilométriques
     if (result.data && typeof window.KmManager?.creerTrajetsAutoReservation === 'function') {
@@ -758,6 +761,9 @@ async function updateReservationFromIcal(reservationId, newData) {
 
     if (typeof window.autoResolveCleaningConflictForReservation === 'function') {
         await window.autoResolveCleaningConflictForReservation(reservationId);
+    }
+    if (typeof window.syncCleaningScheduleForReservation === 'function') {
+        await window.syncCleaningScheduleForReservation(reservationId, 'update');
     }
     
     // 🚗 Si les dates ont changé, recréer les trajets auto

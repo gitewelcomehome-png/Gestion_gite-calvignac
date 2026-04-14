@@ -14,8 +14,7 @@ ADD COLUMN IF NOT EXISTS charges_fiscales NUMERIC(10,2) DEFAULT 0;
 
 -- 2. Recréer les politiques RLS owner proprement
 DROP POLICY IF EXISTS gc_owner_manage_prestations              ON public.prestations_catalogue;
-DROP POLICY IF EXISTS gc_admin_manage_prestations_only         ON public.prestations_catalogue;
-DROP POLICY IF EXISTS gc_admin_manage_prestations_fallback     ON public.prestations_catalogue;
+DROP POLICY IF EXISTS gc_admi
 
 -- Politique owner : accès complet via ownership du gîte
 CREATE POLICY gc_owner_manage_prestations

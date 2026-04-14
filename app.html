@@ -1852,7 +1852,7 @@
                     .select('token')
                     .eq('owner_user_id', user.id)
                     .eq('type', 'company')
-                    .single();
+                    .maybeSingle();
 
                 if (!existing) {
                     const { data: newToken, error } = await window.supabaseClient

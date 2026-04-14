@@ -861,9 +861,6 @@ function initializeUI() {
     // 📸 Afficher les photos du gîte
     displayGitePhotos();
     
-    // ✨ NOUVEAU : Initialiser Hero Section
-    initHeroSection();
-    
     // Onglet Entrée
     initOngletEntree();
     
@@ -1190,8 +1187,9 @@ function initHeroSection() {
         // Calculer et afficher le countdown
         updateCountdown(checkIn, checkOut);
         
-        // Mettre à jour le countdown toutes les minutes
-        setInterval(() => updateCountdown(checkIn, checkOut), 60000);
+        // Nettoyer l'interval précédent avant d'en créer un nouveau
+        if (window._countdownInterval) clearInterval(window._countdownInterval);
+        window._countdownInterval = setInterval(() => updateCountdown(checkIn, checkOut), 60000);
         
         // Initialiser les Quick Actions
         initQuickActions();
