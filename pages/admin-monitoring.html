@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Sentry Error Monitoring -->
+    <script
+      src="https://js-de.sentry-cdn.com/20fdc3b052d0030ec6c745effaedaf31.min.js"
+      crossorigin="anonymous"
+    ></script>
     <title>Monitoring - Channel Manager</title>
     
     <!-- Filtre erreurs extensions Chrome -->
@@ -32,12 +37,7 @@
             console.__originalLog = originalLog;
         })();
         
-        // Bloquer window.onerror
-        window.onerror = function() {
-            return true; // Empêcher affichage
-        };
-        
-        // Bloquer window errors
+// Bloquer window errors
         window.addEventListener('error', function(event) {
             event.preventDefault();
             event.stopImmediatePropagation();

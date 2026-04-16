@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Sentry Error Monitoring -->
+    <script
+      src="https://js-de.sentry-cdn.com/20fdc3b052d0030ec6c745effaedaf31.min.js"
+      crossorigin="anonymous"
+    ></script>
     <title>Gestion Parrainage - Admin</title>
     
     <!-- Filtre erreurs extensions Chrome -->
     <script>
-        window.onerror = function(msg, source, lineno, colno, error) {
-            const msgStr = String(msg || '');
-            const srcStr = String(source || '');
-            if (msgStr.includes('webpage_content_reporter') || 
-                srcStr.includes('webpage_content_reporter') ||
-                msgStr.includes('Unexpected token') ||
-                msgStr.includes('export') ||
-                msgStr.includes('import') ||
-                srcStr.includes('chrome-extension') ||
-                msgStr.includes('zustand')) {
-                return true;
-            }
-        };
-    </script>
+</script>
     
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

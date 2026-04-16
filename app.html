@@ -16,6 +16,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Sentry Error Monitoring -->
+    <script
+      src="https://js-de.sentry-cdn.com/20fdc3b052d0030ec6c745effaedaf31.min.js"
+      crossorigin="anonymous"
+    ></script>
     
     <!-- ⚡ CHARGEMENT THÈME IMMÉDIAT - AVANT TOUT -->
     <script>
@@ -56,25 +61,7 @@
     <!-- Favicon vide pour éviter requête 404 -->
     <link rel="icon" href="data:,">
     
-    <!-- 🛡️ Masquer TOUTES les erreurs des extensions Chrome - DOIT être en premier -->
-    <script>
-        // Capturer TOUTES les erreurs avant tout autre script
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            // Bloquer toutes les erreurs d'extensions Chrome
-            if (url && url.includes('chrome-extension://')) {
-                return true; // Empêche l'affichage dans la console
-            }
-            // Bloquer les erreurs de syntaxe export (extensions)
-            if (msg && (msg.includes('Unexpected token') || msg.includes('export'))) {
-                return true;
-            }
-            return false;
-        };
 
-        // BLOQUER IMMÉDIATEMENT les scripts injectés qui cassent l'application
-        // ⚠️ Filtrage des erreurs géré par error-tracker.js
-        // Ne pas bloquer la propagation ici pour permettre le monitoring
-    </script>
     
     <!-- ================================================================ -->
     <!-- 🔍 ERROR TRACKING - DOIT ÊTRE CHARGÉ EN PREMIER -->
