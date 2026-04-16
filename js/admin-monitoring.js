@@ -1812,6 +1812,9 @@ function setupMonitoringDynamicDelegation() {
                 }
                 break;
             }
+            case 'delete-all-errors':
+                await window.deleteAllErrors();
+                break;
             default:
                 break;
         }
