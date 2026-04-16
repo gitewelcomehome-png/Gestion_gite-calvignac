@@ -856,7 +856,7 @@ window.deleteAllErrors = async function() {
 
     try {
         const { error } = await window.supabaseClient
-            .from('error_logs')
+            .from('cm_error_logs')
             .delete()
             .eq('resolved', false);
 
