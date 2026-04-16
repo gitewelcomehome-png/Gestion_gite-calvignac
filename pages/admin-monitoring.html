@@ -290,7 +290,7 @@
   <!-- ── Navigation Onglets ── -->
   <nav class="tab-nav" role="tablist">
     <button class="tab-btn tab-active" role="tab" aria-selected="true" aria-controls="tab-surveillance" data-tab="surveillance">📊  Surveillance</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-workflow" data-tab="workflow">🔄  Workflow &amp; Suivi &amp; Évolution</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-workflow" data-tab="workflow">⚙️&nbsp; CI/CD &amp; Historique</button>
   </nav>
         
         <!-- Header structuré -->
@@ -335,17 +335,26 @@
                     <h3><i data-lucide="zap"></i> Performance</h3>
                     <div>
                         <div style="margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start;">
                                 <span style="font-size: 14px; color: #64748b;">Latence moyenne</span>
-                                <strong id="avgLatency">~</strong>
+                                <div style="text-align:right">
+                                    <strong id="avgLatency">—</strong>
+                                    <br><small style="color:#9ca3af;font-size:11px">Non disponible</small>
+                                </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start;">
                                 <span style="font-size: 14px; color: #64748b;">Requêtes/min</span>
-                                <strong id="requestsPerMin">~</strong>
+                                <div style="text-align:right">
+                                    <strong id="requestsPerMin">—</strong>
+                                    <br><small style="color:#9ca3af;font-size:11px">Non disponible</small>
+                                </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <span style="font-size: 14px; color: #64748b;">Taux d'erreur</span>
-                                <strong id="errorRate" style="color: #10b981;">~</strong>
+                                <div style="text-align:right">
+                                    <strong id="errorRate" style="color: #10b981;">—</strong>
+                                    <br><small style="color:#9ca3af;font-size:11px">Non disponible</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -401,21 +410,13 @@
         <section style="margin-bottom: 30px;">
             <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; justify-content: space-between;">
                 <span><i data-lucide="alert-octagon"></i> Erreurs Non Résolues</span>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
                     <select id="unresolvedErrorTypeFilter" class="btn" style="background: white; color: #1e293b; border: 1px solid #cbd5e1; padding: 8px 10px; min-width: 170px;">
                         <option value="">Tous les niveaux</option>
                         <option value="critical">Critiques</option>
                         <option value="warning">Warnings</option>
                     </select>
-                    <button class="btn btn-danger" data-action="delete-all-errors" title="Supprimer toutes les erreurs non résolues">
-                        <i data-lucide="trash-2"></i>
-                        Supprimer tout
-                    </button>
-                    <button class="btn btn-primary" data-action="auto-fix-errors" title="Correction automatique des erreurs">
-                        <i data-lucide="wand-2"></i>
-                        Auto-Fix
-                    </button>
-                    <button class="btn btn-success" data-action="refresh-errors">
+                    <button class="btn" style="background:white;border:1.5px solid #94a3b8;color:#475569;font-weight:600;" data-action="refresh-errors">
                         <i data-lucide="refresh-cw"></i>
                         Actualiser
                     </button>
@@ -426,6 +427,19 @@
                     Chargement des erreurs...
                 </div>
             </div>
+            <!-- Zone d'actions critiques -->
+            <hr style="border:none;border-top:1px solid #fee2e2;margin:20px 0 14px 0;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <span style="font-size:13px;color:#6b7280;font-weight:600;">Zone d'actions critiques :</span>
+                <button class="btn" style="background:#f59e0b;color:white;" data-action="auto-fix-errors" title="Correction automatique des erreurs">
+                    <i data-lucide="wand-2"></i>
+                    Auto-Fix
+                </button>
+                <button class="btn btn-danger" data-action="delete-all-errors" title="Supprimer toutes les erreurs non résolues">
+                    <i data-lucide="trash-2"></i>
+                    Supprimer tout
+                </button>
+            </div>
         </section>
 
         <!-- Tests de Corrections -->
@@ -433,14 +447,11 @@
             <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; justify-content: space-between;">
                 <span><i data-lucide="test-tubes"></i> Tests de Corrections</span>
                 <div style="display:flex; gap:10px; flex-wrap: wrap;">
-                    <a class="btn btn-primary" href="/pages/test-fixes.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                    <a class="btn btn-primary" href="#testsCorrectionsSection" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
                         <i data-lucide="flask-conical"></i>
                         Ouvrir page de test
                     </a>
-                    <button class="btn btn-secondary" data-action="refresh-test-status">
-                        <i data-lucide="check-check"></i>
-                        Statut validation
-                    </button>
+                    <span id="validation-status-badge" style="padding:6px 12px;border-radius:20px;font-size:13px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;display:inline-flex;align-items:center;">⏳ En attente de validation</span>
                     <button class="btn btn-secondary" data-action="refresh-test-corrections">
                         <i data-lucide="refresh-cw"></i>
                         Rafraîchir
@@ -466,28 +477,30 @@
                 Logs Explorer
             </h2>
             
-            <div class="filter-bar">
-                <select id="filterType">
-                    <option value="">Tous les types</option>
-                    <option value="critical">Critiques</option>
-                    <option value="warning">Warnings</option>
-                    <option value="info">Info</option>
-                </select>
-                
-                <input type="text" id="filterSource" placeholder="Filtrer par source..." style="flex: 1; min-width: 200px;">
-                
-                <input type="date" id="filterDateFrom" title="Date de début">
-                <input type="date" id="filterDateTo" title="Date de fin">
-                
-                <button class="btn btn-primary" data-action="search-logs">
-                    <i data-lucide="search"></i>
-                    Rechercher
-                </button>
-                
-                <button class="btn btn-danger" data-action="clear-filters">
-                    <i data-lucide="x"></i>
-                    Réinitialiser
-                </button>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+                <!-- Ligne 1 : Type + Source -->
+                <div style="display:flex;gap:10px;">
+                    <select id="filterType" style="padding:10px 14px;border-radius:8px;border:2px solid #e2e8f0;background:white;font-size:14px;">
+                        <option value="">Tous les types</option>
+                        <option value="critical">Critiques</option>
+                        <option value="warning">Warnings</option>
+                        <option value="info">Info</option>
+                    </select>
+                    <input type="text" id="filterSource" placeholder="Filtrer par source..." style="flex:1;padding:10px 14px;border-radius:8px;border:2px solid #e2e8f0;background:white;font-size:14px;">
+                </div>
+                <!-- Ligne 2 : Dates + Actions -->
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <input type="date" id="filterDateFrom" title="Date de début" style="padding:10px 14px;border-radius:8px;border:2px solid #e2e8f0;background:white;font-size:14px;">
+                    <input type="date" id="filterDateTo" title="Date de fin" style="padding:10px 14px;border-radius:8px;border:2px solid #e2e8f0;background:white;font-size:14px;">
+                    <button class="btn" style="background:#0d9488;color:white;font-weight:600;" data-action="search-logs">
+                        <i data-lucide="search"></i>
+                        Rechercher
+                    </button>
+                    <button class="btn" style="background:transparent;border:1.5px solid #ef4444;color:#ef4444;font-weight:600;" data-action="clear-filters">
+                        <i data-lucide="x"></i>
+                        Réinitialiser
+                    </button>
+                </div>
             </div>
 
             <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto;">
@@ -519,7 +532,7 @@
                 <i data-lucide="trending-up"></i>
                 Top 10 Erreurs (30 derniers jours)
             </h2>
-            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div id="top10ErrorsWrapper" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <canvas id="errorsChart" height="300"></canvas>
             </div>
         </section>
@@ -836,12 +849,19 @@
     <script>
         function refreshTestValidationStatus() {
             const statusEl = document.getElementById('testValidationStatus');
+            const badge = document.getElementById('validation-status-badge');
             if (!statusEl) return;
 
             try {
                 const raw = localStorage.getItem('cm_last_test_validation');
                 if (!raw) {
                     statusEl.textContent = 'Statut validation : aucune validation finale enregistrée.';
+                    if (badge) {
+                        badge.textContent = '⏳ En attente de validation';
+                        badge.style.background = '#f3f4f6';
+                        badge.style.color = '#6b7280';
+                        badge.style.borderColor = '#e5e7eb';
+                    }
                     return;
                 }
 
@@ -850,8 +870,20 @@
                 const when = date ? date.toLocaleString('fr-FR') : 'date inconnue';
                 const note = data?.note ? ` — note: ${data.note}` : '';
                 statusEl.textContent = `Statut validation : ✅ validé le ${when}${note}`;
+                if (badge) {
+                    badge.textContent = `✅ Validé le ${when}`;
+                    badge.style.background = '#dcfce7';
+                    badge.style.color = '#166534';
+                    badge.style.borderColor = '#6ee7b7';
+                }
             } catch (error) {
                 statusEl.textContent = 'Statut validation : impossible de lire la validation locale.';
+                if (badge) {
+                    badge.textContent = '⚠️ Erreur lecture';
+                    badge.style.background = '#fef3c7';
+                    badge.style.color = '#92400e';
+                    badge.style.borderColor = '#fcd34d';
+                }
             }
         }
 
