@@ -205,6 +205,8 @@
                     partenaire_nom: a.partenaires_activites?.nom || 'Partenaire'
                 }))
                 .filter(a => {
+                    // En preprod : les données de test ignorent le filtre distance (gîte peut être n'importe où)
+                    if (isPreprod() && a.is_test_data) return true;
                     const d = distanceHaversine(giteLat, giteLon, parseFloat(a.latitude), parseFloat(a.longitude));
                     return d <= rayonKm;
                 });
