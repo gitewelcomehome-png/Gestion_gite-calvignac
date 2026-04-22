@@ -2807,6 +2807,370 @@
                 justify-content: center;
             }
         }
+
+        /* =========================================================
+           TIMELINE MODULE (LOT 3 — fiche-client-planning.js)
+           Classes : tl-*, planning-jour-btn, btn-ajouter-planning,
+                     planning-modal-*, planning-prix
+        ========================================================= */
+
+        /* Wrapper absolu de la timeline */
+        .tl-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Colonne heures à gauche */
+        .tl-heures {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3rem;
+            height: 100%;
+        }
+
+        .tl-heure-label {
+            position: absolute;
+            left: 0;
+            font-size: 0.68rem;
+            color: var(--gray-500);
+            line-height: 1;
+            padding-right: 0.25rem;
+            text-align: right;
+            width: 3rem;
+        }
+
+        /* Zone de dépôt des blocs */
+        .tl-zone {
+            position: absolute;
+            left: 3.25rem;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        /* Lignes séparatrices par heure */
+        .tl-ligne {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gray-100);
+        }
+
+        /* Blocs activités */
+        .tl-bloc {
+            position: absolute;
+            left: 0.25rem;
+            right: 0.25rem;
+            border-radius: 0.375rem;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: grab;
+            overflow: hidden;
+            z-index: 2;
+            color: white;
+        }
+
+        .tl-bloc.bloc-gite {
+            background: var(--primary);
+            box-shadow: 0 2px 6px rgba(6,182,212,0.3);
+        }
+
+        .tl-bloc.bloc-partenaire {
+            background: var(--warning, #f59e0b);
+            box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+        }
+
+        .tl-bloc.bloc-libre {
+            background: var(--gray-600);
+        }
+
+        .tl-bloc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.25rem;
+        }
+
+        .tl-bloc-nom {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .tl-bloc-suppr {
+            background: rgba(0,0,0,0.2);
+            border: none;
+            color: white;
+            width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tl-bloc-meta {
+            font-size: 0.65rem;
+            opacity: 0.85;
+            margin-top: 0.1rem;
+        }
+
+        .tl-bloc-depart {
+            font-size: 0.65rem;
+            margin-top: 0.1rem;
+            font-weight: 500;
+        }
+
+        .tl-bloc-dist {
+            font-size: 0.63rem;
+            opacity: 0.75;
+            margin-top: 0.05rem;
+        }
+
+        /* Boutons jours dans la colonne planning */
+        .planning-jour-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.55rem 0.6rem;
+            border: 1.5px solid transparent;
+            border-radius: 0.5rem;
+            background: none;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.8rem;
+            color: var(--gray-700);
+            margin-bottom: 0.25rem;
+            transition: all 0.15s;
+        }
+
+        .planning-jour-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .planning-jour-btn.actif {
+            background: #e0f9ff;
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .jour-label {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .jour-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 1.2rem;
+            height: 1.2rem;
+            border-radius: 999px;
+            padding: 0 0.25rem;
+            margin-left: 0.35rem;
+        }
+
+        /* Bouton "+ Ajouter à mon séjour" sur les cards */
+        .btn-ajouter-planning {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-top: 0.6rem;
+            padding: 0.4rem 0.85rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+        }
+
+        .btn-ajouter-planning:hover:not(:disabled) {
+            background: var(--primary-dark, #0891b2);
+        }
+
+        .btn-ajouter-planning.already-added,
+        .btn-ajouter-planning:disabled {
+            opacity: 0.55;
+            cursor: default;
+            background: var(--gray-400);
+        }
+
+        /* Prix partenaire */
+        .planning-prix {
+            font-size: 0.75rem;
+            color: var(--warning, #f59e0b);
+            font-weight: 600;
+            margin-top: 0.15rem;
+        }
+
+        /* Modal ajout planning */
+        .planning-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9999;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .planning-modal-overlay {
+                align-items: center;
+            }
+        }
+
+        .planning-modal-box {
+            background: white;
+            border-radius: 1rem 1rem 0 0;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        @media (min-width: 640px) {
+            .planning-modal-box {
+                border-radius: 1rem;
+                box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+            }
+        }
+
+        .planning-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .planning-modal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        .planning-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--gray-500);
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .planning-modal-body {
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .planning-modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .planning-modal-field label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .planning-modal-field select,
+        .planning-modal-field input[type="time"] {
+            padding: 0.5rem 0.7rem;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-800);
+            background: white;
+        }
+
+        .planning-modal-field select:focus,
+        .planning-modal-field input[type="time"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .planning-modal-row {
+            flex-direction: row !important;
+            gap: 0.75rem;
+        }
+
+        .planning-modal-row > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .planning-modal-trajet {
+            padding: 0.6rem 0.75rem;
+            background: var(--gray-50);
+            border-radius: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--gray-700);
+            min-height: 1.5rem;
+        }
+
+        .planning-modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem 1.25rem;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .planning-modal-footer .btn-secondary {
+            flex: 1;
+            padding: 0.6rem;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .planning-modal-footer .btn-primary {
+            flex: 2;
+            padding: 0.6rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .planning-modal-footer .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -3355,7 +3719,7 @@
                                     <option value="pied" data-i18n="planning_mode_pied">🚶 À pied</option>
                                 </select>
                             </div>
-                            <button id="btnVoirCatalogue" class="btn btn-outline btn-sm" type="button">
+                            <button id="btnVoirCatalogue" class="btn btn-outline btn-sm" type="button" data-view="catalogue">
                                 <i data-lucide="plus"></i>
                                 <span data-i18n="planning_btn_catalogue">+ Ajouter depuis le catalogue</span>
                             </button>
@@ -3366,7 +3730,7 @@
                             <div class="planning-empty-state" id="planningEmptyState">
                                 <i data-lucide="calendar-x"></i>
                                 <p data-i18n="planning_aucune_activite_jour">Aucune activité planifiée pour ce jour.<br>Ajoutez-en depuis le catalogue !</p>
-                                <button class="btn btn-primary btn-sm" type="button" id="btnEmptyVoirCatalogue">
+                                <button class="btn btn-primary btn-sm" type="button" id="btnEmptyVoirCatalogue" data-view="catalogue">
                                     <i data-lucide="map-pin"></i>
                                     <span data-i18n="planning_vue_catalogue">Voir le catalogue</span>
                                 </button>
@@ -3641,7 +4005,8 @@
     <script src="../js/fiche-activites-map.js?v=2.5.5"></script>
     <script src="../js/fiche-client-app.js?v=2.10.3"></script>
     <script src="../js/fiche-client-prestations.js?v=1.0.2"></script>
-    <!-- LOT 2 — Bascule Catalogue / Planning (logique métier complète en LOT 3) -->
+    <script src="../js/fiche-client-planning.js?v=1.0.0"></script>
+    <!-- LOT 2/3 — Bascule Catalogue / Planning -->
     <script>
     (function () {
         'use strict';
@@ -3663,6 +4028,11 @@
             // Réinitialiser les icônes Lucide pour la vue activée
             if (typeof lucide !== 'undefined') {
                 try { lucide.createIcons(); } catch (e) { /* silent */ }
+            }
+
+            // Notifier le module planning quand on bascule sur la vue planning
+            if (view === 'planning' && typeof window.onVuePlanningShow === 'function') {
+                window.onVuePlanningShow();
             }
         }
 
