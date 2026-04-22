@@ -2303,6 +2303,510 @@
                 height: 56px;
             }
         }
+
+        /* =============================================
+           LOT 2 — Planificateur de séjour
+           Switcher Catalogue / Planning + badges source
+           ============================================= */
+
+        /* Bandeau switcher sous le titre de l'onglet */
+        .activites-switcher {
+            display: flex;
+            gap: 0;
+            background: var(--gray-100);
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .sub-tab-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .sub-tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .sub-tab-btn svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }
+
+        .planning-count-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.1rem 0.45rem;
+            border-radius: 999px;
+            min-width: 1.2rem;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* Badges source sur les cards activités */
+        .badge-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            margin-bottom: 0.25rem;
+        }
+
+        .badge-source-gite {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-source-partenaire {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-source-ajoutee {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Bouton "+ Ajouter à mon séjour" sur les cards */
+        .btn-ajouter-sejour {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: 1.5px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-ajouter-sejour:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-ajouter-sejour.ajoutee {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .btn-ajouter-sejour.ajoutee:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-reserver-activite {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            background: var(--warning);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .btn-reserver-activite:hover {
+            background: #d97706;
+        }
+
+        /* Filtre source dans #filtresActivites */
+        .filtres-source {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-filter-source {
+            padding: 0.3rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 999px;
+            border: 1.5px solid var(--gray-300);
+            background: white;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-filter-source.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ——— VUE PLANNING ——— */
+        .planning-layout {
+            display: flex;
+            gap: 1rem;
+            min-height: 500px;
+        }
+
+        /* Colonne jours */
+        .planning-jours {
+            width: 30%;
+            min-width: 100px;
+            max-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .planning-jours-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .planning-jour-item {
+            padding: 0.6rem 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-bottom: 0.25rem;
+            transition: all 0.15s;
+            font-size: 0.8rem;
+            color: var(--gray-700);
+            border: 1.5px solid transparent;
+        }
+
+        .planning-jour-item:hover {
+            background: var(--gray-100);
+        }
+
+        .planning-jour-item.active {
+            background: #e0f9ff;
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .planning-jour-nom {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .planning-jour-date {
+            font-size: 0.72rem;
+            color: var(--gray-600);
+            margin-top: 0.1rem;
+        }
+
+        .planning-jour-count {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.05rem 0.4rem;
+            border-radius: 999px;
+            margin-top: 0.2rem;
+        }
+
+        /* Timeline section */
+        .planning-timeline-section {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .planning-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .planning-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .planning-toolbar-label {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .planning-select {
+            padding: 0.35rem 0.6rem;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            background: white;
+            color: var(--gray-800);
+            cursor: pointer;
+        }
+
+        .planning-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Grille timeline */
+        .timeline-container {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .timeline-heure-slot {
+            display: flex;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--gray-100);
+            min-height: 40px;
+        }
+
+        .timeline-heure-label {
+            width: 3.5rem;
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            color: var(--gray-600);
+            padding: 0.4rem 0.5rem;
+            border-right: 1px solid var(--gray-200);
+            line-height: 1;
+        }
+
+        .timeline-heure-zone {
+            flex: 1;
+            min-height: 40px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .timeline-heure-zone:hover {
+            background: #f0fdfe;
+        }
+
+        /* Bloc activité posé dans la timeline */
+        .timeline-bloc-activite {
+            position: absolute;
+            left: 0.25rem;
+            right: 0.25rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 0.375rem;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: grab;
+            overflow: hidden;
+            z-index: 2;
+            box-shadow: 0 2px 6px rgba(6,182,212,0.3);
+        }
+
+        .timeline-bloc-activite.source-partenaire {
+            background: var(--warning);
+            box-shadow: 0 2px 6px rgba(245,158,11,0.3);
+        }
+
+        .timeline-bloc-activite.source-libre {
+            background: var(--gray-600);
+        }
+
+        .timeline-bloc-titre {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .timeline-bloc-meta {
+            font-size: 0.65rem;
+            opacity: 0.85;
+            margin-top: 0.1rem;
+        }
+
+        .timeline-bloc-remove {
+            position: absolute;
+            top: 0.2rem;
+            right: 0.25rem;
+            background: rgba(0,0,0,0.2);
+            border: none;
+            color: white;
+            width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* État vide du planning */
+        .planning-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 3rem 1rem;
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        .planning-empty-state svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            opacity: 0.4;
+        }
+
+        .planning-empty-state p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Résumé kilométrique du jour */
+        .planning-resume-jour {
+            display: flex;
+            gap: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 0.75rem;
+        }
+
+        .resume-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+
+        .resume-item svg {
+            width: 1rem;
+            height: 1rem;
+            color: var(--primary);
+        }
+
+        /* Alerte de départ */
+        .planning-alerte-depart {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9990;
+            padding: 0.75rem 1rem;
+            background: var(--warning);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .planning-alerte-depart.visible {
+            transform: translateY(0);
+        }
+
+        .planning-alerte-depart.critique {
+            background: var(--danger);
+        }
+
+        /* Responsive mobile */
+        @media (max-width: 768px) {
+            .planning-layout {
+                flex-direction: column;
+            }
+
+            .planning-jours {
+                width: 100%;
+                max-width: 100%;
+                display: flex;
+                flex-direction: row;
+                gap: 0.5rem;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .planning-jours-header {
+                display: none;
+            }
+
+            .planning-jour-item {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+
+            .planning-jour-date {
+                display: none;
+            }
+
+            .planning-toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .planning-toolbar-left {
+                width: 100%;
+            }
+
+            .planning-select {
+                flex: 1;
+            }
+
+            #btnVoirCatalogue {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2797,16 +3301,94 @@
         
         <!-- Onglet ACTIVITÉS -->
         <div class="tab-content" id="tab-activites">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="activites_title"><i data-lucide="map"></i> Activités à découvrir</h2>
-                </div>
-                <div class="map-container" id="mapActivites"></div>
-                <div id="filtresActivites" style="margin-bottom: 1rem;">
-                    <!-- Filtres seront injectés dynamiquement -->
-                </div>
-                <div id="listeActivites"></div>
+
+            <!-- Bandeau switcher Catalogue / Mon planning -->
+            <div class="activites-switcher">
+                <button class="sub-tab-btn active" data-view="catalogue">
+                    <i data-lucide="map"></i>
+                    <span data-i18n="planning_vue_catalogue">Catalogue</span>
+                </button>
+                <button class="sub-tab-btn" data-view="planning">
+                    <i data-lucide="calendar-check"></i>
+                    <span data-i18n="planning_vue_planning">Mon planning</span>
+                    <span class="planning-count-badge" id="planningCount" style="display:none;">0</span>
+                </button>
             </div>
+
+            <!-- VUE CATALOGUE (défaut — contenu existant préservé à 100 %) -->
+            <div id="vueCatalogue">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" data-i18n="activites_title"><i data-lucide="map"></i> Activités à découvrir</h2>
+                    </div>
+                    <div class="map-container" id="mapActivites"></div>
+                    <div id="filtresActivites" style="margin-bottom: 1rem;">
+                        <!-- Filtres catégorie injectés dynamiquement -->
+                        <!-- Filtre source (Tout / Gîte / Partenaire) ajouté par fiche-client-planning.js (LOT 3) -->
+                    </div>
+                    <div id="listeActivites"></div>
+                </div>
+            </div>
+
+            <!-- VUE PLANNING (masquée par défaut) -->
+            <div id="vuePlanning" style="display:none;">
+                <div class="planning-layout">
+
+                    <!-- Colonne jours de présence -->
+                    <aside class="planning-jours" id="planningJours">
+                        <div class="planning-jours-header" data-i18n="planning_jours_presence">Jours de présence</div>
+                        <div id="planningJoursList">
+                            <!-- Jours générés depuis reservation.date_arrivee → date_depart (LOT 3) -->
+                        </div>
+                    </aside>
+
+                    <!-- Timeline principale -->
+                    <section class="planning-timeline-section">
+
+                        <!-- Toolbar transport + bouton catalogue -->
+                        <div class="planning-toolbar">
+                            <div class="planning-toolbar-left">
+                                <label class="planning-toolbar-label"><i data-lucide="car"></i></label>
+                                <select id="modeTransportGlobal" class="planning-select">
+                                    <option value="voiture" data-i18n="planning_mode_voiture">🚗 Voiture</option>
+                                    <option value="velo" data-i18n="planning_mode_velo">🚲 Vélo</option>
+                                    <option value="pied" data-i18n="planning_mode_pied">🚶 À pied</option>
+                                </select>
+                            </div>
+                            <button id="btnVoirCatalogue" class="btn btn-outline btn-sm" type="button">
+                                <i data-lucide="plus"></i>
+                                <span data-i18n="planning_ajouter_au_sejour">+ Ajouter depuis le catalogue</span>
+                            </button>
+                        </div>
+
+                        <!-- Grille timeline 7h–23h (slots générés en LOT 3) -->
+                        <div class="timeline-container" id="timelineContainer">
+                            <div class="planning-empty-state" id="planningEmptyState">
+                                <i data-lucide="calendar-x"></i>
+                                <p data-i18n="planning_aucune_activite_jour">Aucune activité planifiée pour ce jour.<br>Ajoutez-en depuis le catalogue !</p>
+                                <button class="btn btn-primary btn-sm" type="button" id="btnEmptyVoirCatalogue">
+                                    <i data-lucide="map-pin"></i>
+                                    <span data-i18n="planning_vue_catalogue">Voir le catalogue</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Résumé kilométrique du jour -->
+                        <div class="planning-resume-jour" id="planningResume">
+                            <div class="resume-item">
+                                <i data-lucide="route"></i>
+                                <span id="resumeTotalKm">0 km</span>
+                            </div>
+                            <div class="resume-item">
+                                <i data-lucide="clock"></i>
+                                <span id="resumeTempsTotal">0 min de trajet</span>
+                            </div>
+                        </div>
+
+                    </section>
+                </div>
+            </div>
+
         </div>
         
         <!-- Onglet DEMANDE -->
@@ -3059,6 +3641,47 @@
     <script src="../js/fiche-activites-map.js?v=2.5.5"></script>
     <script src="../js/fiche-client-app.js?v=2.10.3"></script>
     <script src="../js/fiche-client-prestations.js?v=1.0.2"></script>
+    <!-- LOT 2 — Bascule Catalogue / Planning (logique métier complète en LOT 3) -->
+    <script>
+    (function () {
+        'use strict';
+
+        function basculerVueActivites(view) {
+            const vueCatalogue = document.getElementById('vueCatalogue');
+            const vuePlanning  = document.getElementById('vuePlanning');
+            if (!vueCatalogue || !vuePlanning) return;
+
+            const isCatalogue = view === 'catalogue';
+            vueCatalogue.style.display = isCatalogue ? '' : 'none';
+            vuePlanning.style.display  = isCatalogue ? 'none' : '';
+
+            // Mise à jour des boutons switcher
+            document.querySelectorAll('.sub-tab-btn').forEach(function (btn) {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+
+            // Réinitialiser les icônes Lucide pour la vue activée
+            if (typeof lucide !== 'undefined') {
+                try { lucide.createIcons(); } catch (e) { /* silent */ }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Délégation sur le switcher
+            document.addEventListener('click', function (e) {
+                var btn = e.target.closest('[data-view]');
+                if (!btn) return;
+                var view = btn.dataset.view;
+                if (view === 'catalogue' || view === 'planning') {
+                    basculerVueActivites(view);
+                }
+            });
+        });
+
+        // Exposer pour LOT 3
+        window.basculerVueActivites = basculerVueActivites;
+    })();
+    </script>
     <script>
         // � Initialiser les icônes Lucide
         if (typeof lucide !== 'undefined') {
