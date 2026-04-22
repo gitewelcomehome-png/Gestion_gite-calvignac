@@ -177,12 +177,22 @@
 
     // ==================== ACTIVITÉS PARTENAIRES ====================
 
+    function isPreprod() {
+        const h = window.location.hostname;
+        return h === 'localhost' || h === '127.0.0.1' || h.includes('preprod') || h.includes('vercel.app');
+    }
+
     async function chargerActivitesPartenaires(giteLat, giteLon, rayonKm = 50) {
         try {
-            const { data, error } = await getSb()
+            let query = getSb()
                 .from('activites_partenaires')
                 .select('*, partenaires_activites(nom)')
                 .eq('actif', true);
+            // En production : exclure les données de test
+            if (!isPreprod()) {
+                query = query.eq('is_test_data', false);
+            }
+            const { data, error } = await query;
             if (error) {
                 console.error('activites_partenaires load error:', error);
                 return [];
