@@ -2593,25 +2593,118 @@
         }
 
         .planning-mode-btn {
-            padding: 0.3rem 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.32rem 0.7rem;
             border: none;
             border-radius: 0.45rem;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             background: transparent;
             color: var(--gray-500, #6b7280);
             cursor: pointer;
             font-weight: 500;
             transition: all 0.15s;
             white-space: nowrap;
-            line-height: 1.4;
+            line-height: 1;
+        }
+
+        .planning-mode-btn svg {
+            width: 0.95rem;
+            height: 0.95rem;
+            stroke-width: 2;
+            flex-shrink: 0;
         }
 
         .planning-mode-btn.actif {
             background: white;
             color: var(--gray-900, #111827);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.14);
             font-weight: 600;
         }
+
+        /* Bouton navigation dans les blocs */
+        .tl-nav-btn {
+            background: rgba(255,255,255,0.25);
+            border: none;
+            color: white;
+            border-radius: 0.3rem;
+            padding: 0.1rem 0.3rem;
+            font-size: 0.68rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            margin-top: 0.2rem;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+
+        .tl-nav-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .tl-nav-btn svg {
+            width: 0.7rem;
+            height: 0.7rem;
+            stroke-width: 2.5;
+        }
+
+        /* Bottom sheet navigation */
+        .nav-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 10001;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .nav-sheet-box {
+            background: white;
+            border-radius: 1rem 1rem 0 0;
+            padding: 1.25rem 1.25rem 2rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+        }
+
+        .nav-sheet-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--gray-800);
+        }
+
+        .nav-sheet-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .nav-sheet-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border: none;
+            border-radius: 0.65rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            transition: opacity 0.15s;
+        }
+
+        .nav-sheet-btn:hover { opacity: 0.88; }
+
+        .nav-sheet-btn.waze   { background: #33ccff; color: #1a1a1a; }
+        .nav-sheet-btn.gmaps  { background: #4285f4; }
+        .nav-sheet-btn.apple  { background: #1c1c1e; }
+        .nav-sheet-btn.cancel { background: var(--gray-100); color: var(--gray-700); }
 
         .btn-sm {
             padding: 0.35rem 0.75rem;
@@ -2831,12 +2924,11 @@
 
             .planning-modes {
                 flex: 1;
-                justify-content: space-between;
             }
 
             .planning-mode-btn {
                 flex: 1;
-                text-align: center;
+                justify-content: center;
             }
 
             #btnVoirCatalogue {
@@ -3766,11 +3858,17 @@
                             <div class="planning-toolbar-left">
                                 <div class="planning-modes" id="planningModes" role="group" aria-label="Mode de transport">
                                     <button class="planning-mode-btn actif" data-mode="voiture"
-                                            onclick="window.selecterModeTransport('voiture')" type="button">🚗 Voiture</button>
+                                            onclick="window.selecterModeTransport('voiture')" type="button">
+                                        <i data-lucide="car"></i> Voiture
+                                    </button>
                                     <button class="planning-mode-btn" data-mode="velo"
-                                            onclick="window.selecterModeTransport('velo')" type="button">🚴 Vélo</button>
+                                            onclick="window.selecterModeTransport('velo')" type="button">
+                                        <i data-lucide="bike"></i> Vélo
+                                    </button>
                                     <button class="planning-mode-btn" data-mode="pied"
-                                            onclick="window.selecterModeTransport('pied')" type="button">🚶 À pied</button>
+                                            onclick="window.selecterModeTransport('pied')" type="button">
+                                        <i data-lucide="footprints"></i> À pied
+                                    </button>
                                 </div>
                             </div>
                             <div style="display:flex;gap:0.5rem;align-items:center;">

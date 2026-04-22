@@ -35,6 +35,14 @@
         return window.token || new URLSearchParams(window.location.search).get('token') || null;
     }
 
+    // Recalcule heure_depart pour affichage avec un mode de transport donné
+    function recalculerDepart(item, mode) {
+        if (!item.distance_km || !item.heure_debut) return item.heure_depart_suggeree;
+        const m = VITESSES[mode] ? mode : 'voiture';
+        const dureeMin = Math.round(parseFloat(item.distance_km) / VITESSES[m] * 60);
+        return calculerHeureDepart(item.heure_debut, dureeMin);
+    }
+
     function getModeTransport() {
         const btn = document.querySelector('#planningModes .planning-mode-btn.actif');
         return (btn && btn.dataset.mode) || 'voiture';
@@ -44,6 +52,9 @@
         document.querySelectorAll('#planningModes .planning-mode-btn').forEach(b => {
             b.classList.toggle('actif', b.dataset.mode === mode);
         });
+        if (window.lucide) window.lucide.createIcons();
+        // Recalcule les temps de départ pour le jour affiché avec le nouveau mode
+        if (planningJourActif) afficherPlanning(planningJourActif);
     };
 
     function tSafe(key) {
@@ -469,6 +480,7 @@
 
         container.innerHTML = buildTimelineHTML(items);
         mettreAJourResume(items);
+        if (window.lucide) window.lucide.createIcons();
     }
 
     function buildTimelineHTML(items) {
@@ -511,6 +523,13 @@
                 )?.nom || item.titre_libre || 'Activité').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
                 const sourceClass = item.source === 'partenaire' ? 'bloc-partenaire' : (item.source === 'libre' ? 'bloc-libre' : 'bloc-gite');
+                const modeActif = getModeTransport();
+                const departRecalc = recalculerDepart(item, modeActif);
+                const modeIcons = { voiture: 'car', velo: 'bike', pied: 'footprints' };
+                const modeIcon = modeIcons[modeActif] || 'car';
+                const lat = item.latitude_dest;
+                const lon = item.longitude_dest;
+                const hasNav = lat && lon;
 
                 blocsHTML += `
                     <div class="tl-bloc ${sourceClass}"
@@ -526,13 +545,19 @@
                             ${item.heure_debut ? item.heure_debut.slice(0, 5) : ''}
                             ${item.heure_fin ? '→ ' + item.heure_fin.slice(0, 5) : ''}
                         </div>
-                        ${item.heure_depart_suggeree ? `
+                        ${departRecalc ? `
                             <div class="tl-bloc-depart">
-                                ${TRANSPORT_ICONS[item.mode_transport] || '🚗'} ${tSafe('planning_depart_a')} ${item.heure_depart_suggeree.slice(0, 5)}
+                                <i data-lucide="${modeIcon}"></i> ${tSafe('planning_depart_a')} ${departRecalc.slice(0, 5)}
                             </div>
                         ` : ''}
                         ${item.distance_km ? `
                             <div class="tl-bloc-dist">${item.distance_km} km · ${formatDureeMin(item.duree_trajet_min)}</div>
+                        ` : ''}
+                        ${hasNav ? `
+                            <button class="tl-nav-btn" onclick="event.stopPropagation();window.ouvrirNavigationVers(${lat},${lon},'${nom.replace(/'/g,"\\'")}')"
+                                    type="button">
+                                <i data-lucide="navigation-2"></i> Y aller
+                            </button>
                         ` : ''}
                     </div>
                 `;
@@ -627,6 +652,53 @@
 
     window.fermerAlerteDepart = function () {
         masquerBanniereAlerte();
+    };
+
+    window.ouvrirNavigationVers = function (lat, lon, nom) {
+        const existing = document.getElementById('navSheet');
+        if (existing) existing.remove();
+
+        const encodedNom = encodeURIComponent(nom);
+        const wazeUrl    = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`;
+        const gmapsUrl   = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
+        const appleUrl   = `https://maps.apple.com/?daddr=${lat},${lon}`;
+
+        const sheet = document.createElement('div');
+        sheet.id = 'navSheet';
+        sheet.className = 'nav-sheet-overlay';
+        sheet.innerHTML = `
+            <div class="nav-sheet-box">
+                <div class="nav-sheet-title">📍 Naviguer vers ${nom}</div>
+                <div class="nav-sheet-btns">
+                    <a href="${wazeUrl}" target="_blank" rel="noopener" class="nav-sheet-btn waze">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <circle cx="12" cy="10" r="8"/><circle cx="9" cy="9" r="1.2" fill="white"/>
+                            <circle cx="15" cy="9" r="1.2" fill="white"/>
+                            <path d="M9 13 Q12 15.5 15 13" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        Ouvrir dans Waze
+                    </a>
+                    <a href="${gmapsUrl}" target="_blank" rel="noopener" class="nav-sheet-btn gmaps">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                            <circle cx="12" cy="9" r="2.5" fill="white" stroke="white"/>
+                        </svg>
+                        Google Maps
+                    </a>
+                    <a href="${appleUrl}" target="_blank" rel="noopener" class="nav-sheet-btn apple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                        </svg>
+                        Plans (Apple)
+                    </a>
+                    <button class="nav-sheet-btn cancel" onclick="document.getElementById('navSheet').remove()" type="button">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(sheet);
+        sheet.addEventListener('click', e => { if (e.target === sheet) sheet.remove(); });
     };
 
     function appliquerEtatBoutonAlertes() {
