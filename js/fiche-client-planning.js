@@ -10,6 +10,7 @@
     // ==================== CONSTANTES ====================
 
     const VITESSES = { voiture: 50, velo: 15, pied: 4.5 }; // km/h
+    const TRANSPORT_ICONS = { voiture: '🚗', velo: '🚴', pied: '🚶' };
     const FACTEUR_SINUOSITE = { voiture: 1.3, velo: 1.2, pied: 1.15 };
     const MARGE_SECURITE_MIN = 10;
     const TIMELINE_START = 7;  // 7h
@@ -33,6 +34,17 @@
     function getToken() {
         return window.token || new URLSearchParams(window.location.search).get('token') || null;
     }
+
+    function getModeTransport() {
+        const btn = document.querySelector('#planningModes .planning-mode-btn.actif');
+        return (btn && btn.dataset.mode) || 'voiture';
+    }
+
+    window.selecterModeTransport = function (mode) {
+        document.querySelectorAll('#planningModes .planning-mode-btn').forEach(b => {
+            b.classList.toggle('actif', b.dataset.mode === mode);
+        });
+    };
 
     function tSafe(key) {
         return typeof window.t === 'function' ? window.t(key) : key;
@@ -333,10 +345,10 @@
                     </div>
                     <div class="planning-modal-field">
                         <label for="pm-mode">Mode de transport</label>
-                        <select id="pm-mode">
-                            <option value="voiture">🚗 ${tSafe('planning_mode_voiture')}</option>
-                            <option value="velo">🚴 ${tSafe('planning_mode_velo')}</option>
-                            <option value="pied">🚶 ${tSafe('planning_mode_pied')}</option>
+                        <select id="pm-mode" class="planning-select">
+                            <option value="voiture" ${getModeTransport()==='voiture'?'selected':''}>🚗 ${tSafe('planning_mode_voiture')}</option>
+                            <option value="velo" ${getModeTransport()==='velo'?'selected':''}>🚴 ${tSafe('planning_mode_velo')}</option>
+                            <option value="pied" ${getModeTransport()==='pied'?'selected':''}>🚶 ${tSafe('planning_mode_pied')}</option>
                         </select>
                     </div>
                     <div id="pm-trajet-info" class="planning-modal-trajet"></div>
@@ -516,7 +528,7 @@
                         </div>
                         ${item.heure_depart_suggeree ? `
                             <div class="tl-bloc-depart">
-                                🚗 ${tSafe('planning_depart_a')} ${item.heure_depart_suggeree.slice(0, 5)}
+                                ${TRANSPORT_ICONS[item.mode_transport] || '🚗'} ${tSafe('planning_depart_a')} ${item.heure_depart_suggeree.slice(0, 5)}
                             </div>
                         ` : ''}
                         ${item.distance_km ? `

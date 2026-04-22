@@ -2582,6 +2582,37 @@
             border-color: var(--primary);
         }
 
+        /* Pills mode transport toolbar */
+        .planning-modes {
+            display: flex;
+            gap: 0.2rem;
+            background: var(--gray-100, #f3f4f6);
+            border-radius: 0.6rem;
+            padding: 0.2rem;
+            border: 1px solid var(--gray-200, #e5e7eb);
+        }
+
+        .planning-mode-btn {
+            padding: 0.3rem 0.65rem;
+            border: none;
+            border-radius: 0.45rem;
+            font-size: 0.82rem;
+            background: transparent;
+            color: var(--gray-500, #6b7280);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.15s;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+
+        .planning-mode-btn.actif {
+            background: white;
+            color: var(--gray-900, #111827);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+            font-weight: 600;
+        }
+
         .btn-sm {
             padding: 0.35rem 0.75rem;
             font-size: 0.8rem;
@@ -2798,8 +2829,14 @@
                 width: 100%;
             }
 
-            .planning-select {
+            .planning-modes {
                 flex: 1;
+                justify-content: space-between;
+            }
+
+            .planning-mode-btn {
+                flex: 1;
+                text-align: center;
             }
 
             #btnVoirCatalogue {
@@ -2919,21 +2956,28 @@
         }
 
         .tl-bloc-meta {
-            font-size: 0.65rem;
-            opacity: 0.85;
-            margin-top: 0.1rem;
+            font-size: 0.68rem;
+            opacity: 0.9;
+            margin-top: 0.15rem;
+            letter-spacing: 0.01em;
         }
 
         .tl-bloc-depart {
-            font-size: 0.65rem;
-            margin-top: 0.1rem;
-            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.68rem;
+            margin-top: 0.15rem;
+            font-weight: 600;
+            background: rgba(0,0,0,0.18);
+            border-radius: 0.3rem;
+            padding: 0.05rem 0.3rem;
         }
 
         .tl-bloc-dist {
-            font-size: 0.63rem;
-            opacity: 0.75;
-            margin-top: 0.05rem;
+            font-size: 0.62rem;
+            opacity: 0.72;
+            margin-top: 0.1rem;
         }
 
         /* Boutons jours dans la colonne planning */
@@ -3720,12 +3764,14 @@
                         <!-- Toolbar transport + bouton catalogue -->
                         <div class="planning-toolbar">
                             <div class="planning-toolbar-left">
-                                <label class="planning-toolbar-label"><i data-lucide="car"></i></label>
-                                <select id="modeTransportGlobal" class="planning-select">
-                                    <option value="voiture" data-i18n="planning_mode_voiture">🚗 Voiture</option>
-                                    <option value="velo" data-i18n="planning_mode_velo">🚲 Vélo</option>
-                                    <option value="pied" data-i18n="planning_mode_pied">🚶 À pied</option>
-                                </select>
+                                <div class="planning-modes" id="planningModes" role="group" aria-label="Mode de transport">
+                                    <button class="planning-mode-btn actif" data-mode="voiture"
+                                            onclick="window.selecterModeTransport('voiture')" type="button">🚗 Voiture</button>
+                                    <button class="planning-mode-btn" data-mode="velo"
+                                            onclick="window.selecterModeTransport('velo')" type="button">🚴 Vélo</button>
+                                    <button class="planning-mode-btn" data-mode="pied"
+                                            onclick="window.selecterModeTransport('pied')" type="button">🚶 À pied</button>
+                                </div>
                             </div>
                             <div style="display:flex;gap:0.5rem;align-items:center;">
                                 <button id="btnToggleAlertes" class="btn btn-outline btn-sm" type="button"
