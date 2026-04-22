@@ -83,6 +83,14 @@
 
     // ==================== JOURS SÉJOUR ====================
 
+    function dateToLocalISO(d) {
+        // Utiliser les méthodes locales pour éviter le décalage UTC (timezone)
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const j = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${j}`;
+    }
+
     function genererJoursSejour() {
         if (!window.reservationData) return [];
         // Support double format : check_in/check_out (Supabase) et date_arrivee/date_depart (legacy)
@@ -94,7 +102,7 @@
         const jours = [];
         const courant = new Date(arrivee);
         while (courant < depart) {
-            jours.push(courant.toISOString().slice(0, 10));
+            jours.push(dateToLocalISO(courant)); // getFullYear/Month/Date = heure locale, pas UTC
             courant.setDate(courant.getDate() + 1);
         }
         return jours;
@@ -103,14 +111,11 @@
     // ==================== SUPABASE CRUD ====================
 
     async function chargerPlanning() {
-        if (!window.reservationData?.id) return [];
+        const tok = getToken();
+        if (!tok) return [];
         try {
             const { data, error } = await getSb()
-                .from('planning_sejour')
-                .select('*')
-                .eq('reservation_id', window.reservationData.id)
-                .order('jour')
-                .order('heure_debut');
+                .rpc('get_planning_sejour', { p_token: tok });
             if (error) {
                 console.error('planning_sejour load error:', error);
                 return [];
@@ -139,36 +144,32 @@
             heureFinCalc = minutesEnHeure(heureEnMinutes(heureDebut) + dureeActivite);
         }
 
-        const row = {
-            reservation_id: window.reservationData.id,
-            token_fiche_client: getToken(),
-            jour,
-            heure_debut: heureDebut,
-            heure_fin: heureFinCalc,
-            source: activite.source || 'gite',
-            activite_gite_id: activite.source === 'gite' ? activite.id : null,
-            activite_partenaire_id: activite.source === 'partenaire' ? activite.id : null,
-            titre_libre: null,
-            mode_transport: mode,
-            distance_km: trajet.distance_km,
-            duree_trajet_min: trajet.duree_min,
-            heure_depart_suggeree: heureDepart,
-            latitude_dest: actLat,
-            longitude_dest: actLon,
-            statut: 'planifie'
-        };
-
         const { data, error } = await getSb()
-            .from('planning_sejour')
-            .insert(row)
-            .select()
-            .single();
+            .rpc('insert_planning_sejour', {
+                p_token:            getToken(),
+                p_reservation_id:   window.reservationData.id,
+                p_jour:             jour,
+                p_heure_debut:      heureDebut,
+                p_heure_fin:        heureFinCalc,
+                p_source:           activite.source || 'gite',
+                p_activite_gite_id: activite.source === 'gite' ? activite.id : null,
+                p_activite_part_id: activite.source === 'partenaire' ? activite.id : null,
+                p_titre_libre:      null,
+                p_mode_transport:   mode,
+                p_distance_km:      trajet.distance_km,
+                p_duree_trajet_min: trajet.duree_min,
+                p_heure_depart:     heureDepart,
+                p_latitude_dest:    actLat,
+                p_longitude_dest:   actLon
+            });
         if (error) throw error;
+        const data0 = Array.isArray(data) ? data[0] : data;
+        if (!data0) throw new Error('Aucune donnée retournée par insert_planning_sejour');
 
         // Enrichir le retour avec le nom de l'activité pour l'affichage
-        data._nom = activite.nom;
-        data._source = activite.source;
-        return data;
+        data0._nom = activite.nom;
+        data0._source = activite.source;
+        return data0;
     }
 
     async function supprimerDuPlanning(planningId) {
