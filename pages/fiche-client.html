@@ -2472,70 +2472,84 @@
         /* ——— VUE PLANNING ——— */
         .planning-layout {
             display: flex;
-            gap: 1rem;
+            flex-direction: column;
+            gap: 0.75rem;
             min-height: 500px;
         }
 
-        /* Colonne jours */
+        /* Bande horizontale de chips jours */
         .planning-jours {
-            width: 30%;
-            min-width: 100px;
-            max-width: 140px;
-            flex-shrink: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.4rem;
+            overflow-x: auto;
+            padding: 0.25rem 0 0.4rem;
+            scrollbar-width: none;
         }
 
+        .planning-jours::-webkit-scrollbar { display: none; }
+
         .planning-jours-header {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--gray-600);
-            margin-bottom: 0.5rem;
-            padding: 0 0.5rem;
+            display: none;
         }
 
         .planning-jour-item {
-            padding: 0.6rem 0.5rem;
-            border-radius: 0.5rem;
+            flex-shrink: 0;
+            padding: 0.45rem 0.75rem;
+            border-radius: 0.6rem;
             cursor: pointer;
-            margin-bottom: 0.25rem;
             transition: all 0.15s;
             font-size: 0.8rem;
             color: var(--gray-700);
-            border: 1.5px solid transparent;
+            border: 1.5px solid var(--gray-200);
+            background: white;
+            text-align: center;
+            line-height: 1.2;
         }
 
         .planning-jour-item:hover {
             background: var(--gray-100);
+            border-color: var(--gray-300);
         }
 
         .planning-jour-item.active {
-            background: #e0f9ff;
+            background: var(--primary);
             border-color: var(--primary);
-            color: var(--primary);
+            color: white;
             font-weight: 600;
         }
 
         .planning-jour-nom {
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
         }
 
         .planning-jour-date {
-            font-size: 0.72rem;
-            color: var(--gray-600);
-            margin-top: 0.1rem;
+            font-size: 0.7rem;
+            opacity: 0.75;
+            margin-top: 0.05rem;
+        }
+
+        .planning-jour-item.active .planning-jour-date {
+            opacity: 0.85;
         }
 
         .planning-jour-count {
             display: inline-block;
-            background: var(--primary);
-            color: white;
-            font-size: 0.65rem;
+            background: white;
+            color: var(--primary);
+            font-size: 0.62rem;
             font-weight: 700;
-            padding: 0.05rem 0.4rem;
+            padding: 0.05rem 0.35rem;
             border-radius: 999px;
             margin-top: 0.2rem;
+        }
+
+        .planning-jour-item.active .planning-jour-count {
+            background: rgba(255,255,255,0.3);
+            color: white;
         }
 
         /* Timeline section */
@@ -2893,24 +2907,6 @@
             .planning-jours {
                 width: 100%;
                 max-width: 100%;
-                display: flex;
-                flex-direction: row;
-                gap: 0.5rem;
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-            }
-
-            .planning-jours-header {
-                display: none;
-            }
-
-            .planning-jour-item {
-                flex-shrink: 0;
-                white-space: nowrap;
-            }
-
-            .planning-jour-date {
-                display: none;
             }
 
             .planning-toolbar {
@@ -3072,26 +3068,67 @@
             margin-top: 0.1rem;
         }
 
-        /* Boutons jours dans la colonne planning */
+        /* Chips jours (bande horizontale) */
         .planning-jour-btn {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            padding: 0.55rem 0.6rem;
-            border: 1.5px solid transparent;
-            border-radius: 0.5rem;
-            background: none;
+            flex-shrink: 0;
+            padding: 0.5rem 0.85rem;
+            border: 1.5px solid var(--gray-200, #e5e7eb);
+            border-radius: 0.65rem;
+            background: white;
             cursor: pointer;
-            text-align: left;
-            font-size: 0.8rem;
+            text-align: center;
+            font-size: 0.78rem;
             color: var(--gray-700);
-            margin-bottom: 0.25rem;
             transition: all 0.15s;
+            line-height: 1.2;
+            gap: 0.1rem;
         }
 
         .planning-jour-btn:hover {
-            background: var(--gray-100);
+            border-color: var(--primary);
+            background: #f0fdfe;
+        }
+
+        .planning-jour-btn.actif {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .jour-nom {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: capitalize;
+        }
+
+        .jour-date {
+            font-size: 0.7rem;
+            opacity: 0.75;
+        }
+
+        .planning-jour-btn.actif .jour-date {
+            opacity: 0.9;
+        }
+
+        .jour-badge {
+            margin-top: 0.2rem;
+            background: white;
+            color: var(--primary);
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.05rem 0.4rem;
+            border-radius: 999px;
+            min-width: 1.2rem;
+            line-height: 1.4;
+        }
+
+        .planning-jour-btn.actif .jour-badge {
+            background: rgba(255,255,255,0.3);
+            color: white;
         }
 
         .planning-jour-btn.actif {

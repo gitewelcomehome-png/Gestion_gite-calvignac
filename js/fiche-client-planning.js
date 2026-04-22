@@ -447,18 +447,23 @@
         if (!list) return;
         list.innerHTML = jours.map(j => {
             const d = new Date(j + 'T00:00:00');
-            const label = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+            const jourSemaine = d.toLocaleDateString('fr-FR', { weekday: 'short' });
+            const dateLabel  = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             const count = planningItems.filter(p => p.jour === j).length;
             const isActif = j === jourActif;
             return `
                 <button class="planning-jour-btn${isActif ? ' actif' : ''}"
                         data-jour="${j}"
                         onclick="window.planningSelectionnerJour('${j}')">
-                    <span class="jour-label">${label}</span>
-                    ${count > 0 ? `<span class="jour-badge">${count}</span>` : ''}
+                    <div class="jour-nom">${jourSemaine}</div>
+                    <div class="jour-date">${dateLabel}</div>
+                    ${count > 0 ? `<div class="jour-badge">${count}</div>` : ''}
                 </button>
             `;
         }).join('');
+        // Scroller vers le chip actif
+        const actifEl = list.querySelector('.planning-jour-btn.actif');
+        if (actifEl) actifEl.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
     }
 
     // ==================== AFFICHAGE TIMELINE ====================
