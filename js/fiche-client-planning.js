@@ -617,7 +617,34 @@
         masquerBanniereAlerte();
     };
 
+    function appliquerEtatBoutonAlertes() {
+        const btn = document.getElementById('btnToggleAlertes');
+        if (!btn) return;
+        const desactive = localStorage.getItem('alertes-planning-off') === '1';
+        btn.title = desactive ? 'Alertes désactivées — cliquer pour réactiver' : 'Alertes actives — cliquer pour désactiver';
+        btn.style.opacity = desactive ? '0.4' : '1';
+        btn.innerHTML = desactive ? '🔕' : '🔔';
+    }
+
+    window.toggleAlertes = function () {
+        const desactive = localStorage.getItem('alertes-planning-off') === '1';
+        if (desactive) {
+            localStorage.removeItem('alertes-planning-off');
+            // Si notification non encore accordée, proposer le modal
+            if ('Notification' in window && Notification.permission === 'default') {
+                localStorage.removeItem('notif-planning-asked');
+                demanderPermissionNotifications();
+            }
+        } else {
+            localStorage.setItem('alertes-planning-off', '1');
+            masquerBanniereAlerte();
+        }
+        appliquerEtatBoutonAlertes();
+    };
+
+
     function verifierAlertes() {
+        if (localStorage.getItem('alertes-planning-off') === '1') return;
         const today = dateToLocalISO(new Date());
         const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
 
@@ -725,6 +752,7 @@
         if (_alerteIntervalId) clearInterval(_alerteIntervalId);
         _alerteIntervalId = setInterval(verifierAlertes, 60000);
         verifierAlertes(); // vérification immédiate
+        appliquerEtatBoutonAlertes();
     }
 
     // Exposer pour le toggle de vue (fiche-client.html)
