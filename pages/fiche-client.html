@@ -3174,6 +3174,14 @@
     </style>
 </head>
 <body>
+    <!-- Bannière alertes de départ (LOT 4) -->
+    <div id="planningAlerte" class="planning-alerte-depart" role="alert" aria-live="assertive">
+        <span id="planningAlerteTexte"></span>
+        <button onclick="window.fermerAlerteDepart && window.fermerAlerteDepart()"
+                style="background:none;border:none;color:white;font-size:1.3rem;cursor:pointer;margin-left:0.75rem;line-height:1;padding:0"
+                aria-label="Fermer l'alerte">×</button>
+    </div>
+
     <!-- Loading screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="spinner"></div>

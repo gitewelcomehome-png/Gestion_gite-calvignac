@@ -21,6 +21,8 @@
     let planningItems = [];
     let planningJourActif = null;
     let activitesMergeesCache = []; // toutes activités (gite + partenaires)
+    let _alerteIntervalId = null;
+    const _alertesNotifiees = new Set();
 
     // ==================== HELPERS COMMUNS ====================
 
@@ -595,14 +597,113 @@
         }
     };
 
-    // ==================== NOTIFICATIONS ====================
+    // ==================== NOTIFICATIONS & ALERTES ====================
+
+    function masquerBanniereAlerte() {
+        const el = document.getElementById('planningAlerte');
+        if (el) el.classList.remove('visible', 'critique');
+    }
+
+    function afficherBanniereAlerte(texte, critique) {
+        const el = document.getElementById('planningAlerte');
+        const texteEl = document.getElementById('planningAlerteTexte');
+        if (!el || !texteEl) return;
+        texteEl.textContent = texte;
+        el.classList.toggle('critique', !!critique);
+        el.classList.add('visible');
+    }
+
+    window.fermerAlerteDepart = function () {
+        masquerBanniereAlerte();
+    };
+
+    function verifierAlertes() {
+        const today = dateToLocalISO(new Date());
+        const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+
+        const itemsAujourdhui = planningItems.filter(p => p.jour === today && p.heure_depart_suggeree);
+
+        let alerteCritique = null; // diff ≤ 5 min
+        let alerteWarning = null;  // diff ≤ 15 min
+
+        for (const item of itemsAujourdhui) {
+            const departMin = heureEnMinutes(item.heure_depart_suggeree);
+            const diff = departMin - nowMin;
+            if (diff > 0 && diff <= 5) {
+                if (!alerteCritique) alerteCritique = item;
+            } else if (diff > 0 && diff <= 15) {
+                if (!alerteWarning) alerteWarning = item;
+            }
+        }
+
+        const alerte = alerteCritique || alerteWarning;
+        if (!alerte) {
+            masquerBanniereAlerte();
+            return;
+        }
+
+        const isCritique = !!alerteCritique;
+        const nom = alerte._nom
+            || activitesMergeesCache.find(a =>
+                a.id === alerte.activite_gite_id || a.id === alerte.activite_partenaire_id
+            )?.nom
+            || 'Activité';
+
+        const texte = (isCritique
+            ? tSafe('planning_alerte_depart_5min')
+            : tSafe('planning_alerte_depart_15min'))
+            + ' — ' + nom;
+
+        afficherBanniereAlerte(texte, isCritique);
+
+        // Notification + vibration : une seule fois par alerte/niveau
+        const alerteKey = alerte.id + ':' + (isCritique ? '5' : '15');
+        if (!_alertesNotifiees.has(alerteKey)) {
+            _alertesNotifiees.add(alerteKey);
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try { new Notification(texte, { body: nom }); } catch (e) { /* ignore */ }
+            }
+            if (isCritique && navigator.vibrate) {
+                navigator.vibrate([300, 100, 300]);
+            }
+        }
+    }
 
     function demanderPermissionNotifications() {
-        if (!('Notification' in window) || Notification.permission !== 'default') return;
-        // Modal pédagogique minimal (LOT 4 l'enrichira)
-        try {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'default') return;
+        if (localStorage.getItem('notif-planning-asked')) return;
+        if (document.getElementById('notifModal')) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'notifModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:flex-end;justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:white;border-radius:1rem 1rem 0 0;padding:1.5rem;width:100%;max-width:480px;box-shadow:0 -4px 20px rgba(0,0,0,0.15)">
+                <div style="font-size:2rem;text-align:center;margin-bottom:0.75rem">🔔</div>
+                <h3 style="margin:0 0 0.5rem;font-size:1.1rem;text-align:center">Activer les alertes de départ ?</h3>
+                <p style="margin:0 0 1.25rem;color:#666;font-size:0.9rem;text-align:center;line-height:1.4">
+                    Recevez une notification quand il faut partir pour ne pas être en retard à vos activités.
+                    Vous pouvez désactiver à tout moment dans les réglages.
+                </p>
+                <div style="display:flex;gap:0.75rem;flex-direction:column">
+                    <button id="notifModalOui" style="padding:0.75rem;border:none;border-radius:0.5rem;background:var(--primary,#0066cc);color:white;font-size:1rem;font-weight:600;cursor:pointer">
+                        🔔 Activer les alertes
+                    </button>
+                    <button id="notifModalNon" style="padding:0.75rem;border:none;border-radius:0.5rem;background:#f0f0f0;color:#333;font-size:0.9rem;cursor:pointer">
+                        Plus tard
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        localStorage.setItem('notif-planning-asked', '1');
+
+        document.getElementById('notifModalOui').addEventListener('click', () => {
+            modal.remove();
             Notification.requestPermission().catch(() => {});
-        } catch (e) { /* safari legacy */ }
+        });
+        document.getElementById('notifModalNon').addEventListener('click', () => modal.remove());
     }
 
     // ==================== INIT ====================
@@ -618,6 +719,12 @@
             afficherJoursSejour(jours, planningJourActif);
             afficherPlanning(planningJourActif);
         }
+
+        // Démarrer la vérification des alertes (LOT 4)
+        _alertesNotifiees.clear();
+        if (_alerteIntervalId) clearInterval(_alerteIntervalId);
+        _alerteIntervalId = setInterval(verifierAlertes, 60000);
+        verifierAlertes(); // vérification immédiate
     }
 
     // Exposer pour le toggle de vue (fiche-client.html)
