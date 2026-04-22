@@ -2336,48 +2336,63 @@ async function loadActivitesForClient() {
         
         const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
         const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
-        
-        if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
+        const hasGeoCoords = giteLat && giteLon && !isNaN(giteLat) && !isNaN(giteLon);
+
+        if (!hasGeoCoords) {
             document.getElementById('mapActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
-            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
-            return;
         }
-        
+
         if (!activites || activites.length === 0) {
-            document.getElementById('mapActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ ${t('aucune_activite')}</p>`;
-            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ ${t('aucune_activite')}</p>`;
+            // Pas d'activités gîte — on continue quand même pour charger les partenaires
+        }
+
+        // Si pas de coordonnées GPS et pas d'activités gîte : rien à afficher
+        if (!hasGeoCoords && (!activites || activites.length === 0)) {
+            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
             return;
         }
         
         // Google Maps iframe avec marqueur gîte visible
         const mapElement = document.getElementById('mapActivites');
-        
-        mapElement.innerHTML = `
-            <iframe 
-                width="100%" 
-                height="400" 
-                frameborder="0" 
-                scrolling="no" 
-                marginheight="0" 
-                marginwidth="0" 
-                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
-                style="border: 1px solid #ccc; border-radius: 8px;">
-            </iframe>
-            <div style="text-align: center; margin-top: 0.5rem;">
-                <strong style="color: #ef4444;"><i data-lucide="home" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('votre_gite')}</strong><br>
-                <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
-                   target="_blank" 
-                   style="color: var(--primary); font-size: 0.875rem;">
-                    <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 0.25rem;"></i>${t('btn_voir_google_maps')}
-                </a>
-            </div>
-        `;
+
+        if (hasGeoCoords) {
+            mapElement.innerHTML = `
+                <iframe 
+                    width="100%" 
+                    height="400" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
+                    style="border: 1px solid #ccc; border-radius: 8px;">
+                </iframe>
+                <div style="text-align: center; margin-top: 0.5rem;">
+                    <strong style="color: #ef4444;"><i data-lucide="home" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('votre_gite')}</strong><br>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
+                       target="_blank" 
+                       style="color: var(--primary); font-size: 0.875rem;">
+                        <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 0.25rem;"></i>${t('btn_voir_google_maps')}
+                    </a>
+                </div>
+            `;
+        }
         
         // Initialiser les icônes Lucide dans la carte
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
+        // Fusionner activités gîte + partenaires si le module planning est chargé
+        const activitesFinales = typeof window.fusionnerActivites === 'function'
+            ? await window.fusionnerActivites(activites, giteLat, giteLon)
+            : activites;
+
         // Liste interactive des activités
-        displayActivitesListInteractive(activites, giteLat, giteLon);
+        displayActivitesListInteractive(activitesFinales, giteLat, giteLon);
+
+        // Enrichir les cartes (badges source + bouton "+Ajouter") si module planning chargé
+        if (typeof window.enrichirCartesActivites === 'function') {
+            window.enrichirCartesActivites(activitesFinales);
+        }
     } catch (error) {
         console.error('❌ Erreur critique dans loadActivitesForClient:', error);
         document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ ${t('erreur_chargement_activites')}</p>`;
