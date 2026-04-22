@@ -2480,13 +2480,6 @@
         /* Bande horizontale de chips jours */
         .planning-jours {
             width: 100%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 0.4rem;
-            overflow-x: auto;
-            padding: 0.25rem 0 0.4rem;
-            scrollbar-width: none;
         }
 
         .planning-jours::-webkit-scrollbar { display: none; }
@@ -2494,6 +2487,18 @@
         .planning-jours-header {
             display: none;
         }
+
+        #planningJoursList {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            gap: 0.4rem;
+            overflow-x: auto;
+            padding: 0.25rem 0 0.5rem;
+            scrollbar-width: none;
+        }
+
+        #planningJoursList::-webkit-scrollbar { display: none; }
 
         .planning-jour-item {
             flex-shrink: 0;
