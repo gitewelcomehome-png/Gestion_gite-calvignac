@@ -29,7 +29,7 @@
     }
 
     function getToken() {
-        return window.token || null;
+        return window.token || new URLSearchParams(window.location.search).get('token') || null;
     }
 
     function tSafe(key) {
@@ -85,8 +85,12 @@
 
     function genererJoursSejour() {
         if (!window.reservationData) return [];
-        const arrivee = new Date(window.reservationData.date_arrivee + 'T00:00:00');
-        const depart = new Date(window.reservationData.date_depart + 'T00:00:00');
+        // Support double format : check_in/check_out (Supabase) et date_arrivee/date_depart (legacy)
+        const arriveeStr = window.reservationData.check_in || window.reservationData.date_arrivee;
+        const departStr  = window.reservationData.check_out || window.reservationData.date_depart;
+        if (!arriveeStr || !departStr) return [];
+        const arrivee = new Date(arriveeStr.slice(0, 10) + 'T00:00:00');
+        const depart  = new Date(departStr.slice(0, 10) + 'T00:00:00');
         const jours = [];
         const courant = new Date(arrivee);
         while (courant < depart) {
