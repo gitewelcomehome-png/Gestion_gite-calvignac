@@ -354,14 +354,6 @@
                             <input type="time" id="pm-fin" value="${heureFinDefaut}" min="07:00" max="23:30" step="1800">
                         </div>
                     </div>
-                    <div class="planning-modal-field">
-                        <label for="pm-mode">Mode de transport</label>
-                        <select id="pm-mode" class="planning-select">
-                            <option value="voiture" ${getModeTransport()==='voiture'?'selected':''}>🚗 ${tSafe('planning_mode_voiture')}</option>
-                            <option value="velo" ${getModeTransport()==='velo'?'selected':''}>🚴 ${tSafe('planning_mode_velo')}</option>
-                            <option value="pied" ${getModeTransport()==='pied'?'selected':''}>🚶 ${tSafe('planning_mode_pied')}</option>
-                        </select>
-                    </div>
                     <div id="pm-trajet-info" class="planning-modal-trajet"></div>
                 </div>
                 <div class="planning-modal-footer">
@@ -380,7 +372,7 @@
 
         // Calcul trajet en temps réel
         function calculerEtAfficherTrajet() {
-            const mode = document.getElementById('pm-mode')?.value || 'voiture';
+            const mode = getModeTransport();
             const heureDebut = document.getElementById('pm-debut')?.value;
             const giteLat = parseFloat(window.giteInfo?.gps_lat || window.giteInfo?.latitude);
             const giteLon = parseFloat(window.giteInfo?.gps_lon || window.giteInfo?.longitude);
@@ -397,8 +389,16 @@
             }
         }
 
-        document.getElementById('pm-mode')?.addEventListener('change', calculerEtAfficherTrajet);
-        document.getElementById('pm-debut')?.addEventListener('change', calculerEtAfficherTrajet);
+        // Heure fin = début + 1h auto
+        document.getElementById('pm-debut')?.addEventListener('change', () => {
+            const debut = document.getElementById('pm-debut')?.value;
+            if (debut) {
+                const finAuto = minutesEnHeure(heureEnMinutes(debut) + 60);
+                const finEl = document.getElementById('pm-fin');
+                if (finEl) finEl.value = finAuto;
+            }
+            calculerEtAfficherTrajet();
+        });
         calculerEtAfficherTrajet();
 
         // Confirmer
@@ -406,7 +406,7 @@
             const jour = document.getElementById('pm-jour')?.value;
             const heureDebut = document.getElementById('pm-debut')?.value;
             const heureFin = document.getElementById('pm-fin')?.value || null;
-            const mode = document.getElementById('pm-mode')?.value || 'voiture';
+            const mode = getModeTransport();
 
             if (!jour || !heureDebut) return;
 
