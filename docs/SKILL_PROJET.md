@@ -506,6 +506,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
 - Commit : 67ed4eb
 
+### MOB-005 -- CORRIGE
+- Fichier : css/mobile-fix.css (nouveau) + <link> injecte dans 31 fichiers HTML
+- Symptome : iOS Safari zoome automatiquement sur les inputs dont font-size < 16px
+- Cause : inputs avec font-size 13-14px repandus dans tout le projet
+- Fix : creation de css/mobile-fix.css avec @media (max-width:768px) forcant 16px !important sur input/textarea/select ; lien injecte dans app.html, index.html et tous les pages/*.html contenant des inputs
+- Commit : 0f8b412
+
 ### MOB-004 -- CORRIGE
 - Fichier : app.html (@media max-width:768px)
 - Symptome : widget #subscription-banner (.plan-badge "QUATTRO ANNUEL") recouvre le bouton hamburger #mobile-menu-toggle
@@ -538,6 +545,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - 238d1ad : fix(mobile) calendrier tarifs garde 7 colonnes responsive — MOB-002
 - fe43aef : fix(mobile) header fiche-client compact sur petit ecran — MOB-003
 - d6a383c : fix(mobile) hamburger 44px et widget user compact — MOB-004
+- 0f8b412 : fix(mobile) inputs 16px minimum pour eviter zoom iOS — MOB-005
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
