@@ -69,6 +69,12 @@ html.is-mobile body {
     font-size: 0.95rem !important;
     font-weight: 500 !important;
 }
+/* Masquer onglets fiscal et infos-gites dans le menu hamburger */
+.is-mobile .icalou-modern-nav .nav-tab[data-tab="charges"],
+.is-mobile .icalou-modern-nav .nav-tab[data-tab="infos-gites"] {
+    display: none !important;
+}
+
 /* Masquer la bande noire du theme-controls */
 .is-mobile .theme-controls {
     background: transparent !important;
