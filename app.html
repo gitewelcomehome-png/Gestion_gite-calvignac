@@ -302,11 +302,6 @@
                 display: flex !important;
             }
             
-            .theme-controls {
-                gap: 12px !important;
-                justify-content: space-between !important;
-            }
-            
             /* Dashboard demandes clients - Optimisation mobile */
             #dashboard-demandes-clients {
                 padding: 8px !important;
@@ -557,11 +552,19 @@
             #subscription-banner .plan-badge {
                 display: none; /* cacher le badge "QUATTRO ANNUEL" en mobile */
             }
+            /* MOB-009 — theme-controls pleine largeur : stop overflow iOS */
             .theme-controls {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 8px;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 8px !important;
+                left: 0 !important;
+                right: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                border-radius: 0 !important;
+                padding: 4px 12px !important;
             }
         }
         
@@ -1112,8 +1115,7 @@
         });
     </script>
 
-    <!-- Menu hamburger mobile (injecté dynamiquement) -->
-    <div id="mobile-menu-container"></div>
+    <!-- Menu hamburger mobile — container supprimé (conflit listeners, MOB-009) -->
 
     <script>
     // ⚡ DÉTECTION MOBILE/DESKTOP - CHARGEMENT SÉPARÉ
