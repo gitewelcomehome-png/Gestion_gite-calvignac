@@ -540,6 +540,29 @@
             form[data-form="whatsapp-reponse"] button {
                 width: 100% !important;
             }
+
+            /* MOB-004 — hamburger accessible + widget user compact */
+            #mobile-menu-toggle {
+                position: relative;
+                z-index: 1100;
+                margin-right: 8px;
+                width: 44px;
+                height: 44px; /* taille tactile minimale */
+            }
+            .user-info, .user-menu {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+            }
+            .user-info .badge, .user-info [class*="quattro" i],
+            #subscription-banner .plan-badge {
+                display: none; /* cacher le badge "QUATTRO ANNUEL" en mobile */
+            }
+            .theme-controls {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
         }
         
         @media (max-width: 480px) {
