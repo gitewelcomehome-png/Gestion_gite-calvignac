@@ -506,6 +506,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
 - Commit : 67ed4eb
 
+### MOB-002 -- CORRIGE
+- Fichier : css/tab-calendrier.css
+- Symptome : grille calendrier-tarifs s'affiche en 4 colonnes sur mobile au lieu de 7 (jours de la semaine decales)
+- Cause : @media (max-width:768px) forçait repeat(4,1fr) sur .calendar-grid-tarifs et .calendar-grid-reservations
+- Fix (Option A) : repeat(7, minmax(40px, 1fr)) + gap:4px + font-size:0.75rem + overflow-x:auto ; cellules min-height:60px padding:4px 2px ; .day-price font-size:0.65rem
+- Commit : 238d1ad
+
 ### Anomalies detectees
 - ANOM-003 : Pages legales (CGU, Privacy, Legal) sans navigation coherente avec le site
 - ANOM-004 : Section Blog -- liens Lire les articles et Voir les videos pointent sur #blog (meme page), pas de vrai contenu
@@ -514,6 +521,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 ### Corrections appliquees
 - fc3d1bc : fix toggle prix Avec/Sans engagement index.html (26 insertions)
 - 67ed4eb : fix(mobile) bottom-nav fiche-client scrollable horizontal — MOB-001
+- 238d1ad : fix(mobile) calendrier tarifs garde 7 colonnes responsive — MOB-002
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
