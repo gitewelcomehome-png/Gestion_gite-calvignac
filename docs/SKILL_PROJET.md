@@ -499,6 +499,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Issue GitHub : #5
 - Fix suggere : Creer pages/support.html avec formulaire contact
 
+### MOB-001 -- CORRIGE
+- Page : pages/fiche-client.html — bottom-nav mobile
+- Symptome : la barre d'onglets deborde sur 390px avec 8 onglets (Entree, Pendant, Sortie, Prestations, Activites, Demandes, Evaluation, FAQ)
+- Cause : .bottom-nav-item avait flex:1 + min-width:0, pas de scroll horizontal
+- Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
+- Commit : 67ed4eb
+
 ### Anomalies detectees
 - ANOM-003 : Pages legales (CGU, Privacy, Legal) sans navigation coherente avec le site
 - ANOM-004 : Section Blog -- liens Lire les articles et Voir les videos pointent sur #blog (meme page), pas de vrai contenu
@@ -506,6 +513,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 
 ### Corrections appliquees
 - fc3d1bc : fix toggle prix Avec/Sans engagement index.html (26 insertions)
+- 67ed4eb : fix(mobile) bottom-nav fiche-client scrollable horizontal — MOB-001
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
