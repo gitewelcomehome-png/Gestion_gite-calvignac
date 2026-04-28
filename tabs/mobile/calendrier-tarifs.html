@@ -392,14 +392,14 @@ async function loadTarifsMobile() {
         // Charger les tarifs depuis le champ JSON tarifs_calendrier de la table gites
         const { data: giteData, error: errorTarifs } = await window.supabaseClient
             .from('gites')
-            .select('tarifs_calendrier, regles_tarifs, adresse, name, capacity')
+            .select('tarifs_calendrier, regles_tarifs, address, name, capacity')
             .eq('id', currentGiteIdMobile)
             .single();
         
         if (errorTarifs) throw errorTarifs;
 
         currentGiteNameMobile = (giteData?.name || '').trim();
-        currentGiteAdresseMobile = (giteData?.adresse || '').trim();
+        currentGiteAdresseMobile = (giteData?.address || '').trim();
         currentGiteCapacityMobile = Number.isFinite(Number(giteData?.capacity))
             ? Number(giteData.capacity)
             : null;
@@ -447,18 +447,17 @@ async function loadTarifsMobile() {
         }
 
         // Pré-remplir la région IA depuis l'adresse du gîte
-        if (giteData?.adresse) {
+        if (giteData?.address) {
             const regionField = document.getElementById('aiRegionInput');
             if (regionField) {
                 // Extraire code postal et ville de l'adresse (ex: "lieu-dit, 46300 Calvignac")
-                const matchCP = giteData.adresse.match(/(\d{5})\s+([\w\s-]+)/i);
+                const matchCP = giteData.address.match(/(\d{5})\s+([\w\s-]+)/i);
                 if (matchCP) {
                     const dept = matchCP[1].substring(0, 2);
                     const ville = matchCP[2].trim();
-                    // Construire un label utile pour l'IA (dept + ville + nom du gîte si disponible)
                     regionField.value = `${ville} (${dept})`;
                 } else {
-                    regionField.value = giteData.adresse;
+                    regionField.value = giteData.address;
                 }
             }
         }
