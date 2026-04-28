@@ -1208,6 +1208,13 @@
             'tab-checklists': 'tabs/mobile/checklists.html' + cacheBuster,
             'tab-calendrier-tarifs': 'tabs/mobile/calendrier-tarifs.html?v=1.4' + cacheBuster,
             'tab-communaute': 'tabs/tab-communaute.html' + cacheBuster,
+            // Onglets sans version mobile — version desktop en fallback
+            'tab-kanban': 'tabs/tab-kanban.html?v=5.0' + cacheBuster,
+            'tab-statistiques': 'tabs/tab-statistiques.html' + cacheBuster,
+            'tab-prestations': 'tabs/tab-prestations.html' + cacheBuster,
+            'tab-charges': 'tabs/tab-fiscalite-v2.html' + cacheBuster,
+            'tab-decouvrir': 'tabs/tab-decouvrir.html' + cacheBuster,
+            'tab-faq': 'tabs/tab-faq.html' + cacheBuster,
         };
         
         const tabFiles = isMobile ? mobileTabs : desktopTabs;
