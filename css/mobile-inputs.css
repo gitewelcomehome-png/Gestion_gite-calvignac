@@ -1,21 +1,27 @@
 /* =============================================
-   MOB-005b / RESIDUAL-2 — inputs 16px dans les modales
-   Spécificité renforcée pour passer au-dessus de
-   html.style-sidebar .modal-content .form-group et
-   autres règles spécifiques de main.css.
+   MOB-005b / RESIDUAL-2 v3 — inputs 16px dans les modales
+   Spécificité matchée contre la règle hostile de main.css :
+   html.style-sidebar .modal-content .form-group input { font-size: 0.85rem !important }
+   spécificité = 0,4,1 → on copie ce sélecteur pour le battre.
    Safari iOS zoome dès que font-size < 16px.
    ============================================= */
 @media (max-width: 768px) {
+  /* Match la spécificité de main.css pour battre 0.85rem */
+  html.style-sidebar .modal-content .form-group input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  html.style-sidebar .modal-content .form-group select,
+  html.style-sidebar .modal-content .form-group textarea,
+  html .modal-content .form-group input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  html .modal-content .form-group select,
+  html .modal-content .form-group textarea,
+  /* Couvre les autres modales sans .style-sidebar */
   .modal input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
   .modal textarea,
   .modal select,
   .modal-content input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
   .modal-content textarea,
   .modal-content select,
-  .modal-overlay input:not([type="checkbox"]):not([type="radio"]),
   .modal-overlay textarea,
   .modal-overlay select,
-  dialog input:not([type="checkbox"]):not([type="radio"]),
   dialog textarea,
   dialog select {
     font-size: 16px !important;
