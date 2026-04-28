@@ -1565,6 +1565,11 @@ setTimeout(() => {
     document.getElementById('btnAIAnalyseEvents')?.addEventListener('click', () => analyserDatesIA(true));
     document.getElementById('btnAIAppliquerTout')?.addEventListener('click', appliquerToutesSuggestions);
     
+    // Boutons modal tarif
+    document.getElementById('btnSaveTarifModal')?.addEventListener('click', saveTarifModalMobile);
+    document.getElementById('btnDeleteTarifModal')?.addEventListener('click', deleteTarifModalMobile);
+    document.getElementById('closeModalTarifMobile')?.addEventListener('click', closeModalTarifMobile);
+
     // Fermer modal en cliquant sur le fond
     document.getElementById('modalTarifMobile')?.addEventListener('click', (e) => {
         if (e.target.id === 'modalTarifMobile') {
