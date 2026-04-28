@@ -4,132 +4,33 @@
 
 // Menu hamburger mobile
 function initMobileMenu() {
-    // D'abord injecter le HTML du menu
-    const container = document.getElementById('mobile-menu-container');
-    if (!container) {
-        console.error('❌ Container mobile-menu-container non trouvé');
-        return;
-    }
-    
-    container.innerHTML = `
-        <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-
-        <nav id="mobile-nav-menu" class="mobile-nav-menu">
-            <div class="mobile-nav-list">
-                <!-- Les onglets seront générés dynamiquement -->
-            </div>
-            <div class="mobile-nav-footer">
-                <button onclick="if(confirm('Voulez-vous vraiment vous déconnecter ?')) { window.location.href='logout.php'; }" class="mobile-logout-btn">
-                    <span class="mobile-logout-icon">⏻</span>
-                    <span class="mobile-logout-text">Déconnexion</span>
-                </button>
-            </div>
-        </nav>
-        <div id="mobile-nav-overlay" class="mobile-nav-overlay"></div>
-    `;
-    
+    // Utiliser les éléments déjà présents dans app.html
+    // (le bouton hamburger est dans .theme-controls, la nav est .icalou-modern-nav)
     const mobileMenuBtn = document.getElementById('mobile-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-nav-menu');
+    const mobileNav = document.querySelector('.icalou-modern-nav');
     const mobileOverlay = document.getElementById('mobile-nav-overlay');
-    const mobileNavList = document.querySelector('.mobile-nav-list');
-    
-    if (!mobileMenuBtn || !mobileMenu) {
-        console.warn('⚠️ Éléments menu mobile non trouvés');
+
+    if (!mobileNav) {
+        console.warn('⚠️ .icalou-modern-nav non trouvée');
         return;
     }
-    
-    // Pages à exclure du menu mobile
-    const excludedTabs = ['statistiques', 'charges', 'faq', 'decouvrir', 'checklists'];
-    
-    // Liste de fallback si les boutons desktop ne sont pas trouvés
-    const fallbackMenu = [
-        { id: 'dashboard', icon: '📊', text: 'Tableau de Bord' },
-        { id: 'gestion', icon: '🏠', text: 'Gestion Gîtes' },
-        { id: 'reservations', icon: '📅', text: 'Réservations' },
-        { id: 'menage', icon: '🧹', text: 'Planning Ménage' },
-        { id: 'draps', icon: '🛏️', text: 'Draps' },
-        { id: 'infos-gites', icon: '💰', text: 'Calendrier & Tarifs' },
-        { id: 'fiches-clients', icon: '👥', text: 'Fiches Clients' },
-        { id: 'archives', icon: '📦', text: 'Archives' }
-    ];
-    
-    // Générer les liens du menu depuis les onglets
-    const tabs = document.querySelectorAll('.tab-neo[data-tab]');
-    let menuHTML = '';
-    
-    if (tabs.length === 0) {
-        // Générer depuis la liste fallback
-        fallbackMenu.forEach(item => {
-            menuHTML += `
-                <button onclick="window.switchTab('${item.id}'); window.closeMobileMenu();" class="mobile-menu-item">
-                    <span style="font-size: 1.2rem;">${item.icon}</span>
-                    <span class="mobile-menu-text">${item.text}</span>
-                </button>
-            `;
-        });
-        
-        if (mobileNavList) {
-            mobileNavList.innerHTML = menuHTML;
-        }
-        return;
-    }
-    
-    tabs.forEach(tab => {
-        const tabId = tab.getAttribute('data-tab');
-        if (!tabId) return;
-        
-        // Filtrer les onglets exclus
-        if (excludedTabs.includes(tabId)) {
-            return;
-        }
-        
-        // Récupérer l'icône SVG
-        const svgIcon = tab.querySelector('.tab-icon');
-        const iconHTML = svgIcon ? svgIcon.outerHTML : '<span style="font-size: 1.2rem;">📄</span>';
-        
-        // Récupérer le texte du bouton
-        let text = tab.textContent.trim();
-        
-        // Si le texte est vide, utiliser le tabId
-        if (!text || text.length < 2) {
-            text = tabId;
-        }
-        
-        menuHTML += `
-            <button onclick="window.switchTab('${tabId}'); window.closeMobileMenu();" class="mobile-menu-item">
-                ${iconHTML}
-                <span class="mobile-menu-text">${text}</span>
-            </button>
-        `;
-    });
-    
-    if (mobileNavList) {
-        mobileNavList.innerHTML = menuHTML;
-    }
-    
-    // Ouvrir le menu
-    mobileMenuBtn.addEventListener('click', () => {
-        mobileMenu.classList.add('active');
-        mobileOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
-    
-    // Fermer le menu
+
+    // Définir window.closeMobileMenu (utilisé par les switchTab)
     const closeMobileMenuFunc = () => {
-        mobileMenu.classList.remove('active');
-        mobileOverlay.classList.remove('active');
+        mobileNav.classList.remove('active');
+        if (mobileOverlay) mobileOverlay.classList.remove('active');
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove('active');
         document.body.style.overflow = '';
     };
-    
-    mobileOverlay.addEventListener('click', closeMobileMenuFunc);
-    
-    // Fonction globale pour fermer
     window.closeMobileMenu = closeMobileMenuFunc;
-    // Alias pour compatibilité avec d'anciens appels
+
+    // Fermer automatiquement le menu au clic sur un onglet
+    mobileNav.querySelectorAll('.nav-tab[data-tab]').forEach(tab => {
+        tab.addEventListener('click', () => {
+            setTimeout(closeMobileMenuFunc, 150);
+        });
+    });
+
     if (!window.showTab) {
         window.showTab = window.switchTab;
     }
