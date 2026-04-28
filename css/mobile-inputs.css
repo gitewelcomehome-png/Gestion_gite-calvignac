@@ -1,7 +1,8 @@
 /* =============================================
-   MOB-005b — inputs 16px dans les modales
-   Spécificité renforcée pour passer au-dessus des
-   styles de modales qui overrident mobile-fix.css.
+   MOB-005b / RESIDUAL-2 — inputs 16px dans les modales
+   Spécificité renforcée pour passer au-dessus de
+   html.style-sidebar .modal-content .form-group et
+   autres règles spécifiques de main.css.
    Safari iOS zoome dès que font-size < 16px.
    ============================================= */
 @media (max-width: 768px) {
@@ -11,7 +12,10 @@
   .modal-content input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
   .modal-content textarea,
   .modal-content select,
-  dialog input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  .modal-overlay input:not([type="checkbox"]):not([type="radio"]),
+  .modal-overlay textarea,
+  .modal-overlay select,
+  dialog input:not([type="checkbox"]):not([type="radio"]),
   dialog textarea,
   dialog select {
     font-size: 16px !important;
