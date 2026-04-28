@@ -1,0 +1,19 @@
+/* =============================================
+   MOB-005 — Prévention du zoom automatique iOS
+   Safari zoome dès qu'un input a font-size < 16px.
+   Cette règle force 16px sur tous les champs textuels
+   en mobile. Les checkbox/radio ne sont pas affectés.
+   ============================================= */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
