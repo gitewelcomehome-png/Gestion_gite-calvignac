@@ -603,17 +603,30 @@ function renderCalendrierMobile() {
         const suggestionPrix = aiSugg ? Number(aiSugg.prixSuggere) : null;
         const showSuggestedPrice = Boolean(aiSugg && !isReserved && Number.isFinite(suggestionPrix));
 
+        // Détection promo last-minute
+        const today = new Date(); today.setHours(0,0,0,0);
+        const lmPromo = reglesCacheMobile?.promotions?.last_minute;
+        const daysFromToday = Math.round((dateObj - today) / (1000*60*60*24));
+        const isLastMinute = !isReserved && lmPromo?.actif && daysFromToday >= 0 && daysFromToday < (lmPromo.jours_avant || 7);
+
         let prixHtml = '<div style="font-size: 0.65rem; color: var(--text-secondary);">—</div>';
+        let promoBadgeHtml = '';
         if (isReserved) {
-            prixHtml = '<div style="font-size: 0.55rem; color: rgba(255,255,255,0.9); font-weight: 600;">🔒</div>';
+            prixHtml = '<div style="font-size: 0.7rem; color: rgba(255,255,255,0.95); font-weight: 700;">🔒</div>';
         } else if (showSuggestedPrice) {
             const basePart = Number.isFinite(prixExistant)
-                ? `<span style="display:block; font-size:0.56rem; color:var(--text-secondary); text-decoration:line-through; line-height:1;">${prixExistant}€</span>`
+                ? `<span style="display:block; font-size:0.58rem; color:var(--text-secondary); text-decoration:line-through; line-height:1;">${prixExistant}€</span>`
                 : '';
+            prixHtml = `${basePart}<div class="day-price-mobile" style="font-weight:800;">${suggestionPrix}€</div>`;
+        } else if (isLastMinute && tarif) {
+            const pct = lmPromo.pourcentage || 15;
+            const prixPromo = Math.round(Number(tarif.prix_nuit) * (1 - pct / 100));
             prixHtml = `
-                ${basePart}
-                <div class="day-price-mobile" style="font-weight: 800; line-height:1.1;">${suggestionPrix}€</div>
+                <span style="display:block; font-size:0.55rem; color:var(--text-secondary); text-decoration:line-through; line-height:1;">${tarif.prix_nuit}€</span>
+                <div class="day-price-mobile" style="color:#f97316;">${prixPromo}€</div>
             `;
+            promoBadgeHtml = `<div class="promo-lm-tag">-${pct}%</div>`;
+            dayCard.classList.add('has-promo-lm');
         } else if (tarif) {
             prixHtml = `<div class="day-price-mobile">${tarif.prix_nuit}€</div>`;
         }
@@ -621,7 +634,7 @@ function renderCalendrierMobile() {
         dayCard.innerHTML = `
             <div class="day-number-mobile" style="${isReserved ? 'color: white; font-weight: 700;' : ''}">${day}</div>
             ${prixHtml}
-            ${demandeLabel ? `<span class="ai-badge">${demandeLabel}</span>` : (aiSugg && !isReserved ? `<span class="ai-badge">${aiSugg.icon}</span>` : '')}
+            ${promoBadgeHtml || (demandeLabel ? `<span class="ai-badge">${demandeLabel}</span>` : (aiSugg && !isReserved ? `<span class="ai-badge">${aiSugg.icon}</span>` : ''))}
         `;
         
         if (!isReserved) {

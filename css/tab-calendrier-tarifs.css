@@ -301,18 +301,19 @@
 }
 
 .day-card-mobile {
-    min-height: 28px;
-    height: 28px;
+    height: auto;
+    min-height: 54px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 2px;
-    font-size: 0.6rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
     cursor: pointer;
     position: relative;
     transition: all 0.2s;
-    padding: 0;
+    padding: 4px 2px;
+    gap: 1px;
 }
 
 .day-card-mobile.other-month {
@@ -333,16 +334,29 @@
 }
 
 .day-number-mobile {
-    font-size: 0.65rem;
+    font-size: 0.78rem;
     font-weight: 700;
     line-height: 1;
 }
 
 .day-price-mobile {
-    font-size: 0.5rem;
+    font-size: 0.6rem;
     font-weight: 600;
-    margin-top: 0;
     line-height: 1;
+}
+
+/* Badge promo last-minute sur les cases du calendrier */
+.promo-lm-tag {
+    font-size: 0.55rem;
+    font-weight: 800;
+    color: #f97316;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.day-card-mobile.has-promo-lm {
+    border-left-width: 3px;
+    border-left-color: #f97316 !important;
 }
 
 /* ============================================
