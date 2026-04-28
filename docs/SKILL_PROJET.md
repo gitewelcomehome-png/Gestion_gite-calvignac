@@ -499,6 +499,56 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Issue GitHub : #5
 - Fix suggere : Creer pages/support.html avec formulaire contact
 
+### MOB-001 -- CORRIGE
+- Page : pages/fiche-client.html — bottom-nav mobile
+- Symptome : la barre d'onglets deborde sur 390px avec 8 onglets (Entree, Pendant, Sortie, Prestations, Activites, Demandes, Evaluation, FAQ)
+- Cause : .bottom-nav-item avait flex:1 + min-width:0, pas de scroll horizontal
+- Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
+- Commit : 67ed4eb
+
+### MOB-008 -- CORRIGE
+- Fichier : pages/fiche-client.html (CSS + JS)
+- Symptome : l'utilisateur ne sait pas que les onglets scrollent horizontalement
+- Cause : pas de signal visuel de depassement ; is-scroll-end jamais toggle en JS
+- Fix CSS : mask-image gradient fade 16px sur les bords dans @media 768px ; variantes is-scroll-start (fade droit only) et is-scroll-end (fade gauche only)
+- Fix JS : ajout nav.classList.toggle('is-scroll-end', isEnd) dans updateScrollHint
+- Commit : efc9f69
+
+### MOB-006 -- CORRIGE
+- Fichier : pages/fiche-client.html (@media max-width:768px)
+- Symptome : body.scrollWidth = 2129px sur iPhone (scroll horizontal visible)
+- Cause : html sans overflow-x:hidden + container max-width:1200px inline dans header qui depasse sur mobile
+- Fix : html overflow-x:hidden + max-width:100vw; .container/main/section/card/modal-content/.header>div/[style*=1200px] box-sizing:border-box + max-width:100vw ; img/video/iframe max-width:100%
+- Commit : a3648af
+
+### MOB-005 -- CORRIGE
+- Fichier : css/mobile-fix.css (nouveau) + <link> injecte dans 31 fichiers HTML
+- Symptome : iOS Safari zoome automatiquement sur les inputs dont font-size < 16px
+- Cause : inputs avec font-size 13-14px repandus dans tout le projet
+- Fix : creation de css/mobile-fix.css avec @media (max-width:768px) forcant 16px !important sur input/textarea/select ; lien injecte dans app.html, index.html et tous les pages/*.html contenant des inputs
+- Commit : 0f8b412
+
+### MOB-004 -- CORRIGE
+- Fichier : app.html (@media max-width:768px)
+- Symptome : widget #subscription-banner (.plan-badge "QUATTRO ANNUEL") recouvre le bouton hamburger #mobile-menu-toggle
+- Cause : pas de z-index ni taille fixe sur le bouton hamburger ; badge visible en mobile
+- Fix : #mobile-menu-toggle z-index:1100 + 44x44px taille tactile ; #subscription-banner .plan-badge display:none ; .theme-controls flex+space-between
+- Commit : d6a383c
+
+### MOB-003 -- CORRIGE
+- Fichier : pages/fiche-client.html
+- Symptome : header fixe occupe 221px (~1/3 de l'ecran sur 390px) ; tab Entree et cards pas visibles sans scroller
+- Cause : pas de regles .header dans les @media mobile
+- Fix : @media (max-width:768px) min-height:140px padding:12px 16px + h1 1.1rem ; @media (max-width:480px) min-height:110px + h1 1rem
+- Commit : fe43aef
+
+### MOB-002 -- CORRIGE
+- Fichier : css/tab-calendrier.css
+- Symptome : grille calendrier-tarifs s'affiche en 4 colonnes sur mobile au lieu de 7 (jours de la semaine decales)
+- Cause : @media (max-width:768px) forçait repeat(4,1fr) sur .calendar-grid-tarifs et .calendar-grid-reservations
+- Fix (Option A) : repeat(7, minmax(40px, 1fr)) + gap:4px + font-size:0.75rem + overflow-x:auto ; cellules min-height:60px padding:4px 2px ; .day-price font-size:0.65rem
+- Commit : 238d1ad
+
 ### Anomalies detectees
 - ANOM-003 : Pages legales (CGU, Privacy, Legal) sans navigation coherente avec le site
 - ANOM-004 : Section Blog -- liens Lire les articles et Voir les videos pointent sur #blog (meme page), pas de vrai contenu
@@ -506,6 +556,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 
 ### Corrections appliquees
 - fc3d1bc : fix toggle prix Avec/Sans engagement index.html (26 insertions)
+- 67ed4eb : fix(mobile) bottom-nav fiche-client scrollable horizontal — MOB-001
+- 238d1ad : fix(mobile) calendrier tarifs garde 7 colonnes responsive — MOB-002
+- fe43aef : fix(mobile) header fiche-client compact sur petit ecran — MOB-003
+- d6a383c : fix(mobile) hamburger 44px et widget user compact — MOB-004
+- 0f8b412 : fix(mobile) inputs 16px minimum pour eviter zoom iOS — MOB-005
+- a3648af : fix(mobile) fiche-client supprime scroll horizontal — MOB-006
+- efc9f69 : feat(mobile) fade scroll indicator sur onglets fiche-client — MOB-008
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant

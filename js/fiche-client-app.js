@@ -427,7 +427,33 @@ const translations = {
         prestations_title: 'Prestations',
         prestations_description: 'Découvrez nos services supplémentaires pour agrémenter votre séjour',
         photo_entree: 'Entrée',
-        photo_boite_cles: 'Boîte à clés'
+        photo_boite_cles: 'Boîte à clés',
+        planning_vue_catalogue: 'Catalogue',
+        planning_vue_planning: 'Mon planning',
+        planning_ajouter_au_sejour: '+ Ajouter à mon séjour',
+        planning_retirer_du_sejour: 'Retirer du séjour',
+        planning_deja_ajoutee: 'Ajoutée ✓',
+        planning_source_gite: 'Proposée par le gîte',
+        planning_source_partenaire: 'Partenaire Gîtes de France',
+        planning_jours_presence: 'Jours de présence',
+        planning_aucune_activite_jour: 'Aucune activité planifiée pour ce jour.\nAjoutez-en depuis le catalogue !',
+        planning_depart_a: 'Départ à',
+        planning_distance_km: 'km',
+        planning_duree_trajet: 'min de trajet',
+        planning_mode_voiture: '🚗 Voiture',
+        planning_mode_velo: '🚲 Vélo',
+        planning_mode_pied: '🚶 À pied',
+        planning_resume_total_km: 'km',
+        planning_resume_temps_total: 'min de trajet',
+        planning_activite_libre: 'Activité libre',
+        planning_titre: 'Titre',
+        planning_adresse: 'Adresse',
+        planning_alerte_depart_15min: '⏰ Vous devez partir dans 15 min !',
+        planning_alerte_depart_5min: '🚨 Partez maintenant !',
+        planning_filtre_toutes: 'Toutes',
+        planning_filtre_gite: 'Proposées par le gîte',
+        planning_filtre_partenaire: 'Partenaires',
+        planning_btn_catalogue: '+ Ajouter depuis le catalogue'
     },
     en: {
         tab_entree: 'Check-in',
@@ -605,7 +631,33 @@ const translations = {
         prestations_title: 'Services',
         prestations_description: 'Discover additional services to enhance your stay',
         photo_entree: 'Entrance',
-        photo_boite_cles: 'Key box'
+        photo_boite_cles: 'Key box',
+        planning_vue_catalogue: 'Catalogue',
+        planning_vue_planning: 'My plan',
+        planning_ajouter_au_sejour: '+ Add to my stay',
+        planning_retirer_du_sejour: 'Remove from stay',
+        planning_deja_ajoutee: 'Added ✓',
+        planning_source_gite: 'Suggested by host',
+        planning_source_partenaire: 'Partner Gîtes de France',
+        planning_jours_presence: 'Days of stay',
+        planning_aucune_activite_jour: 'No activities planned for this day.\nAdd some from the catalogue!',
+        planning_depart_a: 'Leave at',
+        planning_distance_km: 'km',
+        planning_duree_trajet: 'min travel',
+        planning_mode_voiture: '🚗 Car',
+        planning_mode_velo: '🚲 Bike',
+        planning_mode_pied: '🚶 On foot',
+        planning_resume_total_km: 'km',
+        planning_resume_temps_total: 'min travel',
+        planning_activite_libre: 'Custom activity',
+        planning_titre: 'Title',
+        planning_adresse: 'Address',
+        planning_alerte_depart_15min: '⏰ You need to leave in 15 min!',
+        planning_alerte_depart_5min: '🚨 Leave now!',
+        planning_filtre_toutes: 'All',
+        planning_filtre_gite: 'By host',
+        planning_filtre_partenaire: 'Partners',
+        planning_btn_catalogue: '+ Add from catalogue'
     }
 };
 
@@ -2284,48 +2336,63 @@ async function loadActivitesForClient() {
         
         const giteLat = parseFloat(giteInfo?.gps_lat || giteInfo?.latitude);
         const giteLon = parseFloat(giteInfo?.gps_lon || giteInfo?.longitude);
-        
-        if (!giteLat || !giteLon || isNaN(giteLat) || isNaN(giteLon)) {
+        const hasGeoCoords = giteLat && giteLon && !isNaN(giteLat) && !isNaN(giteLon);
+
+        if (!hasGeoCoords) {
             document.getElementById('mapActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
-            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
-            return;
         }
-        
+
         if (!activites || activites.length === 0) {
-            document.getElementById('mapActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ ${t('aucune_activite')}</p>`;
-            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">ℹ️ ${t('aucune_activite')}</p>`;
+            // Pas d'activités gîte — on continue quand même pour charger les partenaires
+        }
+
+        // Si pas de coordonnées GPS et pas d'activités gîte : rien à afficher
+        if (!hasGeoCoords && (!activites || activites.length === 0)) {
+            document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--gray-600);">⚠️ ${t('coordonnees_indisponibles')}</p>`;
             return;
         }
         
         // Google Maps iframe avec marqueur gîte visible
         const mapElement = document.getElementById('mapActivites');
-        
-        mapElement.innerHTML = `
-            <iframe 
-                width="100%" 
-                height="400" 
-                frameborder="0" 
-                scrolling="no" 
-                marginheight="0" 
-                marginwidth="0" 
-                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
-                style="border: 1px solid #ccc; border-radius: 8px;">
-            </iframe>
-            <div style="text-align: center; margin-top: 0.5rem;">
-                <strong style="color: #ef4444;"><i data-lucide="home" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('votre_gite')}</strong><br>
-                <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
-                   target="_blank" 
-                   style="color: var(--primary); font-size: 0.875rem;">
-                    <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 0.25rem;"></i>${t('btn_voir_google_maps')}
-                </a>
-            </div>
-        `;
+
+        if (hasGeoCoords) {
+            mapElement.innerHTML = `
+                <iframe 
+                    width="100%" 
+                    height="400" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${giteLat},${giteLon}&zoom=16" 
+                    style="border: 1px solid #ccc; border-radius: 8px;">
+                </iframe>
+                <div style="text-align: center; margin-top: 0.5rem;">
+                    <strong style="color: #ef4444;"><i data-lucide="home" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 0.5rem;"></i>${t('votre_gite')}</strong><br>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${giteLat},${giteLon}" 
+                       target="_blank" 
+                       style="color: var(--primary); font-size: 0.875rem;">
+                        <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 0.25rem;"></i>${t('btn_voir_google_maps')}
+                    </a>
+                </div>
+            `;
+        }
         
         // Initialiser les icônes Lucide dans la carte
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
+        // Fusionner activités gîte + partenaires si le module planning est chargé
+        const activitesFinales = typeof window.fusionnerActivites === 'function'
+            ? await window.fusionnerActivites(activites, giteLat, giteLon)
+            : activites;
+
         // Liste interactive des activités
-        displayActivitesListInteractive(activites, giteLat, giteLon);
+        displayActivitesListInteractive(activitesFinales, giteLat, giteLon);
+
+        // Enrichir les cartes (badges source + bouton "+Ajouter") si module planning chargé
+        if (typeof window.enrichirCartesActivites === 'function') {
+            window.enrichirCartesActivites(activitesFinales);
+        }
     } catch (error) {
         console.error('❌ Erreur critique dans loadActivitesForClient:', error);
         document.getElementById('listeActivites').innerHTML = `<p style="padding: 2rem; text-align: center; color: var(--danger);">⚠️ ${t('erreur_chargement_activites')}</p>`;

@@ -1214,7 +1214,7 @@ function generateWeekReservations(reservations, weekKey, cssClass, toutesReserva
             dateMenage = `${joursComplets[menageDate.getDay()]} ${formatDateShort(menageDate)} à ${timeOfDay}`;
         } else {
             // Calculer la date théorique
-            const menageResult = calculerDateMenage(r, toutesReservations);
+            const menageResult = window.calculerDateMenage ? window.calculerDateMenage(r, toutesReservations) : null;
             dateMenage = menageResult?.formatted ?? menageResult;
         }
         

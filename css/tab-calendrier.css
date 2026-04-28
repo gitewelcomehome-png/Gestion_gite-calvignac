@@ -1144,23 +1144,27 @@ html.theme-dark.style-apple #tab-calendrier-tarifs .input-neo::placeholder {
 
 /* Responsive */
 @media (max-width: 768px) {
+    /* MOB-002 — garder 7 colonnes, réduire la taille des cellules */
     #tab-calendrier-tarifs .calendar-grid-tarifs,
     #tab-calendrier-tarifs .calendar-grid-reservations {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        grid-template-columns: repeat(7, minmax(40px, 1fr));
+        gap: 4px;
+        font-size: 0.75rem;
     }
-    
+
+    /* Wrapper scrollable si écran < 360px */
+    #tab-calendrier-tarifs .calendar-grid-tarifs,
+    #tab-calendrier-tarifs .calendar-grid-reservations {
+        overflow-x: auto;
+    }
+
     #tab-calendrier-tarifs .day-card {
-        min-height: 80px;
-        padding: 8px;
+        min-height: 60px;
+        padding: 4px 2px;
     }
-    
-    #tab-calendrier-tarifs .day-number {
-        font-size: 1.2rem;
-    }
-    
+
     #tab-calendrier-tarifs .day-price {
-        font-size: 0.8rem;
+        font-size: 0.65rem;
     }
 }
 

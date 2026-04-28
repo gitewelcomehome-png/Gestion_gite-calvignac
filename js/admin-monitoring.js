@@ -112,8 +112,43 @@ async function loadMonitoringData() {
         loadErrorsData(),
         loadPerformanceMetrics(),
         loadAIHealthStatus(),
-        loadTestCorrections()
+        loadTestCorrections(),
+        loadTop10Errors()
     ]);
+}
+
+async function loadTop10Errors() {
+    const wrapper = document.getElementById('top10ErrorsWrapper');
+    if (!wrapper) return;
+
+    const emptyState = '<div style="text-align:center;padding:40px;color:#6b7280">✅ <strong>Aucune erreur fréquente</strong> sur les 30 derniers jours</div>';
+
+    try {
+        if (cmErrorLogsAccessUnavailable) {
+            wrapper.innerHTML = emptyState;
+            return;
+        }
+
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { data, error } = await window.supabaseClient
+            .from('cm_error_logs')
+            .select('id')
+            .gte('timestamp', since)
+            .limit(1);
+
+        if (error && isAccessDeniedError(error)) {
+            cmErrorLogsAccessUnavailable = true;
+            wrapper.innerHTML = emptyState;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            wrapper.innerHTML = emptyState;
+        }
+        // Si data non vide, le canvas reste en place pour le chart (non implémenté)
+    } catch (e) {
+        // silent — ne pas casser la page si top10 échoue
+    }
 }
 
 function notifyErrorStateChanged() {
@@ -147,6 +182,14 @@ async function loadAIHealthStatus() {
     const updatedEl = document.getElementById('monitorAIUpdatedAt');
 
     if (!globalEl) return;
+
+    let _aiLoading = true;
+    const _aiTimeout = setTimeout(() => {
+        if (_aiLoading && (globalEl.textContent === 'Chargement...' || globalEl.textContent === 'Vérification...')) {
+            globalEl.textContent = '⚠️ Données non disponibles — vérifiez votre connexion';
+            if (updatedEl) updatedEl.textContent = '';
+        }
+    }, 8000);
 
     try {
         if (aiHealthApiUnavailable) {
@@ -206,6 +249,9 @@ async function loadAIHealthStatus() {
         if (updatedEl) {
             updatedEl.textContent = 'Dernière vérification: erreur';
         }
+    } finally {
+        _aiLoading = false;
+        clearTimeout(_aiTimeout);
     }
 }
 
@@ -214,6 +260,14 @@ window.refreshAIHealthStatus = function() {
 };
 
 async function loadErrorsData() {
+    let _errLoading = true;
+    const container = document.getElementById('errorsContainer');
+    const _errTimeout = setTimeout(() => {
+        if (_errLoading && container && container.innerHTML.includes('Chargement')) {
+            container.innerHTML = '<p style="padding:20px;color:#9ca3af;text-align:center">⚠️ Données non disponibles — vérifiez votre connexion</p>';
+        }
+    }, 8000);
+
     try {
         if (cmErrorLogsAccessUnavailable) {
             displayErrors([]);
@@ -306,6 +360,9 @@ async function loadErrorsData() {
         
     } catch (error) {
         console.error('❌ Erreur chargement erreurs:', error);
+    } finally {
+        _errLoading = false;
+        clearTimeout(_errTimeout);
     }
 }
 
@@ -657,10 +714,23 @@ window.markErrorResolved = async function(errorType, source, message) {
 };
 
 async function loadPerformanceMetrics() {
+    let _perfLoading = true;
+    const _perfTimeout = setTimeout(() => {
+        if (_perfLoading) {
+            const latEl = document.getElementById('avgLatency');
+            if (latEl && (latEl.textContent === '—' || latEl.textContent === '~')) {
+                document.getElementById('avgLatency').textContent = '—';
+                document.getElementById('requestsPerMin').textContent = '—';
+                const errRateEl = document.getElementById('errorRate');
+                if (errRateEl) { errRateEl.textContent = 'N/A'; errRateEl.style.color = '#9ca3af'; }
+            }
+        }
+    }, 8000);
+
     try {
         if (cmErrorLogsAccessUnavailable) {
-            document.getElementById('avgLatency').textContent = '~';
-            document.getElementById('requestsPerMin').textContent = '~';
+            document.getElementById('avgLatency').textContent = '—';
+            document.getElementById('requestsPerMin').textContent = '—';
             document.getElementById('errorRate').textContent = 'N/A';
             document.getElementById('errorRate').style.color = '#64748b';
             return;
@@ -675,8 +745,8 @@ async function loadPerformanceMetrics() {
 
         if (error && isAccessDeniedError(error)) {
             cmErrorLogsAccessUnavailable = true;
-            document.getElementById('avgLatency').textContent = '~';
-            document.getElementById('requestsPerMin').textContent = '~';
+            document.getElementById('avgLatency').textContent = '—';
+            document.getElementById('requestsPerMin').textContent = '—';
             document.getElementById('errorRate').textContent = 'N/A';
             document.getElementById('errorRate').style.color = '#64748b';
             return;
@@ -694,6 +764,9 @@ async function loadPerformanceMetrics() {
         
     } catch (error) {
         console.error('❌ Erreur métriques:', error);
+    } finally {
+        _perfLoading = false;
+        clearTimeout(_perfTimeout);
     }
 }
 
@@ -856,7 +929,7 @@ window.deleteAllErrors = async function() {
 
     try {
         const { error } = await window.supabaseClient
-            .from('error_logs')
+            .from('cm_error_logs')
             .delete()
             .eq('resolved', false);
 
@@ -1812,6 +1885,9 @@ function setupMonitoringDynamicDelegation() {
                 }
                 break;
             }
+            case 'delete-all-errors':
+                await window.deleteAllErrors();
+                break;
             default:
                 break;
         }
