@@ -506,6 +506,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
 - Commit : 67ed4eb
 
+### MOB-003 -- CORRIGE
+- Fichier : pages/fiche-client.html
+- Symptome : header fixe occupe 221px (~1/3 de l'ecran sur 390px) ; tab Entree et cards pas visibles sans scroller
+- Cause : pas de regles .header dans les @media mobile
+- Fix : @media (max-width:768px) min-height:140px padding:12px 16px + h1 1.1rem ; @media (max-width:480px) min-height:110px + h1 1rem
+- Commit : fe43aef
+
 ### MOB-002 -- CORRIGE
 - Fichier : css/tab-calendrier.css
 - Symptome : grille calendrier-tarifs s'affiche en 4 colonnes sur mobile au lieu de 7 (jours de la semaine decales)
@@ -522,6 +529,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - fc3d1bc : fix toggle prix Avec/Sans engagement index.html (26 insertions)
 - 67ed4eb : fix(mobile) bottom-nav fiche-client scrollable horizontal — MOB-001
 - 238d1ad : fix(mobile) calendrier tarifs garde 7 colonnes responsive — MOB-002
+- fe43aef : fix(mobile) header fiche-client compact sur petit ecran — MOB-003
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
