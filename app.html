@@ -1251,6 +1251,22 @@
                     // Contenu trusted (fichiers HTML statiques du projet)
                     window.SecurityUtils.setInnerHTML(targetElement, html, { trusted: true });
                     
+                    // DOMPurify supprime les <script> même avec trusted:true → ré-exécuter manuellement
+                    if (isMobile) {
+                        const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+                        let sm;
+                        while ((sm = scriptRegex.exec(html)) !== null) {
+                            const code = sm[1].trim();
+                            if (code) {
+                                try {
+                                    const s = document.createElement('script');
+                                    s.textContent = code;
+                                    targetElement.appendChild(s);
+                                } catch(e) { /* non bloquant */ }
+                            }
+                        }
+                    }
+                    
                     // Initialiser les icônes Lucide après chargement du HTML
                     if (typeof lucide !== 'undefined') {
                         setTimeout(() => lucide.createIcons(), 50);
