@@ -506,6 +506,14 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
 - Commit : 67ed4eb
 
+### MOB-008 -- CORRIGE
+- Fichier : pages/fiche-client.html (CSS + JS)
+- Symptome : l'utilisateur ne sait pas que les onglets scrollent horizontalement
+- Cause : pas de signal visuel de depassement ; is-scroll-end jamais toggle en JS
+- Fix CSS : mask-image gradient fade 16px sur les bords dans @media 768px ; variantes is-scroll-start (fade droit only) et is-scroll-end (fade gauche only)
+- Fix JS : ajout nav.classList.toggle('is-scroll-end', isEnd) dans updateScrollHint
+- Commit : efc9f69
+
 ### MOB-006 -- CORRIGE
 - Fichier : pages/fiche-client.html (@media max-width:768px)
 - Symptome : body.scrollWidth = 2129px sur iPhone (scroll horizontal visible)
@@ -554,6 +562,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - d6a383c : fix(mobile) hamburger 44px et widget user compact — MOB-004
 - 0f8b412 : fix(mobile) inputs 16px minimum pour eviter zoom iOS — MOB-005
 - a3648af : fix(mobile) fiche-client supprime scroll horizontal — MOB-006
+- efc9f69 : feat(mobile) fade scroll indicator sur onglets fiche-client — MOB-008
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
