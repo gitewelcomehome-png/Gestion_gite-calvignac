@@ -15,7 +15,12 @@
 <html lang="fr" data-theme="dark" id="app-root" class="theme-dark style-sidebar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- PWA / Plein écran iOS : supprimer la barre d'adresse via Ajouter à l'écran d'accueil -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gestion Gîtes">
+    <meta name="mobile-web-app-capable" content="yes">
     <!-- Sentry Error Monitoring -->
     <script
       src="https://js-de.sentry-cdn.com/20fdc3b052d0030ec6c745effaedaf31.min.js"
@@ -552,6 +557,33 @@
             #subscription-banner .plan-badge {
                 display: none; /* cacher le badge "QUATTRO ANNUEL" en mobile */
             }
+            /* MOB-010 — titres hamburger, orientation paysage */
+            /* Afficher les labels dans le menu hamburger (icalou-modern-nav) */
+            .icalou-modern-nav .tab-label {
+                display: inline !important;
+                font-size: 0.95rem !important;
+                font-weight: 500 !important;
+            }
+            /* Banner portrait */
+            #portrait-banner {
+                display: none;
+                position: fixed;
+                bottom: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.85);
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                z-index: 99999;
+                white-space: nowrap;
+                gap: 10px;
+                align-items: center;
+            }
+            @media (orientation: portrait) {
+                #portrait-banner { display: flex !important; }
+            }
             /* MOB-009 rev2 — overflow page, bande noire, menu inaccessible */
             html, body {
                 overflow-x: hidden !important;
@@ -805,6 +837,27 @@
             </button>
         </div>
     </div>
+
+    <!-- MOB-010 : Banner rotation portrait → paysage, dismissable -->
+    <div id="portrait-banner" role="status" aria-live="polite">
+        <span>🔄 Tournez en paysage pour une meilleure expérience</span>
+        <button onclick="document.getElementById('portrait-banner').style.setProperty('display','none','important'); sessionStorage.setItem('portrait-dismissed','1');"
+                style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1rem;cursor:pointer;padding:2px 8px;border-radius:10px;line-height:1;">✕</button>
+    </div>
+    <script>
+        // MOB-010 — Orientation paysage forcée (Android) + masquer banner si déjà dismissé
+        (function() {
+            if (sessionStorage.getItem('portrait-dismissed')) {
+                var b = document.getElementById('portrait-banner');
+                if (b) b.style.setProperty('display','none','important');
+            }
+            if (/Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(function(){});
+                }
+            }
+        })();
+    </script>
 
     <script>
         // ⚡ FONCTIONS THÈME ET STYLE - Disponibles immédiatement
