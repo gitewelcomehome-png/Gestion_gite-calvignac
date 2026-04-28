@@ -15,8 +15,16 @@ html.is-mobile body {
 }
 
 .is-mobile * {
-    max-width: 100vw !important;
     box-sizing: border-box !important;
+}
+
+/* Limiter le débordement aux blocs, pas aux cellules de grille */
+.is-mobile > *,
+.is-mobile .tab-content,
+.is-mobile .tab-container,
+.is-mobile .card,
+.is-mobile .modal-content {
+    max-width: 100% !important;
 }
 
 /* ==========================================
@@ -405,8 +413,22 @@ html.is-mobile body {
    5. TABLEAU DE BORD MOBILE
    ========================================== */
 .is-mobile .tab-container {
-    padding: 15px !important;
+    padding: 10px !important;
+    font-size: 0.82rem !important;
 }
+
+/* Réduction globale du contenu - textes, titres, paddings */
+.is-mobile .tab-content h2 { font-size: 0.85rem !important; }
+.is-mobile .tab-content h3 { font-size: 0.78rem !important; }
+.is-mobile .tab-content h4 { font-size: 0.72rem !important; }
+.is-mobile .tab-content p,
+.is-mobile .tab-content span,
+.is-mobile .tab-content label { font-size: 0.82rem !important; }
+.is-mobile .tab-content .card { padding: 10px !important; margin-bottom: 10px !important; }
+.is-mobile .tab-content table { font-size: 0.72rem !important; }
+.is-mobile .tab-content input,
+.is-mobile .tab-content select,
+.is-mobile .tab-content textarea { padding: 8px !important; font-size: 0.85rem !important; }
 
 /* Sections collapsables */
 .is-mobile .mobile-collapse-section {
