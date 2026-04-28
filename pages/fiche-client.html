@@ -1749,6 +1749,21 @@
             .bottom-nav {
                 display: flex;
             }
+
+            /* MOB-001 — scroll horizontal si trop d'onglets (ex. 8 onglets sur 390px) */
+            .bottom-nav, .tab-navigation {
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .bottom-nav::-webkit-scrollbar,
+            .tab-navigation::-webkit-scrollbar { display: none; }
+            .bottom-nav > *, .tab-navigation > * {
+                scroll-snap-align: start;
+                flex: 0 0 auto;
+                min-width: 80px;
+            }
             
             .main-content {
                 margin-top: 17rem; /* Ajusté car navigation tabs cachée sur mobile */
