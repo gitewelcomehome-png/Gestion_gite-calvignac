@@ -609,10 +609,14 @@ function renderCalendrierMobile() {
         const daysFromToday = Math.round((dateObj - today) / (1000*60*60*24));
         const isLastMinute = !isReserved && lmPromo?.actif && daysFromToday >= 0 && daysFromToday < (lmPromo.jours_avant || 7);
 
-        let prixHtml = '<div style="font-size: 0.65rem; color: var(--text-secondary);">—</div>';
+        let prixHtml = '<div style="font-size: 0.6rem; color: var(--text-secondary);">—</div>';
         let promoBadgeHtml = '';
         if (isReserved) {
-            prixHtml = '<div style="font-size: 0.7rem; color: rgba(255,255,255,0.95); font-weight: 700;">🔒</div>';
+            // Jour réservé : numéro grand + 🔒 en dessous petit
+            dayCard.innerHTML = `
+                <div class="day-number-mobile" style="color:white; font-weight:800; font-size:0.9rem;">${day}</div>
+                <div style="font-size:0.65rem; color:rgba(255,255,255,0.9); line-height:1;">🔒</div>
+            `;
         } else if (showSuggestedPrice) {
             const basePart = Number.isFinite(prixExistant)
                 ? `<span style="display:block; font-size:0.58rem; color:var(--text-secondary); text-decoration:line-through; line-height:1;">${prixExistant}€</span>`
@@ -631,13 +635,12 @@ function renderCalendrierMobile() {
             prixHtml = `<div class="day-price-mobile">${tarif.prix_nuit}€</div>`;
         }
 
-        dayCard.innerHTML = `
-            <div class="day-number-mobile" style="${isReserved ? 'color: white; font-weight: 700;' : ''}">${day}</div>
-            ${prixHtml}
-            ${promoBadgeHtml || (demandeLabel ? `<span class="ai-badge">${demandeLabel}</span>` : (aiSugg && !isReserved ? `<span class="ai-badge">${aiSugg.icon}</span>` : ''))}
-        `;
-        
         if (!isReserved) {
+            dayCard.innerHTML = `
+                <div class="day-number-mobile">${day}</div>
+                ${prixHtml}
+                ${promoBadgeHtml || (demandeLabel ? `<span class="ai-badge">${demandeLabel}</span>` : (aiSugg && !isReserved ? `<span class="ai-badge">${aiSugg.icon}</span>` : ''))}
+            `;
             dayCard.addEventListener('click', () => openTarifModalMobile(dateStr));
         }
         

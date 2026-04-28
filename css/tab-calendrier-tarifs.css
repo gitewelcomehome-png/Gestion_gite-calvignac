@@ -78,6 +78,7 @@
 .cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 58px;
     gap: 4px;
     margin-bottom: 12px;
     padding: 2px;
@@ -301,8 +302,10 @@
 }
 
 .day-card-mobile {
-    height: auto;
-    min-height: 54px;
+    height: 58px;
+    min-height: 58px;
+    max-height: 58px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -312,7 +315,7 @@
     cursor: pointer;
     position: relative;
     transition: all 0.2s;
-    padding: 4px 2px;
+    padding: 3px 2px;
     gap: 1px;
 }
 
