@@ -506,6 +506,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
 - Commit : 67ed4eb
 
+### MOB-004 -- CORRIGE
+- Fichier : app.html (@media max-width:768px)
+- Symptome : widget #subscription-banner (.plan-badge "QUATTRO ANNUEL") recouvre le bouton hamburger #mobile-menu-toggle
+- Cause : pas de z-index ni taille fixe sur le bouton hamburger ; badge visible en mobile
+- Fix : #mobile-menu-toggle z-index:1100 + 44x44px taille tactile ; #subscription-banner .plan-badge display:none ; .theme-controls flex+space-between
+- Commit : d6a383c
+
 ### MOB-003 -- CORRIGE
 - Fichier : pages/fiche-client.html
 - Symptome : header fixe occupe 221px (~1/3 de l'ecran sur 390px) ; tab Entree et cards pas visibles sans scroller
@@ -530,6 +537,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - 67ed4eb : fix(mobile) bottom-nav fiche-client scrollable horizontal — MOB-001
 - 238d1ad : fix(mobile) calendrier tarifs garde 7 colonnes responsive — MOB-002
 - fe43aef : fix(mobile) header fiche-client compact sur petit ecran — MOB-003
+- d6a383c : fix(mobile) hamburger 44px et widget user compact — MOB-004
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
