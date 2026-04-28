@@ -506,6 +506,13 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - Fix : dans @media (max-width:768px), ajout overflow-x:auto + scroll-snap + -webkit-overflow-scrolling + scrollbar-width:none sur .bottom-nav et .tab-navigation ; flex:0 0 auto + min-width:80px sur les items
 - Commit : 67ed4eb
 
+### MOB-006 -- CORRIGE
+- Fichier : pages/fiche-client.html (@media max-width:768px)
+- Symptome : body.scrollWidth = 2129px sur iPhone (scroll horizontal visible)
+- Cause : html sans overflow-x:hidden + container max-width:1200px inline dans header qui depasse sur mobile
+- Fix : html overflow-x:hidden + max-width:100vw; .container/main/section/card/modal-content/.header>div/[style*=1200px] box-sizing:border-box + max-width:100vw ; img/video/iframe max-width:100%
+- Commit : a3648af
+
 ### MOB-005 -- CORRIGE
 - Fichier : css/mobile-fix.css (nouveau) + <link> injecte dans 31 fichiers HTML
 - Symptome : iOS Safari zoome automatiquement sur les inputs dont font-size < 16px
@@ -546,6 +553,7 @@ Accès : `https://www.liveownerunit.fr/app` (auth Supabase requise)
 - fe43aef : fix(mobile) header fiche-client compact sur petit ecran — MOB-003
 - d6a383c : fix(mobile) hamburger 44px et widget user compact — MOB-004
 - 0f8b412 : fix(mobile) inputs 16px minimum pour eviter zoom iOS — MOB-005
+- a3648af : fix(mobile) fiche-client supprime scroll horizontal — MOB-006
 
 ### Issues creees
 - #5 : support.html Page 404 -- fichier manquant
