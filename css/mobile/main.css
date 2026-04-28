@@ -26,6 +26,74 @@ html.is-mobile body {
     display: none !important;
 }
 
+/* Navigation hamburger : forcée en slide-in même en paysage iPhone (>768px)
+   NE PAS utiliser @media width ici — utiliser .is-mobile pour couvrir le paysage */
+.is-mobile .icalou-modern-nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 80% !important;
+    max-width: 320px !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    transition: left 0.3s ease !important;
+    overflow-y: auto !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.3) !important;
+    padding-top: 64px !important;
+    background: var(--card, #fff) !important;
+}
+.is-mobile .icalou-modern-nav.active {
+    left: 0 !important;
+}
+/* Reset la position sticky du nav-container pour qu'il reste dans le panel */
+.is-mobile .icalou-modern-nav .nav-container {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 16px !important;
+    position: static !important;
+    top: auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.is-mobile .icalou-modern-nav .nav-tab {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 12px 16px !important;
+    flex: 0 0 auto !important;
+}
+.is-mobile .icalou-modern-nav .tab-label {
+    display: inline !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+}
+/* Masquer la bande noire du theme-controls */
+.is-mobile .theme-controls {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Banner "Tournez en paysage" */
+.is-mobile #portrait-banner {
+    display: none;
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    z-index: 99999;
+    white-space: nowrap;
+    gap: 10px;
+    align-items: center;
+}
+
 /* ==========================================
    2. HEADER ET LAYOUT
    ========================================== */

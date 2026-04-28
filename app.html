@@ -557,64 +557,14 @@
             #subscription-banner .plan-badge {
                 display: none; /* cacher le badge "QUATTRO ANNUEL" en mobile */
             }
-            /* MOB-010 — titres hamburger, orientation paysage */
-            /* Afficher les labels dans le menu hamburger (icalou-modern-nav) */
-            .icalou-modern-nav .tab-label {
-                display: inline !important;
-                font-size: 0.95rem !important;
-                font-weight: 500 !important;
-            }
-            /* Banner portrait */
-            #portrait-banner {
-                display: none;
-                position: fixed;
-                bottom: 70px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0,0,0,0.85);
-                color: #fff;
-                padding: 10px 20px;
-                border-radius: 20px;
-                font-size: 0.85rem;
-                z-index: 99999;
-                white-space: nowrap;
-                gap: 10px;
-                align-items: center;
-            }
-            @media (orientation: portrait) {
-                #portrait-banner { display: flex !important; }
-            }
-            /* MOB-009 rev2 — overflow page, bande noire, menu inaccessible */
+            /* MOB-009/010 — overflow iOS (synchrone, avant chargement css/mobile/main.css) */
             html, body {
                 overflow-x: hidden !important;
                 max-width: 100vw !important;
             }
-            .theme-controls {
-                display: flex !important;
-                align-items: center !important;
-                justify-content: space-between !important;
-                gap: 8px !important;
-                left: 0 !important;
-                right: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
-                border-radius: 0 !important;
-                padding: 0 8px !important;
-                /* Supprimer la bande noire — fond transparent, pas de bloc visuel */
-                background: transparent !important;
-                box-shadow: none !important;
-                border: none !important;
-                height: 64px !important;
-                /* Laisser passer les clics sur l'en-tête derrière */
-                pointer-events: none !important;
-            }
-            .theme-controls > * {
-                pointer-events: auto !important;
-            }
-            /* Menu latéral au-dessus de l'overlay (overlay z-index: 9997 dans css/mobile/main.css) */
-            .icalou-modern-nav {
-                z-index: 9999 !important;
+            /* Banner portrait (complété dans css/mobile/main.css via .is-mobile) */
+            @media (orientation: portrait) {
+                #portrait-banner { display: flex !important; }
             }
         }
         
