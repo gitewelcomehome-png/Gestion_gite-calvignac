@@ -761,6 +761,14 @@ html.is-mobile body {
         top: max(8px, env(safe-area-inset-top)) !important;
         right: max(8px, env(safe-area-inset-right)) !important;
     }
+
+    /* Header : aligner sur la position réelle du hamburger (8px + 48px bouton + 8px marge) */
+    .is-mobile .sticky-header {
+        padding-left: max(68px, calc(env(safe-area-inset-left) + 64px)) !important;
+        padding-right: max(64px, calc(env(safe-area-inset-right) + 60px)) !important;
+        padding-top: max(8px, env(safe-area-inset-top)) !important;
+        padding-bottom: 8px !important;
+    }
 }
 
 /* ==========================================
