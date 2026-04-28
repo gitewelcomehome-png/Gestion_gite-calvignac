@@ -625,11 +625,11 @@ function renderCalendrierMobile() {
         } else if (isLastMinute && tarif) {
             const pct = lmPromo.pourcentage || 15;
             const prixPromo = Math.round(Number(tarif.prix_nuit) * (1 - pct / 100));
-            prixHtml = `
-                <span style="display:block; font-size:0.55rem; color:var(--text-secondary); text-decoration:line-through; line-height:1;">${tarif.prix_nuit}€</span>
+            // Une seule ligne : prix réduit + badge -x% côte à côte pour tenir dans 58px
+            prixHtml = `<div style="display:flex; align-items:center; gap:2px; justify-content:center; flex-wrap:nowrap;">
                 <div class="day-price-mobile" style="color:#f97316;">${prixPromo}€</div>
-            `;
-            promoBadgeHtml = `<div class="promo-lm-tag">-${pct}%</div>`;
+                <span class="promo-lm-tag">-${pct}%</span>
+            </div>`;
             dayCard.classList.add('has-promo-lm');
         } else if (tarif) {
             prixHtml = `<div class="day-price-mobile">${tarif.prix_nuit}€</div>`;
