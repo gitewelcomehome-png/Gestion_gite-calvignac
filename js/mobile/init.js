@@ -4,6 +4,11 @@
 
 // Menu hamburger mobile
 function initMobileMenu() {
+    // PROD-001 guard — empêche les appels cumulés (5 animations fill:backwards)
+    const el = document.getElementById('mobile-menu-toggle');
+    if (el && el.dataset.mobileMenuInit) return;
+    if (el) el.dataset.mobileMenuInit = 'true';
+
     // Utiliser les éléments déjà présents dans app.html
     // (le bouton hamburger est dans .theme-controls, la nav est .icalou-modern-nav)
     const mobileMenuBtn = document.getElementById('mobile-menu-toggle');

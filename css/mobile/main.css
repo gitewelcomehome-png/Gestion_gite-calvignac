@@ -200,6 +200,9 @@ html.is-mobile body {
     justify-content: space-around !important;
     align-items: center !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    /* PROD-001 — libère le bouton de tout fill:backwards visibility:hidden */
+    visibility: visible !important;
+    animation: none !important;
 }
 
 .is-mobile .mobile-menu-btn:active {
