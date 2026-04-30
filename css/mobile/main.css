@@ -1162,7 +1162,47 @@ html.is-mobile body {
     .is-mobile h1 {
         font-size: 1.5rem !important;
     }
-    
+}
+
+/* ==========================================
+   PROD-002 — Vision Globale dashboard mobile
+   Remplace les styles inline grid pour permettre
+   le responsive sans !important bloqué
+   ========================================== */
+.vision-globale-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.card-sub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* Pile en colonne sur mobile étroit (<480px) */
+@media (max-width: 480px) {
+    .vision-globale-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    .vision-globale-grid > * {
+        max-width: 100%;
+    }
+}
+
+/* Réduction du gap sur très petits écrans (<380px), garder 2 colonnes dans les sous-grilles */
+@media (max-width: 380px) {
+    .card-sub-grid {
+        gap: 4px;
+    }
+    .card-sub-grid .indicator-box {
+        padding: 4px !important;
+        font-size: 0.85rem !important;
+    }
+}
     .is-mobile h2 {
         font-size: 1.3rem !important;
     }
