@@ -415,8 +415,13 @@ html.is-mobile body {
 /* ==========================================
    5. TABLEAU DE BORD MOBILE
    ========================================== */
+/* PROD-003 — tab-container 100% viewport sans débordement */
 .is-mobile .tab-container {
-    padding: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 10px 12px !important;
     font-size: 0.82rem !important;
 }
 
@@ -1112,7 +1117,11 @@ html.is-mobile body {
 /* Padding containers mobile */
 .is-mobile .container,
 .is-mobile .tab-container {
-    padding: 15px 10px !important;
+    padding: 15px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
 }
 
 /* Footer compact */
