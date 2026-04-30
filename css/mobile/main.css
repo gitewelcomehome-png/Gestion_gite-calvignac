@@ -1215,4 +1215,44 @@ html.is-mobile body {
     .is-mobile h2 {
         font-size: 1.3rem !important;
     }
+
+/* ==========================================
+   PROD-005 — Cartes réservation adaptatives
+   ========================================== */
+.resa-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0;
+}
+
+.resa-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+}
+
+.resa-actions-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3px;
+}
+
+.resa-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 420px) {
+    .resa-card-grid {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    .resa-actions-grid button,
+    .resa-actions-grid-3 button {
+        padding: 6px;
+        font-size: 0.85rem;
+    }
+}
 }
