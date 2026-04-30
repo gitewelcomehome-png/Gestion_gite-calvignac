@@ -542,12 +542,16 @@
             }
 
             /* MOB-004 — hamburger accessible + widget user compact */
-            #mobile-menu-toggle {
+            /* PROD-001 — libère le bouton de tout fill:backwards visibility:hidden */
+            #mobile-menu-toggle,
+            .mobile-menu-btn {
                 position: relative;
                 z-index: 1100;
                 margin-right: 8px;
                 width: 44px;
                 height: 44px; /* taille tactile minimale */
+                visibility: visible !important;
+                animation: none !important;
             }
             .user-info, .user-menu {
                 font-size: 0.8rem;

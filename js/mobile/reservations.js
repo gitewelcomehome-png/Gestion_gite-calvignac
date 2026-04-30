@@ -40,7 +40,7 @@ async function updateReservationsList() {
     // Trier par date de début
     active.sort((a, b) => parseLocalDate(a.dateDebut) - parseLocalDate(b.dateDebut));
     
-    let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0;">';
+    let html = '<div class="resa-card-grid">';
     
     active.forEach(r => {
         const gite = gites.find(g => g.id === r.giteId);
@@ -54,7 +54,7 @@ async function updateReservationsList() {
                 <div style="font-size: 0.6rem; color: ${giteColor}; font-weight: 600; margin-bottom: 4px;">🏠 ${escapeHtml(gite?.name || r.gite)}</div>
                 <div style="font-size: 0.6rem; color: #27AE60; margin-bottom: 2px; font-weight: 600;">📥 ${formatDateShort(dateDebut)}</div>
                 <div style="font-size: 0.6rem; color: #E74C3C; margin-bottom: 6px; font-weight: 600;">📤 ${formatDateShort(dateFin)}</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px;">
+                <div class="resa-actions-grid-3">
                     <button onclick="openEditModal('${r.id}')" style="background: #667eea; color: white; border: 1px solid #2D3436; padding: 4px 2px; border-radius: 4px; cursor: pointer; font-size: 0.65rem; font-weight: 600;">✏️</button>
                     <button onclick="aperçuFicheClient('${r.id}')" style="background: #27ae60; color: white; border: 1px solid #2D3436; padding: 4px 2px; border-radius: 4px; cursor: pointer; font-size: 0.65rem; font-weight: 600;">📄</button>
                     <button onclick="deleteReservationById('${r.id}')" style="background: #e74c3c; color: white; border: 1px solid #2D3436; padding: 4px 2px; border-radius: 4px; cursor: pointer; font-size: 0.65rem; font-weight: 600;">🗑️</button>
