@@ -9,8 +9,18 @@
 
 .cal-container {
     padding: 16px;
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+    .cal-container {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
 }
 
 /* En-tête avec sélecteur gîte */
